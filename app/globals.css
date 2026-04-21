@@ -1,8 +1,27 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --react-flow-edge: #b1b1b7;
+  --react-flow-background: #f8f8f8;
+  --react-flow-dots: #aaa;
+  --react-flow-controls-bg: #ffffff;
+  --react-flow-controls-border: #e2e8f0;
+  --react-flow-controls-text: #1e293b;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --react-flow-edge: #555555;
+  --react-flow-background: #1a1a1a;
+  --react-flow-dots: #333;
+  --react-flow-controls-bg: #1e293b;
+  --react-flow-controls-border: #334155;
+  --react-flow-controls-text: #f8fafc;
 }
 
 @theme inline {
@@ -10,13 +29,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

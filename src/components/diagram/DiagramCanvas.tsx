@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { 
   ReactFlow, 
-  Background, 
   Controls, 
   Node,
 } from '@xyflow/react';
@@ -12,6 +11,7 @@ import { useStore } from '@/store/useStore';
 import { CustomNode } from '@/components/nodes/CustomNode';
 import { NodeCreationModal } from '@/components/diagram/NodeCreationModal';
 import { useThemeStore } from '@/store/useThemeStore';
+import { cn } from '@/lib/utils';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -86,7 +86,7 @@ export const DiagramCanvas = () => {
   };
 
   return (
-    <div className="w-full h-full relative">
+    <div className={cn("w-full h-full relative bg-background")}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -96,10 +96,10 @@ export const DiagramCanvas = () => {
           onNodeClick={onNodeClick}
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
-          color={theme === "dark" ? "black" : "white"}
+          colorMode={theme}
           fitView
         >
-          <Background gap={20} />
+          {/* <Background gap={20} /> */}
           <Controls />
         </ReactFlow>
       <NodeCreationModal
