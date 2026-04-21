@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useCallback, useEffect } from 'react';
-import ReactFlow, { 
+import { 
+  ReactFlow, 
   Background, 
   Controls, 
   Node,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { useStore } from '@/store/useStore';
 import { CustomNode } from '@/components/nodes/CustomNode';
 import { NodeCreationModal } from '@/components/diagram/NodeCreationModal';

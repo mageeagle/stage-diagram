@@ -11,7 +11,7 @@ import {
   applyNodeChanges, 
   applyEdgeChanges, 
   addEdge 
-} from 'reactflow';
+} from '@xyflow/react';
 import { nanoid } from 'nanoid';
 import { CustomNodeData, NodeInput, NodeOutput } from '../types/diagram';
 
@@ -26,8 +26,8 @@ interface DiagramState {
   locations: string[];
 
   // React Flow actions
-  onNodesChange: OnNodesChange;
-  onEdgesChange: OnEdgesChange;
+  onNodesChange: OnNodesChange<Node<CustomNodeData>>;
+  onEdgesChange: OnEdgesChange<Edge>;
   onConnect: OnConnect;
 
   // Node selection
@@ -65,13 +65,13 @@ export const useStore = create<DiagramState>((set, get) => ({
   types: [],
   locations: [],
 
-  onNodesChange: (changes: NodeChange[]) => {
+  onNodesChange: (changes: NodeChange<Node<CustomNodeData>>[]) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
     });
   },
 
-  onEdgesChange: (changes: EdgeChange[]) => {
+  onEdgesChange: (changes: EdgeChange<Edge>[]) => {
     set({
       edges: applyEdgeChanges(changes, get().edges),
     });
