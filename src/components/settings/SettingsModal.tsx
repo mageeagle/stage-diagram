@@ -60,7 +60,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onKeyDown={handleKeyDown}
     >
       <div
@@ -73,7 +73,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           </h2>
           <button
             onClick={onClose}
-            className="rounded-full p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="cursor-pointer rounded-full p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             <X size={20} />
           </button>
@@ -96,7 +96,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               />
               <button
                 type="submit"
-                className="rounded-md bg-blue-600 p-1.5 text-white hover:bg-blue-700"
+                className="cursor-pointer rounded-md bg-blue-400 p-1.5 text-white hover:bg-blue-300"
               >
                 <Plus size={18} />
               </button>
@@ -110,7 +110,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                   <span>{type}</span>
                   <button
                     onClick={() => removeType(type)}
-                    className="text-zinc-400 hover:text-red-500"
+                    className="cursor-pointer text-zinc-400 hover:text-red-500"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -135,7 +135,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               />
               <button
                 type="submit"
-                className="rounded-md bg-blue-600 p-1.5 text-white hover:bg-blue-700"
+                className="cursor-pointer rounded-md bg-blue-400 p-1.5 text-white hover:bg-blue-300"
               >
                 <Plus size={18} />
               </button>
@@ -149,7 +149,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                   <span>{location}</span>
                   <button
                     onClick={() => removeLocation(location)}
-                    className="text-zinc-400 hover:text-red-500"
+                    className="cursor-pointer text-zinc-400 hover:text-red-500"
                   >
                     <Trash2 size={16} />
                   </button>

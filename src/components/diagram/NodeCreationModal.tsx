@@ -46,7 +46,7 @@ export const NodeCreationModal = ({
 
   return createPortal(
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onKeyDown={handleKeyDown}
     >
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900" onClick={(e) => e.stopPropagation()}>
@@ -56,7 +56,7 @@ export const NodeCreationModal = ({
           </h2>
           <button
             onClick={handleCancel}
-            className="rounded-full p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="cursor-pointer rounded-full p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             <X size={20} />
           </button>
@@ -108,13 +108,13 @@ export const NodeCreationModal = ({
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded-md px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="cursor-pointer rounded-md bg-blue-400 px-4 py-2 text-sm font-medium text-white hover:bg-blue-300"
             >
               Create
             </button>

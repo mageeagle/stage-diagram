@@ -35,7 +35,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
                   type="target"
                   position={Position.Left}
                   id={input.id}
-                  className={cn("w-3 h-3 !bg-blue-500", isDark && "!bg-blue-400")}
+                  className={cn("w-3 h-3 bg-blue-500!", isDark && "!hover:bg-blue-300")}
                 />
                 <span className="text-[10px] ml-4">{input.name}</span >
               </div>
@@ -58,7 +58,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
                   type="source"
                   position={Position.Right}
                   id={output.id}
-                  className={cn("w-3 h-3 !bg-green-500", isDark && "!bg-green-400")}
+                  className={cn("w-3 h-3 bg-green-500!", isDark && "bg-green-400!")}
                 />
               </div>
             ))

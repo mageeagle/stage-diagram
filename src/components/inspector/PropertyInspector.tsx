@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { cn } from "@/lib/utils";
 import { useStore } from '@/store/useStore';
 import { Trash2, Plus, Copy } from 'lucide-react';
@@ -32,7 +31,7 @@ export const PropertyInspector = () => {
 
   return (
     <div className={cn("w-64 h-full p-4 overflow-y-auto flex flex-col border-l", "bg-white text-foreground border-gray-300 dark:bg-background dark:border-gray-700")}>
-      <div className="flex-grow">
+      <div className="grow">
         <h2 className="font-bold text-lg mb-4">Properties</h2>
 
         <div className="mb-6">
@@ -54,7 +53,7 @@ export const PropertyInspector = () => {
             </label>
             <button
               onClick={() => addInput(selectedNode.id)}
-              className="text-blue-500 hover:text-blue-700"
+              className="cursor-pointer text-blue-500 hover:text-blue-700"
             >
               <Plus size={16} />
             </button>
@@ -70,7 +69,7 @@ export const PropertyInspector = () => {
                 />
                 <button
                   onClick={() => removeInput(selectedNode.id, input.id)}
-                  className="text-red-500 hover:text-red-700"
+                  className="cursor-pointer text-red-500 hover:text-red-700"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -86,7 +85,7 @@ export const PropertyInspector = () => {
             </label>
             <button
               onClick={() => addOutput(selectedNode.id)}
-              className="text-blue-500 hover:text-blue-700"
+              className="cursor-pointer text-blue-500 hover:text-blue-700"
             >
               <Plus size={16} />
             </button>
@@ -102,7 +101,7 @@ export const PropertyInspector = () => {
                 />
                 <button
                   onClick={() => removeOutput(selectedNode.id, output.id)}
-                  className="text-red-500 hover:text-red-700"
+                  className="cursor-pointer text-red-500 hover:text-red-700"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -115,14 +114,14 @@ export const PropertyInspector = () => {
       <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
         <button
           onClick={() => selectedNodeId && copyNode(selectedNodeId)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 rounded-md transition-colors"
+          className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 rounded-md transition-colors"
         >
           <Copy size={16} />
           Copy Node
         </button>
         <button
           onClick={() => selectedNodeId && deleteNode(selectedNodeId)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50 rounded-md transition-colors"
+          className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50 rounded-md transition-colors"
         >
           <Trash2 size={16} />
           Delete Node
