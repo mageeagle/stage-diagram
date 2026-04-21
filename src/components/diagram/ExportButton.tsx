@@ -5,7 +5,7 @@ import { Download, FileImage, FileCode, FileType, FileText, ChevronDown } from '
 import { toPng, toJpeg, toSvg } from 'html-to-image';
 
 interface ExportButtonProps {
-  targetRef: React.RefObject<HTMLDivElement>;
+  targetRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const ExportButton = ({ targetRef }: ExportButtonProps) => {
@@ -31,28 +31,29 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
   };
 
   const runExport = async (exportFn: (el: HTMLElement) => Promise<string>, filename: string, isJpeg: boolean = false) => {
-    if (!targetRef.current) return;
+    const el = targetRef.current;
+    if (!el) return;
 
     // Find and hide UI elements that shouldn't be in the export
-    const elementsToHide = targetRef.current.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
+    const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
     const hiddenElements: { element: HTMLElement; originalDisplay: string }[] = [];
 
-    elementsToHide.forEach((el) => {
-      const element = el as HTMLElement;
-      hiddenElements.push({ element, originalDisplay: element.style.display });
-      element.style.display = 'none';
+    elementsToHide.forEach((element) => {
+      const elementAsHtml = element as HTMLElement;
+      hiddenElements.push({ element: elementAsHtml, originalDisplay: elementAsHtml.style.display });
+      elementAsHtml.style.display = 'none';
     });
 
     // Handle JPEG background color to avoid black background
     let originalBgColor = '';
     if (isJpeg) {
-      originalBgColor = targetRef.current.style.backgroundColor;
+      originalBgColor = el.style.backgroundColor;
       // Set background to white for JPEG to avoid black background issues with transparency
-      targetRef.current.style.backgroundColor = 'white';
+      el.style.backgroundColor = 'white';
     }
 
     try {
-      const dataUrl = await exportFn(targetRef.current);
+      const dataUrl = await exportFn(el);
       downloadFile(dataUrl, filename);
     } catch (error) {
       console.error(`Error exporting ${filename}:`, error);
@@ -64,7 +65,7 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
 
       // Restore original background color
       if (isJpeg) {
-        targetRef.current.style.backgroundColor = originalBgColor;
+        el.style.backgroundColor = originalBgColor;
       }
       
       setIsOpen(false);
@@ -84,19 +85,20 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
   };
 
   const exportAsPdf = async () => {
-    if (!targetRef.current) return;
+    const el = targetRef.current;
+    if (!el) return;
     
-    const elementsToHide = targetRef.current.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
+    const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
     const hiddenElements: { element: HTMLElement; originalDisplay: string }[] = [];
-    elementsToHide.forEach((el) => {
-      const element = el as HTMLElement;
-      hiddenElements.push({ element, originalDisplay: element.style.display });
-      element.style.display = 'none';
+    elementsToHide.forEach((element) => {
+      const elementAsHtml = element as HTMLElement;
+      hiddenElements.push({ element: elementAsHtml, originalDisplay: elementAsHtml.style.display });
+      elementAsHtml.style.display = 'none';
     });
 
     try {
       // 1. Generate SVG Data URL
-      const svgDataUrl = await toSvg(targetRef.current);
+      const svgDataUrl = await toSvg(el);
       
       // 2. Fetch the SVG content to get the raw XML string
       const response = await fetch(svgDataUrl);
@@ -117,21 +119,30 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
             <meta charset="UTF-8">
             <title>Export Diagram</title>
             <style>
+              @page {
+                size: A4 landscape;
+                margin: 0;
+              }
               body { 
                 margin: 0; 
+                padding: 0;
                 display: flex; 
                 justify-content: center; 
-                align-items: flex-start;
+                align-items: center;
                 background-color: white; 
+                width: 297mm;
+                height: 210mm;
               }
               svg { 
-                width: 100%; 
-                height: auto; 
+                max-width: 100%; 
+                max-height: 100%;
                 display: block;
               }
               @media print {
-                body { margin: 0; padding: 0; }
-                svg { width: 100%; }
+                body { 
+                  width: 297mm;
+                  height: 210mm;
+                }
               }
             </style>
           </head>
