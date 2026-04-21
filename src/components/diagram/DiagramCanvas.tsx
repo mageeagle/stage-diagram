@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
-import { ReactFlow, Controls, Node, SmoothStepEdge } from "@xyflow/react";
+import { ReactFlow, Controls, Node, SmoothStepEdge, Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore } from "@/store/useStore";
 import { CustomNode } from "@/components/nodes/CustomNode";
@@ -46,8 +46,16 @@ export const DiagramCanvas = () => {
     [setSelectedNode, setSelectedEdge],
   );
 
+  const onNodeDragStart = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      setSelectedNode(node.id);
+      setSelectedEdge(null);
+    },
+    [setSelectedNode, setSelectedEdge],
+  );
+
   const onEdgeClick = useCallback(
-    (_: React.MouseEvent, edge: any) => {
+    (_: React.MouseEvent, edge: Edge) => {
       setSelectedEdge(edge.id);
       setSelectedNode(null);
     },
@@ -138,8 +146,9 @@ export const DiagramCanvas = () => {
            onNodesChange={onNodesChange}
            onEdgesChange={onEdgesChange}
            onConnect={onConnect}
-           onNodeClick={onNodeClick}
-           onEdgeClick={onEdgeClick}
+            onNodeClick={onNodeClick}
+            onNodeDragStart={onNodeDragStart}
+            onEdgeClick={onEdgeClick}
            onPaneClick={onPaneClick}
            nodeTypes={nodeTypes}
            colorMode={theme}
