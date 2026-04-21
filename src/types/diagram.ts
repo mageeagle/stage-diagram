@@ -16,3 +16,11 @@ export interface CustomNodeData {
   location?: string;
   [key: string]: unknown;
 }
+
+export interface NodeTemplate {
+  name: string;
+  inputs: NodeInput[];
+  outputs: NodeOutput[];
+  type: string;       // The 'type' property within node.data
+  nodeType: string;   // The 'type' property of the Node itself (React Flow type)
+}

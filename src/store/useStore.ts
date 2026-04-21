@@ -10,7 +10,7 @@ import {
   addEdge 
 } from '@xyflow/react';
 import { nanoid } from 'nanoid';
-import { CustomNodeData, NodeInput, NodeOutput } from '../types/diagram';
+import { CustomNodeData, NodeInput, NodeOutput, NodeTemplate } from '../types/diagram';
 
 interface DiagramState {
   nodes: Node<CustomNodeData>[];
@@ -19,6 +19,7 @@ interface DiagramState {
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   pendingPosition: { x: number; y: number } | null;
+  templates: NodeTemplate[];
   types: string[];
   locations: string[];
 
@@ -40,6 +41,11 @@ interface DiagramState {
   addOutput: (nodeId: string) => void;
   removeOutput: (nodeId: string, outputId: string) => void;
   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
+
+   // Template actions
+   addTemplate: (template: NodeTemplate) => void;
+   applyTemplate: (template: NodeTemplate, position: { x: number; y: number }) => void;
+   deleteTemplate: (templateName: string) => void;
 
   // Canvas actions
   addNode: (
@@ -69,6 +75,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   isModalOpen: false,
   isSettingsModalOpen: false,
   pendingPosition: null,
+  templates: [],
   types: [],
   locations: [],
 
@@ -242,6 +249,34 @@ export const useStore = create<DiagramState>((set, get) => ({
       }),
     });
   },
+
+  addTemplate: (template) => {
+    set({
+      templates: [...get().templates, template],
+    });
+  },
+
+   applyTemplate: (template, position) => {
+     const newNode: Node<CustomNodeData> = {
+       id: nanoid(),
+       type: template.nodeType,
+       position,
+       data: {
+         label: template.name,
+         inputs: template.inputs,
+         outputs: template.outputs,
+         type: template.type,
+       },
+     };
+     set({
+       nodes: [...get().nodes, newNode],
+     });
+   },
+   deleteTemplate: (templateName) => {
+     set({
+       templates: get().templates.filter((t) => t.name !== templateName),
+     });
+   },
 
   addNode: (type, position, label, inputsCount = 0, outputsCount = 0, typeProperty, locationProperty) => {
     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
