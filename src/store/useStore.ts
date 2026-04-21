@@ -20,7 +20,10 @@ interface DiagramState {
   edges: Edge[];
   selectedNodeId: string | null;
   isModalOpen: boolean;
+  isSettingsModalOpen: boolean;
   pendingPosition: { x: number; y: number } | null;
+  types: string[];
+  locations: string[];
 
   // React Flow actions
   onNodesChange: OnNodesChange;
@@ -44,7 +47,12 @@ interface DiagramState {
    copyNode: (nodeId: string) => void;
    deleteNode: (nodeId: string) => void;
    setIsModalOpen: (isOpen: boolean) => void;
+   setIsSettingsModalOpen: (isOpen: boolean) => void;
    setPendingPosition: (position: { x: number; y: number } | null) => void;
+   addType: (type: string) => void;
+   removeType: (type: string) => void;
+   addLocation: (location: string) => void;
+   removeLocation: (location: string) => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -52,7 +60,10 @@ export const useStore = create<DiagramState>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   isModalOpen: false,
+  isSettingsModalOpen: false,
   pendingPosition: null,
+  types: [],
+  locations: [],
 
   onNodesChange: (changes: NodeChange[]) => {
     set({
@@ -248,5 +259,10 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
   setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
+  setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
   setPendingPosition: (position) => set({ pendingPosition: position }),
+  addType: (type) => set({ types: [...get().types, type] }),
+  removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),
+  addLocation: (location) => set({ locations: [...get().locations, location] }),
+  removeLocation: (location) => set({ locations: get().locations.filter((l) => l !== location) }),
 }));

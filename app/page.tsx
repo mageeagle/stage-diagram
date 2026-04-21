@@ -3,10 +3,12 @@
 import { DiagramCanvas } from '@/components/diagram/DiagramCanvas';
 import { PropertyInspector } from '@/components/inspector/PropertyInspector';
 import { useStore } from '@/store/useStore';
-import { Plus } from 'lucide-react';
+import { Plus, Settings } from 'lucide-react';
+import { SettingsModal } from '@/components/settings/SettingsModal';
+import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
 
 export default function Home() {
-  const { setPendingPosition, setIsModalOpen } = useStore();
+  const { setPendingPosition, setIsModalOpen, isSettingsModalOpen, setIsSettingsModalOpen } = useStore();
 
   const handleAddNode = () => {
     setPendingPosition({ x: 100, y: 100 });
@@ -25,6 +27,21 @@ export default function Home() {
           <Plus size={20} />
           Add Node
         </button>
+
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-[10000]">
+          <ThemeSwitcher />
+          <button
+            onClick={() => setIsSettingsModalOpen(true)}
+            className="rounded-md bg-white p-2 text-zinc-600 shadow-md hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+          >
+            <Settings size={24} />
+          </button>
+        </div>
+
+        <SettingsModal 
+          isOpen={isSettingsModalOpen} 
+          onClose={() => setIsSettingsModalOpen(false)} 
+        />
       </main>
 
       <aside className="h-full">
@@ -33,3 +50,4 @@ export default function Home() {
     </div>
   );
 }
+

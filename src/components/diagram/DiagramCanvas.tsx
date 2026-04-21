@@ -11,7 +11,6 @@ import { useStore } from '@/store/useStore';
 import { CustomNode } from '@/components/nodes/CustomNode';
 import { NodeCreationModal } from '@/components/diagram/NodeCreationModal';
 import { useThemeStore } from '@/store/useThemeStore';
-import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -68,7 +67,7 @@ export const DiagramCanvas = () => {
         // For now, we'll just add at a reasonable offset from current center or just 0,0
         setPendingPosition({ x: 100, y: 100 });
         setIsModalOpen(true);
-      }
+     }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -87,7 +86,6 @@ export const DiagramCanvas = () => {
 
   return (
     <div className="w-full h-full relative">
-      <ThemeSwitcher />
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -114,3 +112,4 @@ export const DiagramCanvas = () => {
     </div>
   );
 };
+
