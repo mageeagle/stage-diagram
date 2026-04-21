@@ -9,6 +9,12 @@ export const PropertyInspector = () => {
     selectedNodeId, 
     nodes, 
     updateNodeLabel, 
+    updateNodeType,
+    updateNodeLocation,
+    types,
+    locations,
+    addType,
+    addLocation,
     addInput, 
     removeInput, 
     updateInputName, 
@@ -29,6 +35,22 @@ export const PropertyInspector = () => {
     );
   }
 
+  const handleAddNewType = () => {
+    const newType = window.prompt('Enter new type:');
+    if (newType) {
+      addType(newType);
+      updateNodeType(selectedNode.id, newType);
+    }
+  };
+
+  const handleAddNewLocation = () => {
+    const newLocation = window.prompt('Enter new location:');
+    if (newLocation) {
+      addLocation(newLocation);
+      updateNodeLocation(selectedNode.id, newLocation);
+    }
+  };
+
   return (
     <div className={cn("w-64 h-full p-4 overflow-y-auto flex flex-col border-l", "bg-white text-foreground border-gray-300 dark:bg-background dark:border-gray-700")}>
       <div className="grow">
@@ -45,6 +67,54 @@ export const PropertyInspector = () => {
             onChange={(e) => updateNodeLabel(selectedNode.id, e.target.value)}
           />
         </div >
+
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <label className={cn("block text-xs font-medium uppercase", "text-gray-500 dark:text-gray-400")}>
+              Type
+            </label>
+            <button
+              onClick={handleAddNewType}
+              className="cursor-pointer text-blue-500 hover:text-blue-700"
+            >
+              <Plus size={16} />
+            </button>
+          </div >
+          <select
+            value={selectedNode.data.type || ''}
+            onChange={(e) => updateNodeType(selectedNode.id, e.target.value)}
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+          >
+             <option value="none">None</option>
+             {types.map((t) => (
+               <option key={t} value={t}>{t}</option>
+             ))}
+          </select>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <label className={cn("block text-xs font-medium uppercase", "text-gray-500 dark:text-gray-400")}>
+              Location
+            </label>
+            <button
+              onClick={handleAddNewLocation}
+              className="cursor-pointer text-blue-500 hover:text-blue-700"
+            >
+              <Plus size={16} />
+            </button>
+          </div >
+          <select
+            value={selectedNode.data.location || ''}
+            onChange={(e) => updateNodeLocation(selectedNode.id, e.target.value)}
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+          >
+             <option value="none">None</option>
+             {locations.map((l) => (
+               <option key={l} value={l}>{l}</option>
+             ))}
+          </select>
+        </div>
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">

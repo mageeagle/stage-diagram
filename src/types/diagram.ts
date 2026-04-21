@@ -12,5 +12,7 @@ export interface CustomNodeData {
   label: string;           // The node's name
   inputs: NodeInput[];     // Array of input handles
   outputs: NodeOutput[];   // Array of output handles
+  type?: string;
+  location?: string;
   [key: string]: unknown;
 }

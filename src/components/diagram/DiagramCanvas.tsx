@@ -77,9 +77,9 @@ export const DiagramCanvas = () => {
     };
    }, [selectedNodeId, deleteNode, copyNode, setPendingPosition, setIsModalOpen]);
 
-  const handleCreateNode = (name: string, inputsCount: number, outputsCount: number) => {
+  const handleCreateNode = (name: string, inputsCount: number, outputsCount: number, type: string, location: string) => {
     if (pendingPosition) {
-      addNode('custom', pendingPosition, name, inputsCount, outputsCount);
+      addNode('custom', pendingPosition, name, inputsCount, outputsCount, type, location);
     }
     setIsModalOpen(false);
     setPendingPosition(null);
@@ -99,7 +99,6 @@ export const DiagramCanvas = () => {
           colorMode={theme}
           fitView
         >
-          {/* <Background gap={20} /> */}
           <Controls />
         </ReactFlow>
       <NodeCreationModal

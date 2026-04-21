@@ -1,10 +1,7 @@
 import { create } from 'zustand';
 import { 
-  Connection, 
   Edge, 
-  EdgeChange, 
   Node, 
-  NodeChange, 
   OnNodesChange, 
   OnEdgesChange, 
   OnConnect, 
@@ -35,6 +32,8 @@ interface DiagramState {
 
   // Node property updates
   updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeType: (nodeId: string, type: string) => void;
+  updateNodeLocation: (nodeId: string, location: string) => void;
   addInput: (nodeId: string) => void;
   removeInput: (nodeId: string, inputId: string) => void;
   updateInputName: (nodeId: string, inputId: string, name: string) => void;
@@ -42,17 +41,25 @@ interface DiagramState {
   removeOutput: (nodeId: string, outputId: string) => void;
   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
 
-   // Canvas actions
-   addNode: (type: string, position: { x: number; y: number }, label: string, inputsCount?: number, outputsCount?: number) => void;
-   copyNode: (nodeId: string) => void;
-   deleteNode: (nodeId: string) => void;
-   setIsModalOpen: (isOpen: boolean) => void;
-   setIsSettingsModalOpen: (isOpen: boolean) => void;
-   setPendingPosition: (position: { x: number; y: number } | null) => void;
-   addType: (type: string) => void;
-   removeType: (type: string) => void;
-   addLocation: (location: string) => void;
-   removeLocation: (location: string) => void;
+  // Canvas actions
+  addNode: (
+    type: string,
+    position: { x: number; y: number },
+    label: string,
+    inputsCount?: number,
+    outputsCount?: number,
+    typeProperty?: string,
+    locationProperty?: string
+  ) => void;
+  copyNode: (nodeId: string) => void;
+  deleteNode: (nodeId: string) => void;
+  setIsModalOpen: (isOpen: boolean) => void;
+  setIsSettingsModalOpen: (isOpen: boolean) => void;
+  setPendingPosition: (position: { x: number; y: number } | null) => void;
+  addType: (type: string) => void;
+  removeType: (type: string) => void;
+  addLocation: (location: string) => void;
+  removeLocation: (location: string) => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -65,26 +72,27 @@ export const useStore = create<DiagramState>((set, get) => ({
   types: [],
   locations: [],
 
-  onNodesChange: (changes: NodeChange<Node<CustomNodeData>>[]) => {
+  // React Flow actions
+  onNodesChange: (changes) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
     });
   },
-
-  onEdgesChange: (changes: EdgeChange<Edge>[]) => {
+  onEdgesChange: (changes) => {
     set({
       edges: applyEdgeChanges(changes, get().edges),
     });
   },
-
-  onConnect: (connection: Connection) => {
+  onConnect: (connection) => {
     set({
       edges: addEdge(connection, get().edges),
     });
   },
 
+  // Node selection
   setSelectedNode: (nodeId) => set({ selectedNodeId: nodeId }),
 
+  // Node property updates
   updateNodeLabel: (nodeId, label) => {
     set({
       nodes: get().nodes.map((node) => {
@@ -92,6 +100,34 @@ export const useStore = create<DiagramState>((set, get) => ({
           return {
             ...node,
             data: { ...node.data, label },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+
+  updateNodeType: (nodeId, type) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: { ...node.data, type },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+
+  updateNodeLocation: (nodeId, location) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: { ...node.data, location },
           };
         }
         return node;
@@ -207,57 +243,60 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-   addNode: (type, position, label, inputsCount = 0, outputsCount = 0) => {
-     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
-       id: nanoid(),
-       name: `Input ${i + 1}`,
-     }));
+  addNode: (type, position, label, inputsCount = 0, outputsCount = 0, typeProperty, locationProperty) => {
+    const inputs = Array.from({ length: inputsCount }, (_, i) => ({
+      id: nanoid(),
+      name: `Input ${i + 1}`,
+    }));
 
-     const outputs = Array.from({ length: outputsCount }, (_, i) => ({
-       id: nanoid(),
-       name: `Output ${i + 1}`,
-     }));
+    const outputs = Array.from({ length: outputsCount }, (_, i) => ({
+      id: nanoid(),
+      name: `Output ${i + 1}`,
+    }));
 
-     const newNode: Node<CustomNodeData> = {
-       id: nanoid(),
-       type,
-       position,
-       data: {
-         label,
-         inputs,
-         outputs,
-       },
-     };
-     set({
-       nodes: [...get().nodes, newNode],
-     });
-   },
+    const newNode: Node<CustomNodeData> = {
+      id: nanoid(),
+      type,
+      position,
+      data: {
+        label,
+        inputs,
+        outputs,
+        type: typeProperty,
+        location: locationProperty,
+      },
+    };
+    set({
+      nodes: [...get().nodes, newNode],
+    });
+  },
 
-   copyNode: (nodeId) => {
-     const node = get().nodes.find((n) => n.id === nodeId);
-     if (!node) return;
+  copyNode: (nodeId) => {
+    const node = get().nodes.find((n) => n.id === nodeId);
+    if (!node) return;
 
-     const newNode: Node<CustomNodeData> = {
-       ...node,
-       id: nanoid(),
-       position: {
-         x: node.position.x + 20,
-         y: node.position.y + 20,
-       },
-     };
+    const newNode: Node<CustomNodeData> = {
+      ...node,
+      id: nanoid(),
+      position: {
+        x: node.position.x + 20,
+        y: node.position.y + 20,
+      },
+    };
 
-     set({
-       nodes: [...get().nodes, newNode],
-     });
-   },
+    set({
+      nodes: [...get().nodes, newNode],
+    });
+  },
 
-   deleteNode: (nodeId) => {
+  deleteNode: (nodeId) => {
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
       selectedNodeId: null,
     });
   },
+
   setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
   setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
   setPendingPosition: (position) => set({ pendingPosition: position }),
