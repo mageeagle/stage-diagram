@@ -18,6 +18,7 @@ export interface CustomNodeData {
 }
 
 export interface NodeTemplate {
+  id: string;
   name: string;
   inputs: NodeInput[];
   outputs: NodeOutput[];
