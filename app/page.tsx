@@ -6,10 +6,11 @@ import { useStore } from '@/store/useStore';
 import { Plus } from 'lucide-react';
 
 export default function Home() {
-  const addNode = useStore((state) => state.addNode);
+  const { setPendingPosition, setIsModalOpen } = useStore();
 
   const handleAddNode = () => {
-    addNode('custom', { x: Math.random() * 400, y: Math.random() * 400 });
+    setPendingPosition({ x: 100, y: 100 });
+    setIsModalOpen(true);
   };
 
   return (

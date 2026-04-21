@@ -9,6 +9,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { useStore } from '@/store/useStore';
 import { CustomNode } from '@/components/nodes/CustomNode';
+import { NodeCreationModal } from '@/components/diagram/NodeCreationModal';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -24,7 +25,11 @@ export const DiagramCanvas = () => {
     setSelectedNode,
     selectedNodeId,
     deleteNode,
-    addNode
+    addNode,
+    isModalOpen,
+    pendingPosition,
+    setIsModalOpen,
+    setPendingPosition
   } = useStore();
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -52,7 +57,8 @@ export const DiagramCanvas = () => {
         event.preventDefault();
         // Use a default position or center of viewport if possible. 
         // For now, we'll just add at a reasonable offset from current center or just 0,0
-        addNode('custom', { x: 100, y: 100 });
+        setPendingPosition({ x: 100, y: 100 });
+        setIsModalOpen(true);
       }
     };
 
@@ -60,7 +66,15 @@ export const DiagramCanvas = () => {
     return () => { 
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedNodeId, deleteNode, addNode]);
+  }, [selectedNodeId, deleteNode, setPendingPosition, setIsModalOpen]);
+
+  const handleCreateNode = (name: string, inputsCount: number, outputsCount: number) => {
+    if (pendingPosition) {
+      addNode('custom', pendingPosition, name, inputsCount, outputsCount);
+    }
+    setIsModalOpen(false);
+    setPendingPosition(null);
+  };
 
   return (
     <div className="w-full h-full">
@@ -78,6 +92,14 @@ export const DiagramCanvas = () => {
         <Background color="#aaa" gap={20} />
         <Controls />
       </ReactFlow>
+      <NodeCreationModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setPendingPosition(null);
+        }}
+        onCreate={handleCreateNode}
+      />
     </div>
   );
 };

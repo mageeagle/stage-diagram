@@ -19,6 +19,8 @@ interface DiagramState {
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
   selectedNodeId: string | null;
+  isModalOpen: boolean;
+  pendingPosition: { x: number; y: number } | null;
 
   // React Flow actions
   onNodesChange: OnNodesChange;
@@ -37,15 +39,19 @@ interface DiagramState {
   removeOutput: (nodeId: string, outputId: string) => void;
   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
 
-  // Canvas actions
-  addNode: (type: string, position: { x: number; y: number }) => void;
-  deleteNode: (nodeId: string) => void;
+   // Canvas actions
+   addNode: (type: string, position: { x: number; y: number }, label: string, inputsCount?: number, outputsCount?: number) => void;
+   deleteNode: (nodeId: string) => void;
+   setIsModalOpen: (isOpen: boolean) => void;
+   setPendingPosition: (position: { x: number; y: number } | null) => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeId: null,
+  isModalOpen: false,
+  pendingPosition: null,
 
   onNodesChange: (changes: NodeChange[]) => {
     set({
@@ -189,21 +195,31 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  addNode: (type, position) => {
-    const newNode: Node<CustomNodeData> = {
-      id: nanoid(),
-      type,
-      position,
-      data: {
-        label: 'New Node',
-        inputs: [],
-        outputs: [],
-      },
-    };
-    set({
-      nodes: [...get().nodes, newNode],
-    });
-  },
+   addNode: (type, position, label, inputsCount = 0, outputsCount = 0) => {
+     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
+       id: nanoid(),
+       name: `Input ${i + 1}`,
+     }));
+
+     const outputs = Array.from({ length: outputsCount }, (_, i) => ({
+       id: nanoid(),
+       name: `Output ${i + 1}`,
+     }));
+
+     const newNode: Node<CustomNodeData> = {
+       id: nanoid(),
+       type,
+       position,
+       data: {
+         label,
+         inputs,
+         outputs,
+       },
+     };
+     set({
+       nodes: [...get().nodes, newNode],
+     });
+   },
 
   deleteNode: (nodeId) => {
     set({
@@ -212,4 +228,6 @@ export const useStore = create<DiagramState>((set, get) => ({
       selectedNodeId: null,
     });
   },
+  setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
+  setPendingPosition: (position) => set({ pendingPosition: position }),
 }));
