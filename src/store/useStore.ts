@@ -16,6 +16,7 @@ interface DiagramState {
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
   selectedNodeId: string | null;
+  selectedEdgeId: string | null;
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   pendingPosition: { x: number; y: number } | null;
@@ -30,6 +31,7 @@ interface DiagramState {
 
   // Node selection
   setSelectedNode: (nodeId: string | null) => void;
+  setSelectedEdge: (edgeId: string | null) => void;
 
   // Node property updates
   updateNodeLabel: (nodeId: string, label: string) => void;
@@ -60,6 +62,7 @@ interface DiagramState {
   ) => void;
   copyNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
+  deleteEdge: (edgeId: string) => void;
   setIsModalOpen: (isOpen: boolean) => void;
   setIsSettingsModalOpen: (isOpen: boolean) => void;
   setPendingPosition: (position: { x: number; y: number } | null) => void;
@@ -73,6 +76,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeId: null,
+  selectedEdgeId: null,
   isModalOpen: false,
   isSettingsModalOpen: false,
   pendingPosition: null,
@@ -99,6 +103,7 @@ export const useStore = create<DiagramState>((set, get) => ({
 
   // Node selection
   setSelectedNode: (nodeId) => set({ selectedNodeId: nodeId }),
+  setSelectedEdge: (edgeId) => set({ selectedEdgeId: edgeId }),
 
   // Node property updates
   updateNodeLabel: (nodeId, label) => {
@@ -337,6 +342,13 @@ export const useStore = create<DiagramState>((set, get) => ({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
       selectedNodeId: null,
+      selectedEdgeId: null,
+    });
+  },
+  deleteEdge: (edgeId) => {
+    set({
+      edges: get().edges.filter((edge) => edge.id !== edgeId),
+      selectedEdgeId: null,
     });
   },
 
