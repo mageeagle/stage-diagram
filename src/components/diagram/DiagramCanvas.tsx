@@ -10,27 +10,32 @@ import 'reactflow/dist/style.css';
 import { useStore } from '@/store/useStore';
 import { CustomNode } from '@/components/nodes/CustomNode';
 import { NodeCreationModal } from '@/components/diagram/NodeCreationModal';
+import { useThemeStore } from '@/store/useThemeStore';
+import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
 
 const nodeTypes = {
   custom: CustomNode,
 };
 
 export const DiagramCanvas = () => {
-  const { 
-    nodes, 
-    edges, 
-    onNodesChange, 
-    onEdgesChange, 
-    onConnect, 
-    setSelectedNode,
-    selectedNodeId,
-    deleteNode,
-    addNode,
-    isModalOpen,
-    pendingPosition,
-    setIsModalOpen,
-    setPendingPosition
-  } = useStore();
+   const { 
+     nodes, 
+     edges, 
+     onNodesChange, 
+     onEdgesChange, 
+     onConnect, 
+     setSelectedNode,
+     selectedNodeId,
+     deleteNode,
+     addNode,
+     copyNode,
+     isModalOpen,
+     pendingPosition,
+     setIsModalOpen,
+     setPendingPosition
+   } = useStore();
+
+  const { theme } = useThemeStore();
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNode(node.id);
@@ -49,11 +54,15 @@ export const DiagramCanvas = () => {
         return;
       }
 
-      if ((event.key === 'Delete' || event.key === 'Backspace') && selectedNodeId) {
-        deleteNode(selectedNodeId);
-      }
+     if ((event.key === 'Delete' || event.key === 'Backspace') && selectedNodeId) {
+       deleteNode(selectedNodeId);
+     }
 
-      if (event.key === ' ' || event.key === 'Enter') {
+     if (event.key.toLowerCase() === 'c' && selectedNodeId) {
+       copyNode(selectedNodeId);
+     }
+
+     if (event.key === ' ' || event.key === 'Enter') {
         event.preventDefault();
         // Use a default position or center of viewport if possible. 
         // For now, we'll just add at a reasonable offset from current center or just 0,0
@@ -66,7 +75,7 @@ export const DiagramCanvas = () => {
     return () => { 
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedNodeId, deleteNode, setPendingPosition, setIsModalOpen]);
+   }, [selectedNodeId, deleteNode, copyNode, setPendingPosition, setIsModalOpen]);
 
   const handleCreateNode = (name: string, inputsCount: number, outputsCount: number) => {
     if (pendingPosition) {
@@ -77,21 +86,23 @@ export const DiagramCanvas = () => {
   };
 
   return (
-    <div className="w-full h-full">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={onNodeClick}
-        onPaneClick={onPaneClick}
-        nodeTypes={nodeTypes}
-        fitView
-      >
-        <Background color="#aaa" gap={20} />
-        <Controls />
-      </ReactFlow>
+    <div className="w-full h-full relative">
+      <ThemeSwitcher />
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
+          nodeTypes={nodeTypes}
+          color={theme === "dark" ? "black" : "white"}
+          fitView
+        >
+          <Background gap={20} />
+          <Controls />
+        </ReactFlow>
       <NodeCreationModal
         isOpen={isModalOpen}
         onClose={() => {

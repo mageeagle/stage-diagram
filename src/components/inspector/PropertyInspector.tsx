@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useStore } from '@/store/useStore';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, Copy } from 'lucide-react';
 
 export const PropertyInspector = () => {
   const { 
@@ -15,7 +15,8 @@ export const PropertyInspector = () => {
     addOutput, 
     removeOutput, 
     updateOutputName,
-    deleteNode
+    deleteNode,
+    copyNode
   } = useStore();
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
@@ -110,7 +111,14 @@ export const PropertyInspector = () => {
         </div>
       </div>
 
-      <div className="mt-auto pt-4 border-t border-gray-200">
+      <div className="mt-auto pt-4 border-t border-gray-200 space-y-2">
+        <button
+          onClick={() => selectedNodeId && copyNode(selectedNodeId)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+        >
+          <Copy size={16} />
+          Copy Node
+        </button>
         <button
           onClick={() => selectedNodeId && deleteNode(selectedNodeId)}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"

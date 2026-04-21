@@ -41,6 +41,7 @@ interface DiagramState {
 
    // Canvas actions
    addNode: (type: string, position: { x: number; y: number }, label: string, inputsCount?: number, outputsCount?: number) => void;
+   copyNode: (nodeId: string) => void;
    deleteNode: (nodeId: string) => void;
    setIsModalOpen: (isOpen: boolean) => void;
    setPendingPosition: (position: { x: number; y: number } | null) => void;
@@ -221,7 +222,25 @@ export const useStore = create<DiagramState>((set, get) => ({
      });
    },
 
-  deleteNode: (nodeId) => {
+   copyNode: (nodeId) => {
+     const node = get().nodes.find((n) => n.id === nodeId);
+     if (!node) return;
+
+     const newNode: Node<CustomNodeData> = {
+       ...node,
+       id: nanoid(),
+       position: {
+         x: node.position.x + 20,
+         y: node.position.y + 20,
+       },
+     };
+
+     set({
+       nodes: [...get().nodes, newNode],
+     });
+   },
+
+   deleteNode: (nodeId) => {
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
