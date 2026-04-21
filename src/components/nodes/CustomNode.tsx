@@ -2,14 +2,14 @@ import { Handle, Position, NodeProps, useUpdateNodeInternals } from "reactflow";
 import { CustomNodeData } from "@/types/diagram";
 import { useEffect } from "react";
 
-export const CustomNode = ({ data, id }: NodeProps<CustomNodeData>) => {
+export const CustomNode = ({ data, id, selected }: NodeProps<CustomNodeData>) => {
   const update = useUpdateNodeInternals();
   useEffect(() => {
     update(id);
   }, [data.inputs, data.outputs]);
 
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400 min-w-[250px]">
+    <div className={`px-4 py-2 shadow-md rounded-md bg-white border-2 min-w-[250px] ${selected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-stone-400'}`}>
       <div className="font-bold text-sm mb-2 text-center">{data.label}</div>
 
       <div className="flex flex-row justify-between gap-6">
