@@ -149,7 +149,7 @@ export const PropertyInspector = () => {
       inputs: [...(selectedNode.data.inputs || [])],
       outputs: [...(selectedNode.data.outputs || [])],
       type: selectedNode.data.type || '',
-      nodeType: selectedNode.type,
+      nodeType: selectedNode.type!,
     };
     addTemplate(template);
   };
