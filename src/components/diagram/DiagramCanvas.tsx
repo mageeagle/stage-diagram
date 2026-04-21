@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import ReactFlow, { 
   Background, 
   Controls, 
@@ -21,7 +21,10 @@ export const DiagramCanvas = () => {
     onNodesChange, 
     onEdgesChange, 
     onConnect, 
-    setSelectedNode 
+    setSelectedNode,
+    selectedNodeId,
+    deleteNode,
+    addNode
   } = useStore();
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -31,6 +34,33 @@ export const DiagramCanvas = () => {
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
   }, [setSelectedNode]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+      if (isTyping) {
+        return;
+      }
+
+      if ((event.key === 'Delete' || event.key === 'Backspace') && selectedNodeId) {
+        deleteNode(selectedNodeId);
+      }
+
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        // Use a default position or center of viewport if possible. 
+        // For now, we'll just add at a reasonable offset from current center or just 0,0
+        addNode('custom', { x: 100, y: 100 });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => { 
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedNodeId, deleteNode, addNode]);
 
   return (
     <div className="w-full h-full">

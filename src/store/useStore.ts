@@ -39,6 +39,7 @@ interface DiagramState {
 
   // Canvas actions
   addNode: (type: string, position: { x: number; y: number }) => void;
+  deleteNode: (nodeId: string) => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -201,6 +202,14 @@ export const useStore = create<DiagramState>((set, get) => ({
     };
     set({
       nodes: [...get().nodes, newNode],
+    });
+  },
+
+  deleteNode: (nodeId) => {
+    set({
+      nodes: get().nodes.filter((node) => node.id !== nodeId),
+      edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+      selectedNodeId: null,
     });
   },
 }));
