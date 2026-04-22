@@ -20,12 +20,12 @@ export const DiagramCanvas = () => {
   const onNodesChange = useStore((state) => state.onNodesChange);
   const onEdgesChange = useStore((state) => state.onEdgesChange);
   const onConnect = useStore((state) => state.onConnect);
-  const setSelectedNodeIds = useStore((state) => state.setSelectedNodeIds);
-  const selectedNodeIds = useStore((state) => state.selectedNodeIds);
-  const setSelectedEdge = useStore((state) => state.setSelectedEdge);
-  const selectedEdgeId = useStore((state) => state.selectedEdgeId);
-  const deleteNodes = useStore((state) => state.deleteNodes);
-  const deleteEdge = useStore((state) => state.deleteEdge);
+   const setSelectedNodeIds = useStore((state) => state.setSelectedNodeIds);
+   const selectedNodeIds = useStore((state) => state.selectedNodeIds);
+   const setSelectedEdgeIds = useStore((state) => state.setSelectedEdgeIds);
+   const selectedEdgeIds = useStore((state) => state.selectedEdgeIds);
+   const deleteNodes = useStore((state) => state.deleteNodes);
+   const deleteEdge = useStore((state) => state.deleteEdge);
   const addNode = useStore((state) => state.addNode);
   const copyNodes = useStore((state) => state.copyNodes);
   const isModalOpen = useStore((state) => state.isModalOpen);
@@ -38,44 +38,49 @@ export const DiagramCanvas = () => {
   const { theme } = useThemeStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: Node) => {
-      setSelectedNodeIds([node.id]);
-      setSelectedEdge(null);
-    },
-    [setSelectedNodeIds, setSelectedEdge],
-  );
+   const onNodeClick = useCallback(
+     (_: React.MouseEvent, node: Node) => {
+       setSelectedNodeIds([node.id]);
+       setSelectedEdgeIds([]);
+     },
+     [setSelectedNodeIds, setSelectedEdgeIds],
+   );
 
-  const onNodeDragStart = useCallback(
-    (_: React.MouseEvent, node: Node) => {
-      setSelectedNodeIds([node.id]);
-      setSelectedEdge(null);
-    },
-    [setSelectedNodeIds, setSelectedEdge],
-  );
+   const onNodeDragStart = useCallback(
+     (_: React.MouseEvent, node: Node) => {
+       setSelectedNodeIds([node.id]);
+       setSelectedEdgeIds([]);
+     },
+     [setSelectedNodeIds, setSelectedEdgeIds],
+   );
 
-  const onEdgeClick = useCallback(
-    (_: React.MouseEvent, edge: Edge) => {
-      setSelectedEdge(edge.id);
-      setSelectedNodeIds([]);
-    },
-    [setSelectedEdge, setSelectedNodeIds],
-  );
+   const onEdgeClick = useCallback(
+     (_: React.MouseEvent, edge: Edge) => {
+       setSelectedEdgeIds([edge.id]);
+       setSelectedNodeIds([]);
+     },
+     [setSelectedEdgeIds, setSelectedNodeIds],
+   );
 
-  const onPaneClick = useCallback(() => {
-    setSelectedNodeIds([]);
-    setSelectedEdge(null);
-  }, [setSelectedNodeIds, setSelectedEdge]);
+   const onPaneClick = useCallback(() => {
+     setSelectedNodeIds([]);
+     setSelectedEdgeIds([]);
+   }, [setSelectedNodeIds, setSelectedEdgeIds]);
 
-  const onSelectionChange = useCallback(
-    (params: { nodes: Node[] }) => {
-      const newIds = params.nodes.map((n) => n.id);
-      if (JSON.stringify(newIds) !== JSON.stringify(selectedNodeIds)) {
-        setSelectedNodeIds(newIds);
-      }
-    },
-    [selectedNodeIds, setSelectedNodeIds],
-  );
+   const onSelectionChange = useCallback(
+     (params: { nodes: Node[]; edges: Edge[] }) => {
+       const newNodeIds = params.nodes.map((n) => n.id);
+       const newEdgeIds = params.edges.map((e) => e.id);
+
+       if (JSON.stringify(newNodeIds) !== JSON.stringify(selectedNodeIds)) {
+         setSelectedNodeIds(newNodeIds);
+       }
+       if (JSON.stringify(newEdgeIds) !== JSON.stringify(selectedEdgeIds)) {
+         setSelectedEdgeIds(newEdgeIds);
+       }
+     },
+     [selectedNodeIds, selectedEdgeIds, setSelectedNodeIds, setSelectedEdgeIds],
+   );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -87,18 +92,18 @@ export const DiagramCanvas = () => {
         return;
       }
 
-      if (
-        (event.key === "Delete" || event.key === "Backspace") &&
-        selectedNodeIds.length > 0
-      ) {
-        deleteNodes(selectedNodeIds);
-      }
+       if (
+         (event.key === "Delete" || event.key === "Backspace") &&
+         selectedNodeIds.length > 0
+       ) {
+         deleteNodes(selectedNodeIds);
+       }
 
-      if (
-        (event.key === "Delete" || event.key === "Backspace") && selectedEdgeId
-      ) {
-        deleteEdge(selectedEdgeId);
-      }
+       if (
+         (event.key === "Delete" || event.key === "Backspace") && selectedEdgeIds.length > 0
+       ) {
+         deleteEdge(selectedEdgeIds);
+       }
 
       if (event.key.toLowerCase() === "c" && selectedNodeIds.length > 0) {
         copyNodes(selectedNodeIds);
@@ -129,17 +134,17 @@ export const DiagramCanvas = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    selectedNodeIds,
-    selectedEdgeId,
-    deleteNodes,
-    deleteEdge,
-    copyNodes,
-    setPendingPosition,
-    setIsModalOpen,
-    undo,
-    redo,
-  ]);
+   }, [
+     selectedNodeIds,
+     selectedEdgeIds,
+     deleteNodes,
+     deleteEdge,
+     copyNodes,
+     setPendingPosition,
+     setIsModalOpen,
+     undo,
+     redo,
+   ]);
 
 
   const handleCreateNode = (

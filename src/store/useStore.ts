@@ -27,7 +27,8 @@ interface DiagramState {
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
   selectedNodeIds: string[];
-  selectedEdgeId: string | null;
+  selectedEdgeIds: string[];
+  cableTypes: string[];
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   isNodeListModalOpen: boolean;
@@ -50,7 +51,7 @@ interface DiagramState {
 
   // Node selection
   setSelectedNodeIds: (nodeIds: string[]) => void;
-  setSelectedEdge: (edgeId: string | null) => void;
+  setSelectedEdgeIds: (edgeIds: string[]) => void;
 
    // Node property updates
    updateNodeLabel: (nodeId: string, label: string) => void;
@@ -74,35 +75,39 @@ updateNodeType: (nodeIds: string[], type: string) => void;
   deleteTemplate: (templateId: string) => void;
 
   // Canvas actions
-   addNode: (
-     type: string,
-     position: { x: number; y: number },
-     label: string,
-     inputsCount?: number,
-     outputsCount?: number,
-     typeProperty?: string,
-     locationProperty?: string,
-     power?: boolean
-   ) => void;
+  addNode: (
+    type: string,
+    position: { x: number; y: number },
+    label: string,
+    inputsCount?: number,
+    outputsCount?: number,
+    typeProperty?: string,
+    locationProperty?: string,
+    power?: boolean
+  ) => void;
   copyNodes: (nodeIds: string[]) => void;
   deleteNodes: (nodeIds: string[]) => void;
-  deleteEdge: (edgeId: string) => void;
+  deleteEdge: (edgeIds: string[]) => void;
+  addCableType: (type: string) => void;
+  removeCableType: (type: string) => void;
+  updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
    setIsModalOpen: (isOpen: boolean) => void;
    setIsSettingsModalOpen: (isOpen: boolean) => void;
    setIsNodeListModalOpen: (isOpen: boolean) => void;
    setPendingPosition: (position: { x: number; y: number } | null) => void;
-  addType: (type: string) => void;
-  removeType: (type: string) => void;
-  addLocation: (location: string) => void;
-  removeLocation: (location: string) => void;
-  restoreProjectState: (state: ProjectState) => void;
+   addType: (type: string) => void;
+   removeType: (type: string) => void;
+   addLocation: (location: string) => void;
+   removeLocation: (location: string) => void;
+   restoreProjectState: (state: ProjectState) => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeIds: [],
-  selectedEdgeId: null,
+  selectedEdgeIds: [],
+  cableTypes: [],
   isModalOpen: false,
   isSettingsModalOpen: false,
   isNodeListModalOpen: false,
@@ -166,13 +171,19 @@ export const useStore = create<DiagramState>((set, get) => ({
   onConnect: (connection) => {
     get().recordHistory();
     set({
-      edges: addEdge(connection, get().edges),
+      edges: addEdge(
+        {
+          ...connection,
+          data: { cableType: 'none' },
+        },
+        get().edges,
+      ),
     });
   },
 
   // Node selection
   setSelectedNodeIds: (nodeIds) => set({ selectedNodeIds: nodeIds }),
-  setSelectedEdge: (edgeId) => set({ selectedEdgeId: edgeId }),
+  setSelectedEdgeIds: (edgeIds) => set({ selectedEdgeIds: edgeIds }),
 
   // Node property updates
   updateNodeLabel: (nodeId, label) => {
@@ -387,7 +398,7 @@ export const useStore = create<DiagramState>((set, get) => ({
       nodes: projectState.nodes,
       edges: projectState.edges,
       selectedNodeIds: [],
-      selectedEdgeId: null,
+      selectedEdgeIds: [],
       // Clear temporary/local state indicators when reloading
       pendingPosition: null,
     });
@@ -397,6 +408,7 @@ export const useStore = create<DiagramState>((set, get) => ({
       templates: projectState.templates,
       types: projectState.types,
       locations: projectState.locations,
+      cableTypes: projectState.cableTypes,
     });
   },
   deleteTemplate: (templateId) => {
@@ -465,15 +477,32 @@ export const useStore = create<DiagramState>((set, get) => ({
         (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target),
       ),
       selectedNodeIds: [],
-      selectedEdgeId: null,
+      selectedEdgeIds: [],
     });
   },
 
-  deleteEdge: (edgeId) => {
+  deleteEdge: (edgeIds: string[]) => {
     get().recordHistory();
     set({
-      edges: get().edges.filter((edge) => edge.id !== edgeId),
-      selectedEdgeId: null,
+      edges: get().edges.filter((edge) => !edgeIds.includes(edge.id)),
+      selectedEdgeIds: [],
+    });
+  },
+
+  addCableType: (type) => set({ cableTypes: [...get().cableTypes, type] }),
+  removeCableType: (type) => set({ cableTypes: get().cableTypes.filter((t) => t !== type) }),
+  updateEdgeCableType: (edgeIds, cableType) => {
+    get().recordHistory();
+    set({
+      edges: get().edges.map((edge) => {
+        if (edgeIds.includes(edge.id)) {
+          return {
+            ...edge,
+            data: { ...edge.data, cableType: cableType },
+          };
+        }
+        return edge;
+      }),
     });
   },
 

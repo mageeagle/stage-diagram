@@ -10,6 +10,7 @@ export interface ProjectState {
   edges: Edge[];
   types: string[];
   locations: string[];
+  cableTypes: string[];
 }
 
 /**

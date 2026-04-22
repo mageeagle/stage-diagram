@@ -24,8 +24,10 @@ export default function Home() {
     templates,
     types,
     locations,
+    cableTypes,
     restoreProjectState,
   } = useStore();
+
 
   const handleAddNode = () => {
     setPendingPosition({ x: 100, y: 100 });
@@ -33,7 +35,7 @@ export default function Home() {
   };
 
   const handleExport = () => {
-    exportProject({ templates, nodes, edges, types, locations });
+    exportProject({ templates, nodes, edges, types, locations, cableTypes });
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
