@@ -15,6 +15,7 @@ export const PropertyInspector = () => {
     updateNodeLabel, 
     updateNodeType,
     updateNodeLocation,
+    updateNodePower,
     types,
     locations,
     addType,
@@ -48,7 +49,7 @@ export const PropertyInspector = () => {
                 {templates.length === 0 ? (
                   <div className="italic text-center py-8">
                     Select a node to edit properties or create a template
-                  </div>
+                  </div >
                 ) : (
                   Object.entries(
                     templates.reduce((acc, template) => {
@@ -63,7 +64,7 @@ export const PropertyInspector = () => {
                     <div key={type} className="mb-4 last:mb-0">
                       <div className="text-xs font-bold text-gray-500 uppercase mb-2 px-1">
                         {type}
-                      </div>
+                      </div >
                       <div className="space-y-2">
                         {groupTemplates.map((template) => (
                           <div
@@ -101,13 +102,13 @@ export const PropertyInspector = () => {
                             </div>
                           </div>
                         ))}
-                      </div>
-                    </div>
+                      </div >
+                    </div >
                   ))
                 )}
 
-            </div>
-          </div>
+            </div >
+          </div >
           {editingTemplate && (
             <TemplateEditModal
               key={editingTemplate.id}
@@ -150,6 +151,7 @@ export const PropertyInspector = () => {
       outputs: [...(selectedNode.data.outputs || [])],
       type: selectedNode.data.type || '',
       nodeType: selectedNode.type!,
+      power: selectedNode.data.power,
     };
     addTemplate(template);
   };
@@ -169,7 +171,20 @@ export const PropertyInspector = () => {
             value={selectedNode.data.label}
             onChange={(e) => updateNodeLabel(selectedNode.id, e.target.value)}
           />
-        </div>
+        </div >
+
+        <div className="mb-6 flex items-center gap-3">
+             <input
+               type="checkbox"
+               id="node-power"
+               className="w-4 h-4 cursor-pointer"
+               checked={!!selectedNode.data.power}
+               onChange={(e) => updateNodePower(selectedNode.id, e.target.checked)}
+             />
+          <label htmlFor="node-power" className="text-sm font-medium cursor-pointer">
+            Require Power Plug?
+          </label>
+        </div >
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -182,7 +197,7 @@ export const PropertyInspector = () => {
             >
               <Plus size={16} />
             </button>
-          </div>
+          </div >
           <select
             value={selectedNode.data.type || ''}
             onChange={(e) => updateNodeType(selectedNode.id, e.target.value)}
@@ -193,7 +208,7 @@ export const PropertyInspector = () => {
                <option key={t} value={t}>{t}</option>
              ))}
            </select>
-         </div>
+         </div >
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -206,7 +221,7 @@ export const PropertyInspector = () => {
             >
               <Plus size={16} />
             </button>
-          </div>
+          </div >
           <select
             value={selectedNode.data.location || ''}
             onChange={(e) => updateNodeLocation(selectedNode.id, e.target.value)}
@@ -217,7 +232,7 @@ export const PropertyInspector = () => {
                <option key={l} value={l}>{l}</option>
              ))}
            </select>
-         </div>
+         </div >
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -230,7 +245,7 @@ export const PropertyInspector = () => {
             >
               <Plus size={16} />
             </button>
-          </div>
+          </div >
           <div className="space-y-2">
             {selectedNode.data.inputs?.map((input) => (
               <div key={input.id} className="flex items-center gap-2">
@@ -246,10 +261,10 @@ export const PropertyInspector = () => {
                 >
                   <Trash2 size={14} />
                 </button>
-              </div>
+              </div >
             ))}
-          </div>
-        </div>
+          </div >
+        </div >
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -262,7 +277,7 @@ export const PropertyInspector = () => {
             >
               <Plus size={16} />
             </button>
-          </div>
+          </div >
           <div className="space-y-2">
             {selectedNode.data.outputs?.map((output) => (
               <div key={output.id} className="flex items-center gap-2">
@@ -278,11 +293,11 @@ export const PropertyInspector = () => {
                 >
                   <Trash2 size={14} />
                 </button>
-              </div>
+              </div >
             ))}
-          </div>
-        </div>
-      </div>
+          </div >
+        </div >
+      </div >
 
       <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
         <button
@@ -306,7 +321,7 @@ export const PropertyInspector = () => {
           <Trash2 size={16} />
           Delete Node
         </button>
-      </div>
+      </div >
       {editingTemplate && (
             <TemplateEditModal
               key={editingTemplate.id}
@@ -319,8 +334,7 @@ export const PropertyInspector = () => {
               template={editingTemplate}
               types={types}
             />
-
       )}
-    </div>
+    </div >
   );
 };

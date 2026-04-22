@@ -14,6 +14,7 @@ export interface CustomNodeData {
   outputs: NodeOutput[];   // Array of output handles
   type?: string;
   location?: string;
+  power: boolean;
   [key: string]: unknown;
 }
 
@@ -24,4 +25,5 @@ export interface NodeTemplate {
   outputs: NodeOutput[];
   type: string;       // The 'type' property within node.data
   nodeType: string;   // The 'type' property of the Node itself (React Flow type)
+  power: boolean;
 }

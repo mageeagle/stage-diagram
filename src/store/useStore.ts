@@ -45,16 +45,17 @@ interface DiagramState {
   setSelectedNode: (nodeId: string | null) => void;
   setSelectedEdge: (edgeId: string | null) => void;
 
-  // Node property updates
-  updateNodeLabel: (nodeId: string, label: string) => void;
-  updateNodeType: (nodeId: string, type: string) => void;
-  updateNodeLocation: (nodeId: string, location: string) => void;
-  addInput: (nodeId: string) => void;
-  removeInput: (nodeId: string, inputId: string) => void;
-  updateInputName: (nodeId: string, inputId: string, name: string) => void;
-  addOutput: (nodeId: string) => void;
-  removeOutput: (nodeId: string, outputId: string) => void;
-  updateOutputName: (nodeId: string, outputId: string, name: string) => void;
+   // Node property updates
+   updateNodeLabel: (nodeId: string, label: string) => void;
+   updateNodeType: (nodeId: string, type: string) => void;
+   updateNodeLocation: (nodeId: string, location: string) => void;
+   updateNodePower: (nodeId: string, power: boolean) => void;
+   addInput: (nodeId: string) => void;
+   removeInput: (nodeId: string, inputId: string) => void;
+   updateInputName: (nodeId: string, inputId: string, name: string) => void;
+   addOutput: (nodeId: string) => void;
+   removeOutput: (nodeId: string, outputId: string) => void;
+   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
 
   // Template actions
    addTemplate: (template: NodeTemplate) => void;
@@ -63,15 +64,16 @@ interface DiagramState {
    deleteTemplate: (templateId: string) => void;
 
   // Canvas actions
-  addNode: (
-    type: string,
-    position: { x: number; y: number },
-    label: string,
-    inputsCount?: number,
-    outputsCount?: number,
-    typeProperty?: string,
-    locationProperty?: string
-  ) => void;
+   addNode: (
+     type: string,
+     position: { x: number; y: number },
+     label: string,
+     inputsCount?: number,
+     outputsCount?: number,
+     typeProperty?: string,
+     locationProperty?: string,
+     power?: boolean
+   ) => void;
   copyNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
   deleteEdge: (edgeId: string) => void;
@@ -188,19 +190,32 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  updateNodeLocation: (nodeId, location) => {
-    set({
-      nodes: get().nodes.map((node) => {
-        if (node.id === nodeId) {
-          return {
-            ...node,
-            data: { ...node.data, location },
-          };
-        }
-        return node;
-      }),
-    });
-  },
+   updateNodeLocation: (nodeId, location) => {
+     set({
+       nodes: get().nodes.map((node) => {
+         if (node.id === nodeId) {
+           return {
+             ...node,
+             data: { ...node.data, location },
+           };
+         }
+         return node;
+       }),
+     });
+   },
+   updateNodePower: (nodeId, power) => {
+     set({
+       nodes: get().nodes.map((node) => {
+         if (node.id === nodeId) {
+           return {
+             ...node,
+             data: { ...node.data, power },
+           };
+         }
+         return node;
+       }),
+     });
+   },
 
   addInput: (nodeId) => {
     set({
@@ -316,23 +331,24 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  applyTemplate: (template, position) => {
-    get().recordHistory();
-    const newNode: Node<CustomNodeData> = {
-      id: nanoid(),
-      type: template.nodeType,
-      position,
-      data: {
-        label: template.name,
-        inputs: template.inputs,
-        outputs: template.outputs,
-        type: template.type,
-      },
-    };
-    set({
-      nodes: [...get().nodes, newNode],
-    });
-  },
+   applyTemplate: (template, position) => {
+     get().recordHistory();
+     const newNode: Node<CustomNodeData> = {
+       id: nanoid(),
+       type: template.nodeType,
+       position,
+       data: {
+         label: template.name,
+         inputs: template.inputs,
+         outputs: template.outputs,
+         type: template.type,
+         power: template.power,
+       },
+     };
+     set({
+       nodes: [...get().nodes, newNode],
+     });
+   },
 
   updateTemplate: (template) => {
     set({
@@ -346,34 +362,35 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  addNode: (type, position, label, inputsCount = 0, outputsCount = 0, typeProperty, locationProperty) => {
-    get().recordHistory();
-    const inputs = Array.from({ length: inputsCount }, (_, i) => ({
-      id: nanoid(),
-      name: `Input ${i + 1}`,
-    }));
+   addNode: (type, position, label, inputsCount = 0, outputsCount = 0, typeProperty, locationProperty, power = false) => {
+     get().recordHistory();
+     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
+       id: nanoid(),
+       name: `Input ${i + 1}`,
+     }));
 
-    const outputs = Array.from({ length: outputsCount }, (_, i) => ({
-      id: nanoid(),
-      name: `Output ${i + 1}`,
-    }));
+     const outputs = Array.from({ length: outputsCount }, (_, i) => ({
+       id: nanoid(),
+       name: `Output ${i + 1}`,
+     }));
 
-    const newNode: Node<CustomNodeData> = {
-      id: nanoid(),
-      type,
-      position,
-      data: {
-        label,
-        inputs,
-        outputs,
-        type: typeProperty,
-        location: locationProperty,
-      },
-    };
-    set({
-      nodes: [...get().nodes, newNode],
-    });
-  },
+     const newNode: Node<CustomNodeData> = {
+       id: nanoid(),
+       type,
+       position,
+       data: {
+         label,
+         inputs,
+         outputs,
+         type: typeProperty,
+         location: locationProperty,
+         power,
+       },
+     };
+     set({
+       nodes: [...get().nodes, newNode],
+     });
+   },
 
   copyNode: (nodeId) => {
     get().recordHistory();
