@@ -5,9 +5,10 @@ import { useStore } from '@/store/useStore';
 import { Trash2, Plus } from 'lucide-react';
 
 export const EdgePropertiesPanel = () => {
-  const selectedEdgeIds = useStore((state) => state.selectedEdgeIds);
-  const edges = useStore((state) => state.edges);
-  const cableTypes = useStore((state) => state.cableTypes);
+   const selectedEdgeIds = useStore((state) => state.selectedEdgeIds);
+   const edges = useStore((state) => state.edges);
+   const nodes = useStore((state) => state.nodes);
+   const cableTypes = useStore((state) => state.cableTypes);
   const addCableType = useStore((state) => state.addCableType);
   const updateEdgeCableType = useStore((state) => state.updateEdgeCableType);
   const deleteEdge = useStore((state) => state.deleteEdge);
@@ -83,9 +84,28 @@ export const EdgePropertiesPanel = () => {
         {/* If single select, maybe show source/target info, but let's keep it simple for now */}
         {!isMultiSelect && selectedEdges[0] && (
           <div className="text-xs text-gray-500">
-            <p>Source: {selectedEdges[0].source}</p>
-            <p>Target: {selectedEdges[0].target}</p>
-          </div >
+            {(() => {
+              const edge = selectedEdges[0];
+              const sourceNode = nodes.find((n) => n.id === edge.source);
+              const targetNode = nodes.find((n) => n.id === edge.target);
+
+              if (!sourceNode || !targetNode) return null;
+
+              const sourceOutput = sourceNode.data.outputs?.find((o) => o.id === edge.sourceHandle);
+              const targetInput = targetNode.data.inputs?.find((i) => i.id === edge.targetHandle);
+
+              return (
+                <>
+                  <p>
+                    Source: {sourceNode.data.label} ({sourceOutput?.name || 'Unknown Output'})
+                  </p>
+                  <p>
+                    Target: {targetNode.data.label} ({targetInput?.name || 'Unknown Input'})
+                  </p>
+                </>
+              );
+            })()}
+          </div>
         )}
       </div>
 
