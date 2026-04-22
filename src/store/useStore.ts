@@ -26,7 +26,7 @@ interface HistoryState {
 interface DiagramState {
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
-  selectedNodeId: string | null;
+  selectedNodeIds: string[];
   selectedEdgeId: string | null;
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
@@ -49,14 +49,14 @@ interface DiagramState {
   onConnect: OnConnect;
 
   // Node selection
-  setSelectedNode: (nodeId: string | null) => void;
+  setSelectedNodeIds: (nodeIds: string[]) => void;
   setSelectedEdge: (edgeId: string | null) => void;
 
    // Node property updates
    updateNodeLabel: (nodeId: string, label: string) => void;
-   updateNodeType: (nodeId: string, type: string) => void;
-   updateNodeLocation: (nodeId: string, location: string) => void;
-   updateNodePower: (nodeId: string, power: boolean) => void;
+updateNodeType: (nodeIds: string[], type: string) => void;
+    updateNodeLocation: (nodeIds: string[], location: string) => void;
+    updateNodePower: (nodeIds: string[], power: boolean) => void;
    addInput: (nodeId: string) => void;
    removeInput: (nodeId: string, inputId: string) => void;
    updateInputName: (nodeId: string, inputId: string, name: string) => void;
@@ -84,8 +84,8 @@ interface DiagramState {
      locationProperty?: string,
      power?: boolean
    ) => void;
-  copyNode: (nodeId: string) => void;
-  deleteNode: (nodeId: string) => void;
+  copyNodes: (nodeIds: string[]) => void;
+  deleteNodes: (nodeIds: string[]) => void;
   deleteEdge: (edgeId: string) => void;
    setIsModalOpen: (isOpen: boolean) => void;
    setIsSettingsModalOpen: (isOpen: boolean) => void;
@@ -101,12 +101,12 @@ interface DiagramState {
 export const useStore = create<DiagramState>((set, get) => ({
   nodes: [],
   edges: [],
-  selectedNodeId: null,
+  selectedNodeIds: [],
   selectedEdgeId: null,
-   isModalOpen: false,
-   isSettingsModalOpen: false,
-   isNodeListModalOpen: false,
-   pendingPosition: null,
+  isModalOpen: false,
+  isSettingsModalOpen: false,
+  isNodeListModalOpen: false,
+  pendingPosition: null,
   templates: [],
   types: [],
   locations: [],
@@ -171,7 +171,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   // Node selection
-  setSelectedNode: (nodeId) => set({ selectedNodeId: nodeId }),
+  setSelectedNodeIds: (nodeIds) => set({ selectedNodeIds: nodeIds }),
   setSelectedEdge: (edgeId) => set({ selectedEdgeId: edgeId }),
 
   // Node property updates
@@ -189,10 +189,11 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  updateNodeType: (nodeId, type) => {
+  updateNodeType: (nodeIds, type) => {
+    get().recordHistory();
     set({
       nodes: get().nodes.map((node) => {
-        if (node.id === nodeId) {
+        if (nodeIds.includes(node.id)) {
           return {
             ...node,
             data: { ...node.data, type },
@@ -203,32 +204,34 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-   updateNodeLocation: (nodeId, location) => {
-     set({
-       nodes: get().nodes.map((node) => {
-         if (node.id === nodeId) {
-           return {
-             ...node,
-             data: { ...node.data, location },
-           };
-         }
-         return node;
-       }),
-     });
-   },
-   updateNodePower: (nodeId, power) => {
-     set({
-       nodes: get().nodes.map((node) => {
-         if (node.id === nodeId) {
-           return {
-             ...node,
-             data: { ...node.data, power },
-           };
-         }
-         return node;
-       }),
-     });
-   },
+    updateNodeLocation: (nodeIds, location) => {
+      get().recordHistory();
+      set({
+        nodes: get().nodes.map((node) => {
+          if (nodeIds.includes(node.id)) {
+            return {
+              ...node,
+              data: { ...node.data, location },
+            };
+          }
+          return node;
+        }),
+      });
+    },
+    updateNodePower: (nodeIds, power) => {
+      get().recordHistory();
+      set({
+        nodes: get().nodes.map((node) => {
+          if (nodeIds.includes(node.id)) {
+            return {
+              ...node,
+              data: { ...node.data, power },
+            };
+          }
+          return node;
+        }),
+      });
+    },
 
   addInput: (nodeId) => {
     set({
@@ -383,7 +386,7 @@ export const useStore = create<DiagramState>((set, get) => ({
     set({
       nodes: projectState.nodes,
       edges: projectState.edges,
-      selectedNodeId: null,
+      selectedNodeIds: [],
       selectedEdgeId: null,
       // Clear temporary/local state indicators when reloading
       pendingPosition: null,
@@ -432,33 +435,36 @@ export const useStore = create<DiagramState>((set, get) => ({
      });
    },
 
-  copyNode: (nodeId) => {
+  copyNodes: (nodeIds: string[]) => {
     get().recordHistory();
-    const node = get().nodes.find((n) => n.id === nodeId);
-    if (!node) return;
-
-    const newNode: Node<CustomNodeData> = {
-      ...node,
-      id: nanoid(),
-      position: {
-        x: node.position.x + 20,
-        y: node.position.y + 20,
-      },
-    };
+    const newNodes = nodeIds
+      .map((nodeId) => {
+        const node = get().nodes.find((n) => n.id === nodeId);
+        if (!node) return null;
+        return {
+          ...node,
+          id: nanoid(),
+          position: {
+            x: node.position.x + 20,
+            y: node.position.y + 20,
+          },
+        };
+      })
+      .filter((node): node is Node<CustomNodeData> => node !== null);
 
     set({
-      nodes: [...get().nodes, newNode],
+      nodes: [...get().nodes, ...newNodes],
     });
   },
 
-  deleteNode: (nodeId) => {
+  deleteNodes: (nodeIds: string[]) => {
     get().recordHistory();
     set({
-      nodes: get().nodes.filter((node) => node.id !== nodeId),
+      nodes: get().nodes.filter((node) => !nodeIds.includes(node.id)),
       edges: get().edges.filter(
-        (edge) => edge.source !== nodeId && edge.target !== nodeId,
+        (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target),
       ),
-      selectedNodeId: null,
+      selectedNodeIds: [],
       selectedEdgeId: null,
     });
   },

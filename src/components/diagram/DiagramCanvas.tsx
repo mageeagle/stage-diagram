@@ -21,14 +21,14 @@ export const DiagramCanvas = () => {
     onNodesChange,
     onEdgesChange,
     onConnect,
-    setSelectedNode,
-    selectedNodeId,
+    setSelectedNodeIds,
+    selectedNodeIds,
     setSelectedEdge,
     selectedEdgeId,
-    deleteNode,
+    deleteNodes,
     deleteEdge,
     addNode,
-    copyNode,
+    copyNodes,
     isModalOpen,
     pendingPosition,
     setIsModalOpen,
@@ -42,98 +42,106 @@ export const DiagramCanvas = () => {
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      setSelectedNode(node.id);
+      setSelectedNodeIds([node.id]);
       setSelectedEdge(null);
     },
-    [setSelectedNode, setSelectedEdge],
+    [setSelectedNodeIds, setSelectedEdge],
   );
 
   const onNodeDragStart = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      setSelectedNode(node.id);
+      setSelectedNodeIds([node.id]);
       setSelectedEdge(null);
     },
-    [setSelectedNode, setSelectedEdge],
+    [setSelectedNodeIds, setSelectedEdge],
   );
 
   const onEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
       setSelectedEdge(edge.id);
-      setSelectedNode(null);
+      setSelectedNodeIds([]);
     },
-    [setSelectedEdge, setSelectedNode],
+    [setSelectedEdge, setSelectedNodeIds],
   );
 
   const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
+    setSelectedNodeIds([]);
     setSelectedEdge(null);
-  }, [setSelectedNode, setSelectedEdge]);
+  }, [setSelectedNodeIds, setSelectedEdge]);
 
-      useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
-        const target = event.target as HTMLElement;
-        const isTyping =
-          target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+  const onSelectionChange = useCallback(
+    (params: { nodes: Node[] }) => {
+      const newIds = params.nodes.map((n) => n.id);
+      if (JSON.stringify(newIds) !== JSON.stringify(selectedNodeIds)) {
+        setSelectedNodeIds(newIds);
+      }
+    },
+    [selectedNodeIds, setSelectedNodeIds],
+  );
 
-        if (isTyping) {
-          return;
-        }
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" || target.tagName === "TEXTAREA";
 
-        if (
-          (event.key === "Delete" || event.key === "Backspace") &&
-          selectedNodeId
-        ) {
-          deleteNode(selectedNodeId);
-        }
+      if (isTyping) {
+        return;
+      }
 
-        if ((event.key === "Delete" || event.key === "Backspace") && selectedEdgeId) {
-          deleteEdge(selectedEdgeId);
-        }
+      if (
+        (event.key === "Delete" || event.key === "Backspace") &&
+        selectedNodeIds.length > 0
+      ) {
+        deleteNodes(selectedNodeIds);
+      }
 
-        if (event.key.toLowerCase() === "c" && selectedNodeId) {
-          copyNode(selectedNodeId);
-        }
+      if (
+        (event.key === "Delete" || event.key === "Backspace") && selectedEdgeId
+      ) {
+        deleteEdge(selectedEdgeId);
+      }
 
-        if (
-          (event.ctrlKey || event.metaKey) &&
-          (event.key === "z" || event.key === "Z")
-        ) {
-          undo();
-        }
+      if (event.key.toLowerCase() === "c" && selectedNodeIds.length > 0) {
+        copyNodes(selectedNodeIds);
+      }
 
-        if (
-          (event.ctrlKey || event.metaKey) &&
-          (event.key === "y" || event.key === "Y" || (event.shiftKey && event.key === "Z"))
-        ) {
-          redo();
-        }
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === "z" || event.key === "Z")
+      ) {
+        undo();
+      }
 
-        if (event.key === " " || event.key === "Enter") {
-          event.preventDefault();
-          // Use a default position or center of viewport if possible.
-          // For now, we'll just add at a reasonable offset from current center or just 0,0
-          // Use a default position or center of viewport if possible.
-          // For now, we'll just add at a reasonable offset from current center or just 0,0
-          setPendingPosition({ x: 100, y: 100 });
-          setIsModalOpen(true);
-        }
-      };
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === "y" || event.key === "Y" || (event.shiftKey && event.key === "Z"))
+      ) {
+        redo();
+      }
 
-      window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }, [
-      selectedNodeId,
-      selectedEdgeId,
-      deleteNode,
-      deleteEdge,
-      copyNode,
-      setPendingPosition,
-      setIsModalOpen,
-      undo,
-      redo,
-    ]);
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        setPendingPosition({ x: 100, y: 100 });
+        setIsModalOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [
+    selectedNodeIds,
+    selectedEdgeId,
+    deleteNodes,
+    deleteEdge,
+    copyNodes,
+    setPendingPosition,
+    setIsModalOpen,
+    undo,
+    redo,
+  ]);
 
 
   const handleCreateNode = (
@@ -161,23 +169,24 @@ export const DiagramCanvas = () => {
   return (
     <div className={cn("w-full h-full relative bg-background")}>
       <div ref={containerRef} className="w-full h-full">
-         <ReactFlow
-           nodes={nodes}
-           edges={edges}
-           onNodesChange={onNodesChange}
-           onEdgesChange={onEdgesChange}
-           onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onNodeDragStart={onNodeDragStart}
-            onEdgeClick={onEdgeClick}
-           onPaneClick={onPaneClick}
-           nodeTypes={nodeTypes}
-           colorMode={theme}
-            fitView
-            snapToGrid
-            snapGrid={[20, 20]}
-            edgeTypes={{ default: SmoothStepEdge }}
-         >
+       <ReactFlow
+         nodes={nodes}
+         edges={edges}
+         onNodesChange={onNodesChange}
+         onEdgesChange={onEdgesChange}
+         onConnect={onConnect}
+          onSelectionChange={onSelectionChange}
+          onNodeClick={onNodeClick}
+          onNodeDragStart={onNodeDragStart}
+          onEdgeClick={onEdgeClick}
+          onPaneClick={onPaneClick}
+          nodeTypes={nodeTypes}
+          colorMode={theme}
+           fitView
+           snapToGrid
+           snapGrid={[20, 20]}
+           edgeTypes={{ default: SmoothStepEdge }}
+        >
           <Controls />
         </ReactFlow>
       </div>
