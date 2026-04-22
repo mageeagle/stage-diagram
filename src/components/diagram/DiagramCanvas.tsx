@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
-import { ReactFlow, Controls, Node, SmoothStepEdge, Edge } from "@xyflow/react";
+import { ReactFlow, Controls, Node, Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore } from "@/store/useStore";
 import { CustomNode } from "@/components/nodes/CustomNode";
 import { NodeCreationModal } from "@/components/diagram/NodeCreationModal";
+import { LabeledEdge } from "@/components/diagram/LabeledEdge";
 import { ExportButton } from "@/components/diagram/ExportButton";
 import { useThemeStore } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
@@ -188,7 +189,7 @@ export const DiagramCanvas = () => {
            fitView
            snapToGrid
            snapGrid={[20, 20]}
-           edgeTypes={{ default: SmoothStepEdge }}
+            edgeTypes={{ default: LabeledEdge }}
         >
           <Controls />
         </ReactFlow>
