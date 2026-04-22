@@ -9,31 +9,29 @@ import { TemplateEditModal } from '@/components/diagram/TemplateEditModal';
 import { nanoid } from 'nanoid';
 
 export const PropertyInspector = () => {
-  const { 
-    selectedNodeIds, 
-    nodes, 
-    updateNodeLabel, 
-    updateNodeType,
-    updateNodeLocation,
-    updateNodePower,
-    types,
-    locations,
-    addType,
-    addLocation,
-    addInput, 
-    removeInput, 
-    updateInputName, 
-    addOutput, 
-    removeOutput, 
-    updateOutputName,
-    deleteNodes,
-    copyNodes,
-    templates,
-    addTemplate,
-    applyTemplate,
-    updateTemplate,
-    deleteTemplate
-  } = useStore();
+  const selectedNodeIds = useStore((state) => state.selectedNodeIds);
+  const nodes = useStore((state) => state.nodes);
+  const updateNodeLabel = useStore((state) => state.updateNodeLabel);
+  const updateNodeType = useStore((state) => state.updateNodeType);
+  const updateNodeLocation = useStore((state) => state.updateNodeLocation);
+  const updateNodePower = useStore((state) => state.updateNodePower);
+  const types = useStore((state) => state.types);
+  const locations = useStore((state) => state.locations);
+  const addType = useStore((state) => state.addType);
+  const addLocation = useStore((state) => state.addLocation);
+  const addInput = useStore((state) => state.addInput);
+  const removeInput = useStore((state) => state.removeInput);
+  const updateInputName = useStore((state) => state.updateInputName);
+  const addOutput = useStore((state) => state.addOutput);
+  const removeOutput = useStore((state) => state.removeOutput);
+  const updateOutputName = useStore((state) => state.updateOutputName);
+  const deleteNodes = useStore((state) => state.deleteNodes);
+  const copyNodes = useStore((state) => state.copyNodes);
+  const templates = useStore((state) => state.templates);
+  const addTemplate = useStore((state) => state.addTemplate);
+  const applyTemplate = useStore((state) => state.applyTemplate);
+  const updateTemplate = useStore((state) => state.updateTemplate);
+  const deleteTemplate = useStore((state) => state.deleteTemplate);
 
   const [editingTemplate, setEditingTemplate] = useState<NodeTemplate | null>(null);
   const [isTemplateEditModalOpen, setIsTemplateEditModalOpen] = useState(false);

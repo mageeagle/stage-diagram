@@ -15,27 +15,25 @@ const nodeTypes = {
 };
 
 export const DiagramCanvas = () => {
-  const {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-    setSelectedNodeIds,
-    selectedNodeIds,
-    setSelectedEdge,
-    selectedEdgeId,
-    deleteNodes,
-    deleteEdge,
-    addNode,
-    copyNodes,
-    isModalOpen,
-    pendingPosition,
-    setIsModalOpen,
-    setPendingPosition,
-    undo,
-    redo,
-  } = useStore();
+  const nodes = useStore((state) => state.nodes);
+  const edges = useStore((state) => state.edges);
+  const onNodesChange = useStore((state) => state.onNodesChange);
+  const onEdgesChange = useStore((state) => state.onEdgesChange);
+  const onConnect = useStore((state) => state.onConnect);
+  const setSelectedNodeIds = useStore((state) => state.setSelectedNodeIds);
+  const selectedNodeIds = useStore((state) => state.selectedNodeIds);
+  const setSelectedEdge = useStore((state) => state.setSelectedEdge);
+  const selectedEdgeId = useStore((state) => state.selectedEdgeId);
+  const deleteNodes = useStore((state) => state.deleteNodes);
+  const deleteEdge = useStore((state) => state.deleteEdge);
+  const addNode = useStore((state) => state.addNode);
+  const copyNodes = useStore((state) => state.copyNodes);
+  const isModalOpen = useStore((state) => state.isModalOpen);
+  const pendingPosition = useStore((state) => state.pendingPosition);
+  const setIsModalOpen = useStore((state) => state.setIsModalOpen);
+  const setPendingPosition = useStore((state) => state.setPendingPosition);
+  const undo = useStore((state) => state.undo);
+  const redo = useStore((state) => state.redo);
 
   const { theme } = useThemeStore();
   const containerRef = useRef<HTMLDivElement>(null);
