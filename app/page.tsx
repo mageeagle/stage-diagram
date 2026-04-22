@@ -3,9 +3,10 @@
 import { DiagramCanvas } from "@/components/diagram/DiagramCanvas";
 import { PropertyInspector } from "@/components/inspector/PropertyInspector";
 import { useStore } from "@/store/useStore";
-import { Plus, Settings, Undo, Redo } from "lucide-react";
+import { Plus, Settings, Undo, Redo, Download, Upload } from "lucide-react";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
+import { exportProject, importProject } from "@/utils/projectIO";
 
 export default function Home() {
   const {
@@ -15,11 +16,28 @@ export default function Home() {
     setIsSettingsModalOpen,
     undo,
     redo,
+    nodes,
+    edges,
+    templates,
+    types,
+    locations,
+    restoreProjectState,
   } = useStore();
 
   const handleAddNode = () => {
     setPendingPosition({ x: 100, y: 100 });
     setIsModalOpen(true);
+  };
+
+  const handleExport = () => {
+    exportProject({ templates, nodes, edges, types, locations });
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const loadedFile = e.target.files?.[0];
+    if (loadedFile) {
+      importProject(loadedFile).then((state) => restoreProjectState(state));
+    }
   };
 
   return (
@@ -36,6 +54,26 @@ export default function Home() {
         </button>
 
         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleImport}
+            className="hidden"
+          />
+          <button
+            onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
+            className="cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10"
+            title="Import Project"
+          >
+            <Upload size={20} />
+          </button>
+          <button
+            onClick={handleExport}
+            className="cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10"
+            title="Export Project"
+          >
+            <Download size={20} />
+          </button>
           <button
             onClick={undo}
             className="cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10"

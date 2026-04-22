@@ -1,16 +1,22 @@
-import { create } from 'zustand';
-import { 
-  Edge, 
-  Node, 
-  OnNodesChange, 
-  OnEdgesChange, 
-  OnConnect, 
-  applyNodeChanges, 
-  applyEdgeChanges, 
-  addEdge 
-} from '@xyflow/react';
-import { nanoid } from 'nanoid';
-import { CustomNodeData, NodeInput, NodeOutput, NodeTemplate } from '../types/diagram';
+import { create } from "zustand";
+import {
+  Edge,
+  Node,
+  OnNodesChange,
+  OnEdgesChange,
+  OnConnect,
+  applyNodeChanges,
+  applyEdgeChanges,
+  addEdge,
+} from "@xyflow/react";
+import { nanoid } from "nanoid";
+import {
+  CustomNodeData,
+  NodeInput,
+  NodeOutput,
+  NodeTemplate,
+} from "../types/diagram";
+import { ProjectState } from "@/utils/projectIO";
 
 interface HistoryState {
   nodes: Node<CustomNodeData>[];
@@ -57,10 +63,13 @@ interface DiagramState {
   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
 
   // Template actions
-   addTemplate: (template: NodeTemplate) => void;
-   applyTemplate: (template: NodeTemplate, position: { x: number; y: number }) => void;
-   updateTemplate: (template: NodeTemplate) => void;
-   deleteTemplate: (templateId: string) => void;
+  addTemplate: (template: NodeTemplate) => void;
+  applyTemplate: (
+    template: NodeTemplate,
+    position: { x: number; y: number },
+  ) => void;
+  updateTemplate: (template: NodeTemplate) => void;
+  deleteTemplate: (templateId: string) => void;
 
   // Canvas actions
   addNode: (
@@ -70,7 +79,7 @@ interface DiagramState {
     inputsCount?: number,
     outputsCount?: number,
     typeProperty?: string,
-    locationProperty?: string
+    locationProperty?: string,
   ) => void;
   copyNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
@@ -82,6 +91,7 @@ interface DiagramState {
   removeType: (type: string) => void;
   addLocation: (location: string) => void;
   removeLocation: (location: string) => void;
+  restoreProjectState: (state: ProjectState) => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -206,7 +216,7 @@ export const useStore = create<DiagramState>((set, get) => ({
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId) {
-          const newInput: NodeInput = { id: nanoid(), name: 'New Input' };
+          const newInput: NodeInput = { id: nanoid(), name: "New Input" };
           return {
             ...node,
             data: {
@@ -228,7 +238,9 @@ export const useStore = create<DiagramState>((set, get) => ({
             ...node,
             data: {
               ...node.data,
-              inputs: (node.data.inputs || []).filter((input) => input.id !== inputId),
+              inputs: (node.data.inputs || []).filter(
+                (input) => input.id !== inputId,
+              ),
             },
           };
         }
@@ -246,7 +258,7 @@ export const useStore = create<DiagramState>((set, get) => ({
             data: {
               ...node.data,
               inputs: (node.data.inputs || []).map((input) =>
-                input.id === inputId ? { ...input, name } : input
+                input.id === inputId ? { ...input, name } : input,
               ),
             },
           };
@@ -260,7 +272,7 @@ export const useStore = create<DiagramState>((set, get) => ({
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId) {
-          const newOutput: NodeOutput = { id: nanoid(), name: 'New Output' };
+          const newOutput: NodeOutput = { id: nanoid(), name: "New Output" };
           return {
             ...node,
             data: {
@@ -282,7 +294,9 @@ export const useStore = create<DiagramState>((set, get) => ({
             ...node,
             data: {
               ...node.data,
-              outputs: (node.data.outputs || []).filter((output) => output.id !== outputId),
+              outputs: (node.data.outputs || []).filter(
+                (output) => output.id !== outputId,
+              ),
             },
           };
         }
@@ -300,7 +314,7 @@ export const useStore = create<DiagramState>((set, get) => ({
             data: {
               ...node.data,
               outputs: (node.data.outputs || []).map((output) =>
-                output.id === outputId ? { ...output, name } : output
+                output.id === outputId ? { ...output, name } : output,
               ),
             },
           };
@@ -336,17 +350,48 @@ export const useStore = create<DiagramState>((set, get) => ({
 
   updateTemplate: (template) => {
     set({
-      templates: get().templates.map((t) => (t.id === template.id ? template : t)),
+      templates: get().templates.map((t) =>
+        t.id === template.id ? template : t,
+      ),
     });
   },
 
+  // --- Project State Management ---
+  restoreProjectState: (projectState: ProjectState) => {
+    get().recordHistory();
+
+    // 1. Nodes/Edges: Restore the main canvas data
+    set({
+      nodes: projectState.nodes,
+      edges: projectState.edges,
+      selectedNodeId: null,
+      selectedEdgeId: null,
+      // Clear temporary/local state indicators when reloading
+      pendingPosition: null,
+    });
+
+    // 2. Templates: Restore saved templates
+    set({
+      templates: projectState.templates,
+      types: projectState.types,
+      locations: projectState.locations,
+    });
+  },
   deleteTemplate: (templateId) => {
     set({
       templates: get().templates.filter((t) => t.id !== templateId),
     });
   },
 
-  addNode: (type, position, label, inputsCount = 0, outputsCount = 0, typeProperty, locationProperty) => {
+  addNode: (
+    type,
+    position,
+    label,
+    inputsCount = 0,
+    outputsCount = 0,
+    typeProperty,
+    locationProperty,
+  ) => {
     get().recordHistory();
     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
       id: nanoid(),
@@ -398,7 +443,9 @@ export const useStore = create<DiagramState>((set, get) => ({
     get().recordHistory();
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
-      edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+      edges: get().edges.filter(
+        (edge) => edge.source !== nodeId && edge.target !== nodeId,
+      ),
       selectedNodeId: null,
       selectedEdgeId: null,
     });
@@ -418,5 +465,6 @@ export const useStore = create<DiagramState>((set, get) => ({
   addType: (type) => set({ types: [...get().types, type] }),
   removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),
   addLocation: (location) => set({ locations: [...get().locations, location] }),
-  removeLocation: (location) => set({ locations: get().locations.filter((l) => l !== location) }),
+  removeLocation: (location) =>
+    set({ locations: get().locations.filter((l) => l !== location) }),
 }));
