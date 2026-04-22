@@ -33,6 +33,8 @@ export const DiagramCanvas = () => {
     pendingPosition,
     setIsModalOpen,
     setPendingPosition,
+    undo,
+    redo,
   } = useStore();
 
   const { theme } = useThemeStore();
@@ -67,53 +69,72 @@ export const DiagramCanvas = () => {
     setSelectedEdge(null);
   }, [setSelectedNode, setSelectedEdge]);
 
-   useEffect(() => {
-     const handleKeyDown = (event: KeyboardEvent) => {
-       const target = event.target as HTMLElement;
-       const isTyping =
-         target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+      useEffect(() => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        const target = event.target as HTMLElement;
+        const isTyping =
+          target.tagName === "INPUT" || target.tagName === "TEXTAREA";
 
-       if (isTyping) {
-         return;
-       }
+        if (isTyping) {
+          return;
+        }
 
-       if (
-         (event.key === "Delete" || event.key === "Backspace") &&
-         selectedNodeId
-       ) {
-         deleteNode(selectedNodeId);
-       }
+        if (
+          (event.key === "Delete" || event.key === "Backspace") &&
+          selectedNodeId
+        ) {
+          deleteNode(selectedNodeId);
+        }
 
-       if ((event.key === "Delete" || event.key === "Backspace") && selectedEdgeId) {
-         deleteEdge(selectedEdgeId);
-       }
+        if ((event.key === "Delete" || event.key === "Backspace") && selectedEdgeId) {
+          deleteEdge(selectedEdgeId);
+        }
 
-       if (event.key.toLowerCase() === "c" && selectedNodeId) {
-         copyNode(selectedNodeId);
-       }
+        if (event.key.toLowerCase() === "c" && selectedNodeId) {
+          copyNode(selectedNodeId);
+        }
 
-       if (event.key === " " || event.key === "Enter") {
-         event.preventDefault();
-         // Use a default position or center of viewport if possible.
-         // For now, we'll just add at a reasonable offset from current center or just 0,0
-         setPendingPosition({ x: 100, y: 100 });
-         setIsModalOpen(true);
-       }
-     };
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          (event.key === "z" || event.key === "Z")
+        ) {
+          undo();
+        }
 
-     window.addEventListener("keydown", handleKeyDown);
-     return () => {
-       window.removeEventListener("keydown", handleKeyDown);
-     };
-   }, [
-     selectedNodeId,
-     selectedEdgeId,
-     deleteNode,
-     deleteEdge,
-     copyNode,
-     setPendingPosition,
-     setIsModalOpen,
-   ]);
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          (event.key === "y" || event.key === "Y" || (event.shiftKey && event.key === "Z"))
+        ) {
+          redo();
+        }
+
+        if (event.key === " " || event.key === "Enter") {
+          event.preventDefault();
+          // Use a default position or center of viewport if possible.
+          // For now, we'll just add at a reasonable offset from current center or just 0,0
+          // Use a default position or center of viewport if possible.
+          // For now, we'll just add at a reasonable offset from current center or just 0,0
+          setPendingPosition({ x: 100, y: 100 });
+          setIsModalOpen(true);
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }, [
+      selectedNodeId,
+      selectedEdgeId,
+      deleteNode,
+      deleteEdge,
+      copyNode,
+      setPendingPosition,
+      setIsModalOpen,
+      undo,
+      redo,
+    ]);
+
 
   const handleCreateNode = (
     name: string,

@@ -12,6 +12,11 @@ import {
 import { nanoid } from 'nanoid';
 import { CustomNodeData, NodeInput, NodeOutput, NodeTemplate } from '../types/diagram';
 
+interface HistoryState {
+  nodes: Node<CustomNodeData>[];
+  edges: Edge[];
+}
+
 interface DiagramState {
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
@@ -23,6 +28,13 @@ interface DiagramState {
   templates: NodeTemplate[];
   types: string[];
   locations: string[];
+
+  // Undo/Redo
+  undoStack: HistoryState[];
+  redoStack: HistoryState[];
+  undo: () => void;
+  redo: () => void;
+  recordHistory: () => void;
 
   // React Flow actions
   onNodesChange: OnNodesChange<Node<CustomNodeData>>;
@@ -83,6 +95,47 @@ export const useStore = create<DiagramState>((set, get) => ({
   templates: [],
   types: [],
   locations: [],
+  undoStack: [],
+  redoStack: [],
+
+  undo: () => {
+    const { undoStack, redoStack, nodes, edges } = get();
+    if (undoStack.length === 0) return;
+
+    const previousState = undoStack[undoStack.length - 1];
+    const newUndoStack = undoStack.slice(0, -1);
+
+    set({
+      nodes: previousState.nodes,
+      edges: previousState.edges,
+      undoStack: newUndoStack,
+      redoStack: [...redoStack, { nodes, edges }],
+    });
+  },
+
+  redo: () => {
+    const { undoStack, redoStack, nodes, edges } = get();
+    if (redoStack.length === 0) return;
+
+    const nextState = redoStack[redoStack.length - 1];
+    const newRedoStack = redoStack.slice(0, -1);
+
+    set({
+      nodes: nextState.nodes,
+      edges: nextState.edges,
+      undoStack: [...undoStack, { nodes, edges }],
+      redoStack: newRedoStack,
+    });
+  },
+
+  recordHistory: () => {
+    const { nodes, edges, undoStack } = get();
+    const newUndoStack = [...undoStack, { nodes, edges }].slice(-50);
+    set({
+      undoStack: newUndoStack,
+      redoStack: [],
+    });
+  },
 
   // React Flow actions
   onNodesChange: (changes) => {
@@ -96,6 +149,7 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
   onConnect: (connection) => {
+    get().recordHistory();
     set({
       edges: addEdge(connection, get().edges),
     });
@@ -263,6 +317,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   applyTemplate: (template, position) => {
+    get().recordHistory();
     const newNode: Node<CustomNodeData> = {
       id: nanoid(),
       type: template.nodeType,
@@ -292,6 +347,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   addNode: (type, position, label, inputsCount = 0, outputsCount = 0, typeProperty, locationProperty) => {
+    get().recordHistory();
     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
       id: nanoid(),
       name: `Input ${i + 1}`,
@@ -320,6 +376,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   copyNode: (nodeId) => {
+    get().recordHistory();
     const node = get().nodes.find((n) => n.id === nodeId);
     if (!node) return;
 
@@ -338,6 +395,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   deleteNode: (nodeId) => {
+    get().recordHistory();
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
@@ -345,7 +403,9 @@ export const useStore = create<DiagramState>((set, get) => ({
       selectedEdgeId: null,
     });
   },
+
   deleteEdge: (edgeId) => {
+    get().recordHistory();
     set({
       edges: get().edges.filter((edge) => edge.id !== edgeId),
       selectedEdgeId: null,

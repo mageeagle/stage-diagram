@@ -3,7 +3,7 @@
 import { DiagramCanvas } from "@/components/diagram/DiagramCanvas";
 import { PropertyInspector } from "@/components/inspector/PropertyInspector";
 import { useStore } from "@/store/useStore";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, Undo, Redo } from "lucide-react";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
 
@@ -13,6 +13,8 @@ export default function Home() {
     setIsModalOpen,
     isSettingsModalOpen,
     setIsSettingsModalOpen,
+    undo,
+    redo,
   } = useStore();
 
   const handleAddNode = () => {
@@ -34,6 +36,18 @@ export default function Home() {
         </button>
 
         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+          <button
+            onClick={undo}
+            className="cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10"
+          >
+            <Undo size={20} />
+          </button>
+          <button
+            onClick={redo}
+            className="cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10"
+          >
+            <Redo size={20} />
+          </button>
           <ThemeSwitcher />
           <button
             onClick={() => setIsSettingsModalOpen(true)}
