@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { X, Plus, Trash2 } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { X, Plus, Trash2 } from "lucide-react";
+import { useStore } from "../../store/useStore";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -20,8 +20,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     removeLocation,
   } = useStore();
 
-  const [newType, setNewType] = useState('');
-  const [newLocation, setNewLocation] = useState('');
+  const [newType, setNewType] = useState("");
+  const [newLocation, setNewLocation] = useState("");
 
   const typeInputRef = useRef<HTMLInputElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +38,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     e.preventDefault();
     if (newType.trim()) {
       addType(newType.trim());
-      setNewType('');
+      setNewType("");
       typeInputRef.current?.focus();
     }
   };
@@ -47,13 +47,13 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     e.preventDefault();
     if (newLocation.trim()) {
       addLocation(newLocation.trim());
-      setNewLocation('');
+      setNewLocation("");
       locationInputRef.current?.focus();
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       onClose();
     }
   };
@@ -118,7 +118,6 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               ))}
             </ul>
           </div>
-
           {/* Location List */}
           <div>
             <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
@@ -160,6 +159,6 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
