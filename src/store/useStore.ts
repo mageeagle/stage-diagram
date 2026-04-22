@@ -24,6 +24,7 @@ interface DiagramState {
   selectedEdgeId: string | null;
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
+  isNodeListModalOpen: boolean;
   pendingPosition: { x: number; y: number } | null;
   templates: NodeTemplate[];
   types: string[];
@@ -77,9 +78,10 @@ interface DiagramState {
   copyNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
   deleteEdge: (edgeId: string) => void;
-  setIsModalOpen: (isOpen: boolean) => void;
-  setIsSettingsModalOpen: (isOpen: boolean) => void;
-  setPendingPosition: (position: { x: number; y: number } | null) => void;
+   setIsModalOpen: (isOpen: boolean) => void;
+   setIsSettingsModalOpen: (isOpen: boolean) => void;
+   setIsNodeListModalOpen: (isOpen: boolean) => void;
+   setPendingPosition: (position: { x: number; y: number } | null) => void;
   addType: (type: string) => void;
   removeType: (type: string) => void;
   addLocation: (location: string) => void;
@@ -91,9 +93,10 @@ export const useStore = create<DiagramState>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   selectedEdgeId: null,
-  isModalOpen: false,
-  isSettingsModalOpen: false,
-  pendingPosition: null,
+   isModalOpen: false,
+   isSettingsModalOpen: false,
+   isNodeListModalOpen: false,
+   pendingPosition: null,
   templates: [],
   types: [],
   locations: [],
@@ -429,9 +432,10 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
-  setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
-  setPendingPosition: (position) => set({ pendingPosition: position }),
+   setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
+   setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
+   setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
+   setPendingPosition: (position) => set({ pendingPosition: position }),
   addType: (type) => set({ types: [...get().types, type] }),
   removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),
   addLocation: (location) => set({ locations: [...get().locations, location] }),
