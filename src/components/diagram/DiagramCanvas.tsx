@@ -173,8 +173,10 @@ export const DiagramCanvas = () => {
            onPaneClick={onPaneClick}
            nodeTypes={nodeTypes}
            colorMode={theme}
-           fitView
-           edgeTypes={{ default: SmoothStepEdge }}
+            fitView
+            snapToGrid
+            snapGrid={[20, 20]}
+            edgeTypes={{ default: SmoothStepEdge }}
          >
           <Controls />
         </ReactFlow>
