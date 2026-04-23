@@ -13,7 +13,7 @@ import { NodeListContent } from "./node-list-modal/NodeListContent";
 export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [showDetails, setShowDetails] = useState(true);
-  const { nodes } = useStore();
+  const { nodes, edges, cableTypes } = useStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,6 +73,25 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
             groupBy={groupBy}
             showDetails={showDetails}
           />
+
+          {cableTypes.length > 0 && (
+            <div className="mt-6">
+              <div className="bg-zinc-50 dark:bg-zinc-800/50 px-5 py-2 text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 border-y border-zinc-100 dark:border-zinc-800">
+                Cables
+              </div >
+              <div className="px-5 py-2">
+                {cableTypes.map((type) => {
+                  const count = edges.filter((edge) => edge.data.cableType === type).length;
+                  return (
+                    <div key={type} className="flex justify-between text-sm py-1">
+                      <span className="text-gray-700 dark:text-zinc-300">{type}</span>
+                      <span className="text-gray-500 dark:text-zinc-500">{count}</span>
+                    </div >
+                  );
+                })}
+              </div >
+            </div >
+          )}
         </div>
       </div>
     </div>,
