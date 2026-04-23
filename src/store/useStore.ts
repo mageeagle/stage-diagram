@@ -53,8 +53,12 @@ interface DiagramState {
   setSelectedNodeIds: (nodeIds: string[]) => void;
   setSelectedEdgeIds: (edgeIds: string[]) => void;
 
-   // Node property updates
-   updateNodeLabel: (nodeId: string, label: string) => void;
+  // Export settings
+  updateTitle: (title: string) => void;
+  updatePreparedBy: (preparedBy: string) => void;
+
+  // Node property updates
+  updateNodeLabel: (nodeId: string, label: string) => void;
 updateNodeType: (nodeIds: string[], type: string) => void;
     updateNodeLocation: (nodeIds: string[], location: string) => void;
     updateNodePower: (nodeIds: string[], power: boolean) => void;
@@ -115,6 +119,8 @@ export const useStore = create<DiagramState>((set, get) => ({
   templates: [],
   types: [],
   locations: [],
+  title: "Technical Rider",
+  preparedBy: "",
   undoStack: [],
   redoStack: [],
 
@@ -506,10 +512,12 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-   setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
-   setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
-   setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
-   setPendingPosition: (position) => set({ pendingPosition: position }),
+    setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
+    setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
+    setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
+    setPendingPosition: (position) => set({ pendingPosition: position }),
+  updateTitle: (title) => set({ title }),
+  updatePreparedBy: (preparedBy) => set({ preparedBy }),
   addType: (type) => set({ types: [...get().types, type] }),
   removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),
   addLocation: (location) => set({ locations: [...get().locations, location] }),

@@ -7,16 +7,28 @@ import { useStore } from "../../store/useStore";
 import {
   type GroupByMode,
   type NodeListModalProps,
+  type NodeListHeaderProps,
 } from "./node-list-modal-types";
-import { groupByName, groupByLocation, groupByType } from "./node-list-utils";
 import { NodeListHeader } from "./node-list-modal/NodeListHeader";
 import { NodeListTabs } from "./node-list-modal/NodeListTabs";
 import { NodeListContent } from "./node-list-modal/NodeListContent";
+import { generateNodeListReport } from "./node-list-modal/node-list-report-generator";
+import { exportToPdf } from "./node-list-modal/pdf-export-utils";
 
 export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [showDetails, setShowDetails] = useState(true);
-  const { nodes, edges, cableTypes } = useStore();
+  
+  const { title, preparedBy, nodes, edges, cableTypes, updateTitle, updatePreparedBy } = useStore();
+  
+  // Sync with store on mount and when isOpen or store values change
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    setGroupBy("none");
+    setShowDetails(true);
+    return () => {};
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -30,16 +42,20 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  const handleExport = () => {
+    const report = generateNodeListReport(nodes, groupBy, edges);
+    exportToPdf(report);
+  };
 
-  const aggregatedNodes =
-    nodes.length > 0
-      ? groupBy === "none"
-        ? groupByName(nodes)
-        : groupBy === "location"
-          ? groupByLocation(nodes)
-          : groupByType(nodes)
-      : [];
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateTitle(e.target.value);
+  };
+
+  const handlePreparedByChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updatePreparedBy(e.target.value);
+  };
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div
@@ -50,9 +66,34 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
         className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
-        <NodeListHeader onClose={onClose} />
+        <NodeListHeader
+          onClose={onClose}
+          onExport={handleExport}
+          title={title}
+          preparedBy={preparedBy}
+        />
 
         <div className="px-6 pb-6">
+          <div className="flex items-center gap-2 py-2">
+            <input
+              type="text"
+              id="title-input"
+              value={title}
+              onChange={(e) => updateTitle(e.target.value)}
+              className="flex-1 text-sm font-semibold border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
+              placeholder="Technical Rider"
+            />
+          </div>
+          <div className="flex items-center gap-2 py-2">
+            <input
+              type="text"
+              id="prepared-by-input"
+              value={preparedBy}
+              onChange={(e) => updatePreparedBy(e.target.value)}
+              className="flex-1 text-sm border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
+              placeholder="Prepared by..."
+            />
+          </div>
           <NodeListTabs groupBy={groupBy} setGroupBy={setGroupBy} />
 
           {groupBy !== "type" && (
@@ -73,7 +114,8 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
             </div>
           )}
           <NodeListContent
-            aggregatedNodes={aggregatedNodes}
+            nodes={nodes}
+            edges={edges}
             groupBy={groupBy}
             showDetails={showDetails}
           />

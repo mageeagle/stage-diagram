@@ -1,3 +1,6 @@
+import { type Edge, type Node } from "@xyflow/react";
+import { type CustomNodeData } from "../../types/diagram";
+
 export type GroupByMode = "none" | "location" | "type";
 
 export interface GroupedNode {
@@ -11,10 +14,15 @@ export interface GroupedNode {
 export interface NodeListModalProps {
   isOpen: boolean;
   onClose: () => void;
+  title: string;
+  preparedBy: string;
 }
 
 export interface NodeListHeaderProps {
   onClose: () => void;
+  onExport?: () => void;
+  title: string;
+  preparedBy: string;
 }
 
 export interface NodeListTabsProps {
@@ -29,7 +37,8 @@ export interface NodeListItemProps {
 }
 
 export interface NodeListContentProps {
-  aggregatedNodes: GroupedNode[];
+  nodes: Node<CustomNodeData>[];
+  edges: Edge[];
   groupBy: GroupByMode;
   showDetails: boolean;
 }
