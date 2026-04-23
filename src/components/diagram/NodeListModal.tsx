@@ -135,31 +135,6 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
 
   if (!isOpen) return null;
 
-  const renderNode = (node: Node<CustomNodeData>) => (
-    <div
-      key={node.id}
-      className="flex flex-col p-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-    >
-      <span className="font-medium text-zinc-900 dark:text-zinc-100">
-        {node.data.label}
-      </span>
-      <div className="flex gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-        {node.data.type && (
-          <div className="flex items-center gap-1">
-            <Tag size={12} />
-            {node.data.type}
-          </div>
-        )}
-        {node.data.location && (
-          <div className="flex items-center gap-1">
-            <MapPin size={12} />
-            {node.data.location}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   const aggregatedNodes =
     nodes.length > 0
       ? groupBy === "none"
@@ -211,7 +186,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
               className="flex items-center border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
             >
               <div className="flex-1 px-5 py-3">
-                <div className="font-medium text-zinc-900 dark:text-zinc-100 break-words max-w-full flex flex-col">
+                <div className="font-medium text-zinc-900 dark:text-zinc-100 wrap-break-word max-w-full flex flex-col">
                   <span className="truncate">{node.name}</span>
                   <div className="flex gap-3  text-xs text-zinc-500 dark:text-zinc-400">
                     {node.type && (
@@ -229,7 +204,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex-shrink-0 w-20 px-3 py-3 text-right border-l border-zinc-100 dark:border-zinc-800">
+              <div className="shrink-0 w-20 px-3 py-3 text-right border-l border-zinc-100 dark:border-zinc-800">
                 <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                   {node.quantity}
                 </span>

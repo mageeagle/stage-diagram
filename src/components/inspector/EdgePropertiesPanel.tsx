@@ -24,7 +24,7 @@ export const EdgePropertiesPanel = () => {
   // or 'none' if they differ.
   const getCommonCableType = () => {
     if (selectedEdges.length === 0) return 'none';
-    const firstType = selectedEdges[0].data?.cableType || 'none';
+    const firstType = selectedEdges[0].data?.cableType as string || 'none';
     const allMatch = selectedEdges.every((edge) => (edge.data?.cableType || 'none') === firstType);
     return allMatch ? firstType : 'mixed';
   };
