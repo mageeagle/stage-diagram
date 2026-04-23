@@ -123,6 +123,8 @@ export const useStore = create<DiagramState>((set, get) => ({
   preparedBy: "",
   undoStack: [],
   redoStack: [],
+  title: "Technical Rider",
+  preparedBy: "",
 
   undo: () => {
     const { undoStack, redoStack, nodes, edges } = get();

@@ -1,7 +1,12 @@
 import jsPDF from "jspdf";
 import { Report, ReportRow } from "./node-list-report-generator";
+import { format } from "date-fns";
 
-export function exportToPdf(report: Report): void {
+export function exportToPdf(
+  title: string,
+  preparedBy: string,
+  report: Report,
+): void {
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -26,8 +31,17 @@ export function exportToPdf(report: Report): void {
   };
 
   // Title
-  drawText("Node List Report", margin, currentY, 18, "bold");
-  currentY += 15;
+  drawText(title || "Technical Rider", margin + 5, currentY, 18, "bold");
+  currentY += 5;
+
+  // Prepared By
+  if (preparedBy) {
+    currentY += 5;
+    drawText(`Prepared by: ${preparedBy}`, margin + 5, currentY, 10);
+    currentY += 5;
+  }
+  drawText(format(new Date(), "yyyy.MM.dd"), margin + 5, currentY, 10);
+  currentY += 25;
 
   const renderRows = (rows: ReportRow[]) => {
     rows.forEach((row) => {
@@ -60,14 +74,14 @@ export function exportToPdf(report: Report): void {
             );
           }
           doc.setFontSize(10);
-          doc.text(`${row.node.quantity}`, pageWidth - margin, currentY, {
+          doc.text(`${row.node.quantity}`, pageWidth - margin - 5, currentY, {
             align: "right",
           });
           currentY += 8;
           break;
         case "summary":
           drawText(`${row.label}`, margin + 5, currentY, 10);
-          doc.text(`${row.value}`, pageWidth - margin, currentY, {
+          doc.text(`${row.value}`, pageWidth - margin - 5, currentY, {
             align: "right",
           });
           currentY += 8;
@@ -78,7 +92,11 @@ export function exportToPdf(report: Report): void {
       }
     });
   };
-
+  let count = 0;
+  report.nodesReport.forEach((v) => {
+    if (v.type === "header") count++;
+  });
+  if (count === 0) renderRows([{ type: "header", label: "Items" }]);
   // Nodes Report
   renderRows(report.nodesReport);
 

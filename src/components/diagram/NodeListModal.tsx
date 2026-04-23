@@ -19,7 +19,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [showDetails, setShowDetails] = useState(true);
   
-  const { title, preparedBy, nodes, edges, cableTypes, updateTitle, updatePreparedBy } = useStore();
+  const { title, preparedBy, nodes, edges, cableTypes} = useStore();
   
   // Sync with store on mount and when isOpen or store values change
   useEffect(() => {
@@ -44,15 +44,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
 
   const handleExport = () => {
     const report = generateNodeListReport(nodes, groupBy, edges);
-    exportToPdf(report);
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateTitle(e.target.value);
-  };
-
-  const handlePreparedByChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updatePreparedBy(e.target.value);
+    exportToPdf(title, preparedBy, report);
   };
 
   if (!isOpen) return null;
@@ -74,26 +66,6 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
         />
 
         <div className="px-6 pb-6">
-          <div className="flex items-center gap-2 py-2">
-            <input
-              type="text"
-              id="title-input"
-              value={title}
-              onChange={(e) => updateTitle(e.target.value)}
-              className="flex-1 text-sm font-semibold border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
-              placeholder="Technical Rider"
-            />
-          </div>
-          <div className="flex items-center gap-2 py-2">
-            <input
-              type="text"
-              id="prepared-by-input"
-              value={preparedBy}
-              onChange={(e) => updatePreparedBy(e.target.value)}
-              className="flex-1 text-sm border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
-              placeholder="Prepared by..."
-            />
-          </div>
           <NodeListTabs groupBy={groupBy} setGroupBy={setGroupBy} />
 
           {groupBy !== "type" && (
@@ -119,31 +91,6 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
             groupBy={groupBy}
             showDetails={showDetails}
           />
-
-          {cableTypes.length > 0 && (
-            <div className="mt-6">
-              <div className="bg-zinc-50 dark:bg-zinc-800/50 px-5 py-2 text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 border-y border-zinc-100 dark:border-zinc-800">
-                Cables
-              </div>
-              <div className="px-5 py-2">
-                {cableTypes.map((type) => {
-                  const count = edges.filter(
-                    (edge) => edge.data!.cableType === type,
-                  ).length;
-                  return (
-                    <div key={type} className="flex justify-between py-1">
-                      <span className="text-gray-700 dark:text-zinc-300">
-                        {type}
-                      </span>
-                      <span className="text-gray-500 dark:text-zinc-500">
-                        {count}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>,

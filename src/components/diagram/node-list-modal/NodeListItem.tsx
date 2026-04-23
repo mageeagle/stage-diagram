@@ -11,7 +11,7 @@ export const NodeListItem = ({
     <div className="flex items-center border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
       <div className="flex-1 px-5 py-3">
         <div className="font-medium text-zinc-900 dark:text-zinc-100 wrap-break-word max-w-full flex flex-col">
-          <span className="truncate">{node.name}</span>
+          <span className="flex">{node.name}</span>
           {showDetails && (
             <div className="flex gap-3 text-xs text-zinc-500 dark:text-zinc-400">
               {node.type && groupBy !== "type" && (
