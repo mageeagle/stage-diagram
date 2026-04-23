@@ -6,9 +6,11 @@ export const NodeListHeader = ({
   onClose,
   onExport,
   title,
+  subtitle,
   preparedBy,
 }: NodeListHeaderProps) => {
   const updateTitle = useStore((s) => s.updateTitle);
+  const updateSubtitle = useStore((s) => s.updateSubtitle);
   const updatePreparedBy = useStore((s) => s.updatePreparedBy);
   return (
     <div className=" p-6 pb-4">
@@ -38,25 +40,32 @@ export const NodeListHeader = ({
         </div>
       </div>
       <div className="flex items-center justify-between gap-2 py-2">
+        <input
+          type="text"
+          id="title-input"
+          value={title}
+          onChange={(e) => updateTitle(e.target.value)}
+          className="flex-1 text-sm font-semibold border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
+          placeholder="Technical Rider"
+        />
 
-          <input
-            type="text"
-            id="title-input"
-            value={title}
-            onChange={(e) => updateTitle(e.target.value)}
-            className="flex-1 text-sm font-semibold border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
-            placeholder="Technical Rider"
-          />
+        <input
+          type="text"
+          id="title-input"
+          value={subtitle}
+          onChange={(e) => updateSubtitle(e.target.value)}
+          className="flex-1 text-sm border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
+          placeholder="I go to school by bus"
+        />
 
-          <input
-            type="text"
-            id="prepared-by-input"
-            value={preparedBy}
-            onChange={(e) => updatePreparedBy(e.target.value)}
-            className="flex-1 text-sm border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
-            placeholder="Prepared by..."
-          />
-
+        <input
+          type="text"
+          id="prepared-by-input"
+          value={preparedBy}
+          onChange={(e) => updatePreparedBy(e.target.value)}
+          className="flex-1 text-sm border-b border-zinc-300 dark:border-zinc-700 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 placeholder-zinc-400 dark:placeholder-zinc-600"
+          placeholder="Prepared by..."
+        />
       </div>
     </div>
   );

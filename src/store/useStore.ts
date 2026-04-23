@@ -36,6 +36,9 @@ interface DiagramState {
   templates: NodeTemplate[];
   types: string[];
   locations: string[];
+  title: string;
+  subtitle: string;
+  preparedBy: string;
 
   // Undo/Redo
   undoStack: HistoryState[];
@@ -55,19 +58,20 @@ interface DiagramState {
 
   // Export settings
   updateTitle: (title: string) => void;
+  updateSubtitle: (subtitle: string) => void;
   updatePreparedBy: (preparedBy: string) => void;
 
   // Node property updates
   updateNodeLabel: (nodeId: string, label: string) => void;
-updateNodeType: (nodeIds: string[], type: string) => void;
-    updateNodeLocation: (nodeIds: string[], location: string) => void;
-    updateNodePower: (nodeIds: string[], power: boolean) => void;
-   addInput: (nodeId: string) => void;
-   removeInput: (nodeId: string, inputId: string) => void;
-   updateInputName: (nodeId: string, inputId: string, name: string) => void;
-   addOutput: (nodeId: string) => void;
-   removeOutput: (nodeId: string, outputId: string) => void;
-   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
+  updateNodeType: (nodeIds: string[], type: string) => void;
+  updateNodeLocation: (nodeIds: string[], location: string) => void;
+  updateNodePower: (nodeIds: string[], power: boolean) => void;
+  addInput: (nodeId: string) => void;
+  removeInput: (nodeId: string, inputId: string) => void;
+  updateInputName: (nodeId: string, inputId: string, name: string) => void;
+  addOutput: (nodeId: string) => void;
+  removeOutput: (nodeId: string, outputId: string) => void;
+  updateOutputName: (nodeId: string, outputId: string, name: string) => void;
 
   // Template actions
   addTemplate: (template: NodeTemplate) => void;
@@ -87,7 +91,7 @@ updateNodeType: (nodeIds: string[], type: string) => void;
     outputsCount?: number,
     typeProperty?: string,
     locationProperty?: string,
-    power?: boolean
+    power?: boolean,
   ) => void;
   copyNodes: (nodeIds: string[]) => void;
   deleteNodes: (nodeIds: string[]) => void;
@@ -95,15 +99,15 @@ updateNodeType: (nodeIds: string[], type: string) => void;
   addCableType: (type: string) => void;
   removeCableType: (type: string) => void;
   updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
-   setIsModalOpen: (isOpen: boolean) => void;
-   setIsSettingsModalOpen: (isOpen: boolean) => void;
-   setIsNodeListModalOpen: (isOpen: boolean) => void;
-   setPendingPosition: (position: { x: number; y: number } | null) => void;
-   addType: (type: string) => void;
-   removeType: (type: string) => void;
-   addLocation: (location: string) => void;
-   removeLocation: (location: string) => void;
-   restoreProjectState: (state: ProjectState) => void;
+  setIsModalOpen: (isOpen: boolean) => void;
+  setIsSettingsModalOpen: (isOpen: boolean) => void;
+  setIsNodeListModalOpen: (isOpen: boolean) => void;
+  setPendingPosition: (position: { x: number; y: number } | null) => void;
+  addType: (type: string) => void;
+  removeType: (type: string) => void;
+  addLocation: (location: string) => void;
+  removeLocation: (location: string) => void;
+  restoreProjectState: (state: ProjectState) => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -120,11 +124,10 @@ export const useStore = create<DiagramState>((set, get) => ({
   types: [],
   locations: [],
   title: "Technical Rider",
+  subtitle: "I go to school by bus",
   preparedBy: "",
   undoStack: [],
   redoStack: [],
-  title: "Technical Rider",
-  preparedBy: "",
 
   undo: () => {
     const { undoStack, redoStack, nodes, edges } = get();
@@ -182,7 +185,7 @@ export const useStore = create<DiagramState>((set, get) => ({
       edges: addEdge(
         {
           ...connection,
-          data: { cableType: 'none' },
+          data: { cableType: "none" },
         },
         get().edges,
       ),
@@ -223,34 +226,34 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-    updateNodeLocation: (nodeIds, location) => {
-      get().recordHistory();
-      set({
-        nodes: get().nodes.map((node) => {
-          if (nodeIds.includes(node.id)) {
-            return {
-              ...node,
-              data: { ...node.data, location },
-            };
-          }
-          return node;
-        }),
-      });
-    },
-    updateNodePower: (nodeIds, power) => {
-      get().recordHistory();
-      set({
-        nodes: get().nodes.map((node) => {
-          if (nodeIds.includes(node.id)) {
-            return {
-              ...node,
-              data: { ...node.data, power },
-            };
-          }
-          return node;
-        }),
-      });
-    },
+  updateNodeLocation: (nodeIds, location) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (nodeIds.includes(node.id)) {
+          return {
+            ...node,
+            data: { ...node.data, location },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+  updateNodePower: (nodeIds, power) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (nodeIds.includes(node.id)) {
+          return {
+            ...node,
+            data: { ...node.data, power },
+          };
+        }
+        return node;
+      }),
+    });
+  },
 
   addInput: (nodeId) => {
     set({
@@ -370,24 +373,24 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-   applyTemplate: (template, position) => {
-     get().recordHistory();
-     const newNode: Node<CustomNodeData> = {
-       id: nanoid(),
-       type: template.nodeType,
-       position,
-       data: {
-         label: template.name,
-         inputs: template.inputs,
-         outputs: template.outputs,
-         type: template.type,
-         power: template.power,
-       },
-     };
-     set({
-       nodes: [...get().nodes, newNode],
-     });
-   },
+  applyTemplate: (template, position) => {
+    get().recordHistory();
+    const newNode: Node<CustomNodeData> = {
+      id: nanoid(),
+      type: template.nodeType,
+      position,
+      data: {
+        label: template.name,
+        inputs: template.inputs,
+        outputs: template.outputs,
+        type: template.type,
+        power: template.power,
+      },
+    };
+    set({
+      nodes: [...get().nodes, newNode],
+    });
+  },
 
   updateTemplate: (template) => {
     set({
@@ -417,6 +420,8 @@ export const useStore = create<DiagramState>((set, get) => ({
       types: projectState.types,
       locations: projectState.locations,
       cableTypes: projectState.cableTypes,
+      title: projectState.title,
+      preparedBy: projectState.preparedBy,
     });
   },
   deleteTemplate: (templateId) => {
@@ -425,35 +430,44 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-   addNode: (type, position, label, inputsCount = 0, outputsCount = 0, typeProperty, locationProperty, power = false) => {
-     get().recordHistory();
-     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
-       id: nanoid(),
-       name: `Input ${i + 1}`,
-     }));
+  addNode: (
+    type,
+    position,
+    label,
+    inputsCount = 0,
+    outputsCount = 0,
+    typeProperty,
+    locationProperty,
+    power = false,
+  ) => {
+    get().recordHistory();
+    const inputs = Array.from({ length: inputsCount }, (_, i) => ({
+      id: nanoid(),
+      name: `Input ${i + 1}`,
+    }));
 
-     const outputs = Array.from({ length: outputsCount }, (_, i) => ({
-       id: nanoid(),
-       name: `Output ${i + 1}`,
-     }));
+    const outputs = Array.from({ length: outputsCount }, (_, i) => ({
+      id: nanoid(),
+      name: `Output ${i + 1}`,
+    }));
 
-     const newNode: Node<CustomNodeData> = {
-       id: nanoid(),
-       type,
-       position,
-       data: {
-         label,
-         inputs,
-         outputs,
-         type: typeProperty,
-         location: locationProperty,
-         power,
-       },
-     };
-     set({
-       nodes: [...get().nodes, newNode],
-     });
-   },
+    const newNode: Node<CustomNodeData> = {
+      id: nanoid(),
+      type,
+      position,
+      data: {
+        label,
+        inputs,
+        outputs,
+        type: typeProperty,
+        location: locationProperty,
+        power,
+      },
+    };
+    set({
+      nodes: [...get().nodes, newNode],
+    });
+  },
 
   copyNodes: (nodeIds: string[]) => {
     get().recordHistory();
@@ -482,7 +496,8 @@ export const useStore = create<DiagramState>((set, get) => ({
     set({
       nodes: get().nodes.filter((node) => !nodeIds.includes(node.id)),
       edges: get().edges.filter(
-        (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target),
+        (edge) =>
+          !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target),
       ),
       selectedNodeIds: [],
       selectedEdgeIds: [],
@@ -498,7 +513,8 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   addCableType: (type) => set({ cableTypes: [...get().cableTypes, type] }),
-  removeCableType: (type) => set({ cableTypes: get().cableTypes.filter((t) => t !== type) }),
+  removeCableType: (type) =>
+    set({ cableTypes: get().cableTypes.filter((t) => t !== type) }),
   updateEdgeCableType: (edgeIds, cableType) => {
     get().recordHistory();
     set({
@@ -514,11 +530,12 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-    setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
-    setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
-    setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
-    setPendingPosition: (position) => set({ pendingPosition: position }),
+  setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
+  setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
+  setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
+  setPendingPosition: (position) => set({ pendingPosition: position }),
   updateTitle: (title) => set({ title }),
+  updateSubtitle: (subtitle) => set({ subtitle }),
   updatePreparedBy: (preparedBy) => set({ preparedBy }),
   addType: (type) => set({ types: [...get().types, type] }),
   removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),

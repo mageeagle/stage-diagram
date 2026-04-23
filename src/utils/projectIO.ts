@@ -1,8 +1,5 @@
 import { CustomNodeData, NodeTemplate } from "@/types/diagram";
-import {
-  Edge,
-  Node,
-} from "@xyflow/react";
+import { Edge, Node } from "@xyflow/react";
 
 export interface ProjectState {
   templates: NodeTemplate[];
@@ -11,6 +8,8 @@ export interface ProjectState {
   types: string[];
   locations: string[];
   cableTypes: string[];
+  title: string;
+  preparedBy: string;
 }
 
 /**
@@ -21,10 +20,10 @@ export function exportProject(state: ProjectState): void {
   const jsonString = JSON.stringify(state, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
+
+  const a = document.createElement("a");
   a.href = url;
-  a.download = 'project.json';
+  a.download = "project.json";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -42,15 +41,24 @@ export async function importProject(file: File): Promise<ProjectState> {
 
   try {
     data = JSON.parse(text);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
-    throw new Error("Invalid JSON format. Please ensure the file is a valid project export.");
+    throw new Error(
+      "Invalid JSON format. Please ensure the file is a valid project export.",
+    );
   }
 
   const projectState = data as ProjectState;
 
   // Basic validation schema check
-  if (!Array.isArray(projectState.templates) || !Array.isArray(projectState.nodes) || !Array.isArray(projectState.edges)) {
-    throw new Error("Project file format is incorrect. Must contain 'templates', 'nodes', and 'edges' arrays.");
+  if (
+    !Array.isArray(projectState.templates) ||
+    !Array.isArray(projectState.nodes) ||
+    !Array.isArray(projectState.edges)
+  ) {
+    throw new Error(
+      "Project file format is incorrect. Must contain 'templates', 'nodes', and 'edges' arrays.",
+    );
   }
 
   return projectState;

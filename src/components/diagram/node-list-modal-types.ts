@@ -14,14 +14,13 @@ export interface GroupedNode {
 export interface NodeListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  preparedBy: string;
 }
 
 export interface NodeListHeaderProps {
   onClose: () => void;
   onExport?: () => void;
   title: string;
+  subtitle: string;
   preparedBy: string;
 }
 

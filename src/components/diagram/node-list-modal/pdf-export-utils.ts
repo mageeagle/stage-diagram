@@ -4,6 +4,7 @@ import { format } from "date-fns";
 
 export function exportToPdf(
   title: string,
+  subtitle: string,
   preparedBy: string,
   report: Report,
 ): void {
@@ -34,9 +35,13 @@ export function exportToPdf(
   drawText(title || "Technical Rider", margin + 5, currentY, 18, "bold");
   currentY += 5;
 
+  // Subtitle
+  if (subtitle) {
+    drawText(`${subtitle}`, margin + 5, currentY, 10);
+    currentY += 5;
+  }
   // Prepared By
   if (preparedBy) {
-    currentY += 5;
     drawText(`Prepared by: ${preparedBy}`, margin + 5, currentY, 10);
     currentY += 5;
   }

@@ -26,6 +26,8 @@ export default function Home() {
     locations,
     cableTypes,
     restoreProjectState,
+    title,
+    preparedBy
   } = useStore();
 
 
@@ -35,7 +37,7 @@ export default function Home() {
   };
 
   const handleExport = () => {
-    exportProject({ templates, nodes, edges, types, locations, cableTypes });
+    exportProject({ templates, nodes, edges, types, locations, cableTypes, title, preparedBy });
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {

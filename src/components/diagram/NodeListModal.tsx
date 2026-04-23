@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useStore } from "../../store/useStore";
 
 import {
   type GroupByMode,
   type NodeListModalProps,
-  type NodeListHeaderProps,
 } from "./node-list-modal-types";
 import { NodeListHeader } from "./node-list-modal/NodeListHeader";
 import { NodeListTabs } from "./node-list-modal/NodeListTabs";
@@ -18,17 +17,8 @@ import { exportToPdf } from "./node-list-modal/pdf-export-utils";
 export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [showDetails, setShowDetails] = useState(true);
-  
-  const { title, preparedBy, nodes, edges, cableTypes} = useStore();
-  
-  // Sync with store on mount and when isOpen or store values change
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    setGroupBy("none");
-    setShowDetails(true);
-    return () => {};
-  }, [isOpen]);
+
+  const { title, subtitle, preparedBy, nodes, edges } = useStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,7 +34,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
 
   const handleExport = () => {
     const report = generateNodeListReport(nodes, groupBy, edges);
-    exportToPdf(title, preparedBy, report);
+    exportToPdf(title, subtitle, preparedBy, report);
   };
 
   if (!isOpen) return null;
@@ -55,13 +45,14 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
       onClick={(e) => e.stopPropagation()}
     >
       <div
-        className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-zinc-900"
+        className="w-full max-w-7xl rounded-lg bg-white shadow-xl dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
         <NodeListHeader
           onClose={onClose}
           onExport={handleExport}
           title={title}
+          subtitle={subtitle}
           preparedBy={preparedBy}
         />
 
