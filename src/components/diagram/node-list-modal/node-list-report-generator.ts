@@ -117,7 +117,7 @@ export function generateNodeListReport(
   // Get unique cable types from edges
   const cableTypeCounts = new Map<string, number>();
   edges.forEach((edge) => {
-    const type = edge.data?.cableType;
+    const type = edge.data?.cableType as string;
     if (type && type !== 'none') {
       cableTypeCounts.set(type, (cableTypeCounts.get(type) || 0) + 1);
     }
