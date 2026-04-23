@@ -36,6 +36,7 @@ interface DiagramState {
   templates: NodeTemplate[];
   types: string[];
   locations: string[];
+  locationGroupsEnabled: boolean;
 
   // Undo/Redo
   undoStack: HistoryState[];
@@ -100,6 +101,7 @@ updateNodeType: (nodeIds: string[], type: string) => void;
    addLocation: (location: string) => void;
    removeLocation: (location: string) => void;
    restoreProjectState: (state: ProjectState) => void;
+   toggleLocationGroups: () => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -118,6 +120,9 @@ export const useStore = create<DiagramState>((set, get) => ({
   undoStack: [],
   redoStack: [],
 
+  toggleLocationGroups: () =>
+    set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
+  locationGroupsEnabled: false,
   undo: () => {
     const { undoStack, redoStack, nodes, edges } = get();
     if (undoStack.length === 0) return;
