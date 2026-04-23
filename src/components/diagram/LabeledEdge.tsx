@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export function LabeledEdge(props: EdgeProps) {
   const { data, sourceX, sourceY, targetX, targetY } = props;
-  const cableType = data?.cableType;
+  const cableType = data?.cableType as string;
 
   return (
     <>
