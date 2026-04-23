@@ -59,7 +59,8 @@ interface DiagramState {
 updateNodeType: (nodeIds: string[], type: string) => void;
     updateNodeLocation: (nodeIds: string[], location: string) => void;
     updateNodePower: (nodeIds: string[], power: boolean) => void;
-   addInput: (nodeId: string) => void;
+    moveNodes: (nodeIds: string[], delta: { x: number; y: number }) => void;
+    addInput: (nodeId: string) => void;
    removeInput: (nodeId: string, inputId: string) => void;
    updateInputName: (nodeId: string, inputId: string, name: string) => void;
    addOutput: (nodeId: string) => void;
@@ -242,6 +243,23 @@ export const useStore = create<DiagramState>((set, get) => ({
             return {
               ...node,
               data: { ...node.data, power },
+            };
+          }
+          return node;
+        }),
+      });
+    },
+
+    moveNodes: (nodeIds, delta) => {
+      set({
+        nodes: get().nodes.map((node) => {
+          if (nodeIds.includes(node.id)) {
+            return {
+              ...node,
+              position: {
+                x: node.position.x + delta.x,
+                y: node.position.y + delta.y,
+              },
             };
           }
           return node;

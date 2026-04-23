@@ -11,6 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore } from "@/store/useStore";
+import { CustomNodeData } from "@/types/diagram";
 import { CustomNode } from "@/components/nodes/CustomNode";
 import { GroupNode } from "@/components/nodes/GroupNode";
 import { NodeCreationModal } from "@/components/diagram/NodeCreationModal";
@@ -28,6 +29,7 @@ export const DiagramCanvas = () => {
   const nodes = useStore((state) => state.nodes);
   const edges = useStore((state) => state.edges);
   const onNodesChangeOrig = useStore((state) => state.onNodesChange);
+  const moveNodes = useStore((state) => state.moveNodes);
   const onEdgesChange = useStore((state) => state.onEdgesChange);
   const onConnect = useStore((state) => state.onConnect);
   const setSelectedNodeIds = useStore((state) => state.setSelectedNodeIds);
@@ -50,6 +52,7 @@ export const DiagramCanvas = () => {
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
   const { theme } = useThemeStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastDraggedNodePosition = useRef<{ x: number; y: number } | null>(null);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
@@ -60,11 +63,44 @@ export const DiagramCanvas = () => {
   );
 
   const onNodeDragStart = useCallback(
-    (_: React.MouseEvent, node: Node) => {
+    (event: React.MouseEvent, node: Node) => {
       setSelectedNodeIds([node.id]);
       setSelectedEdgeIds([]);
+      if (node.id.startsWith('group-')) {
+        lastDraggedNodePosition.current = { x: node.position.x, y: node.position.y };
+      }
     },
     [setSelectedNodeIds, setSelectedEdgeIds],
+  );
+
+  const onNodeDrag = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      if (node.id.startsWith('group-') && lastDraggedNodePosition.current) {
+        const delta = {
+          x: node.position.x - lastDraggedNodePosition.current.x,
+          y: node.position.y - lastDraggedNodePosition.current.y,
+        };
+
+        if (delta.x !== 0 || delta.y !== 0) {
+          const location = node.id.replace('group-', '');
+          const nodesToMove = nodes.filter((n) => n.data.location === location);
+          if (nodesToMove.length > 0) {
+            moveNodes(nodesToMove.map((n) => n.id), delta);
+            lastDraggedNodePosition.current = { x: node.position.x, y: node.position.y };
+          }
+        }
+      }
+    },
+    [nodes, moveNodes],
+  );
+
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      if (node.id.startsWith('group-')) {
+        lastDraggedNodePosition.current = null;
+      }
+    },
+    [],
   );
 
   const onEdgeClick = useCallback(
@@ -97,13 +133,21 @@ export const DiagramCanvas = () => {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      const newNodes = applyNodeChanges(changes, nodes);
+      // Filter out changes for group nodes to prevent React Flow error
+      const filteredChanges = changes.filter((change) => {
+        if ('id' in change) {
+          return !change.id.startsWith('group-');
+        }
+        return true;
+      }) as NodeChange<Node<CustomNodeData>>[];
+
+      const newNodes = applyNodeChanges(filteredChanges, nodes);
       const hasRelativePos = newNodes.some(
         (node) => node.position !== undefined,
       );
 
       if (!locationGroupsEnabled || !hasRelativePos) {
-        onNodesChangeOrig(changes);
+        onNodesChangeOrig(filteredChanges);
         return;
       }
 
@@ -132,7 +176,7 @@ export const DiagramCanvas = () => {
         }
         return node;
       });
-      onNodesChangeOrig(changes);
+      onNodesChangeOrig(filteredChanges);
       return updatedNodes;
     },
     [nodes, onNodesChangeOrig, locationGroupsEnabled],
@@ -297,6 +341,8 @@ export const DiagramCanvas = () => {
           onSelectionChange={onSelectionChange}
           onNodeClick={onNodeClick}
           onNodeDragStart={onNodeDragStart}
+          onNodeDrag={onNodeDrag}
+          onNodeDragStop={onNodeDragStop}
           onEdgeClick={onEdgeClick}
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
