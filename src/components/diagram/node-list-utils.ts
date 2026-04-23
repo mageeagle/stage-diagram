@@ -13,6 +13,7 @@ export const groupByName = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
       type: node.data.type,
       location: node.data.location,
       quantity: 1,
+      hasPower: !!node.data.power,
     });
   });
 
@@ -22,9 +23,11 @@ export const groupByName = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
     group.forEach((n) => {
       const subKey = `${n.name}-${n.type}-${n.location}`;
       if (subMap.has(subKey)) {
-        subMap.get(subKey)!.quantity += 1;
+        const existing = subMap.get(subKey)!;
+        existing.quantity += 1;
+        existing.hasPower = existing.hasPower || n.hasPower;
       } else {
-        subMap.set(subKey, { ...n, quantity: 1 });
+        subMap.set(subKey, { ...n });
       }
     });
     subMap.forEach((subNode) => result.push(subNode));
@@ -43,6 +46,7 @@ export const groupByLocation = (nodes: Node<CustomNodeData>[]): GroupedNode[] =>
       type: node.data.type,
       location: node.data.location,
       quantity: 1,
+      hasPower: !!node.data.power,
     });
   });
 
@@ -52,9 +56,11 @@ export const groupByLocation = (nodes: Node<CustomNodeData>[]): GroupedNode[] =>
     group.forEach((n) => {
       const subKey = `${n.name}-${n.type}`;
       if (subMap.has(subKey)) {
-        subMap.get(subKey)!.quantity += 1;
+        const existing = subMap.get(subKey)!;
+        existing.quantity += 1;
+        existing.hasPower = existing.hasPower || n.hasPower;
       } else {
-        subMap.set(subKey, { ...n, quantity: 1 });
+        subMap.set(subKey, { ...n });
       }
     });
     subMap.forEach((subNode) => result.push(subNode));
@@ -73,6 +79,7 @@ export const groupByType = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
       type: node.data.type,
       location: node.data.location,
       quantity: 1,
+      hasPower: !!node.data.power,
     });
   });
 
@@ -80,11 +87,13 @@ export const groupByType = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
   map.forEach((group) => {
     const subMap = new Map<string, GroupedNode>();
     group.forEach((n) => {
-      const subKey = `${n.name}-${n.type}`;
+      const subKey = `${n.name}-${n.type}-${n.location}`;
       if (subMap.has(subKey)) {
-        subMap.get(subKey)!.quantity += 1;
+        const existing = subMap.get(subKey)!;
+        existing.quantity += 1;
+        existing.hasPower = existing.hasPower || n.hasPower;
       } else {
-        subMap.set(subKey, { ...n, quantity: 1 });
+        subMap.set(subKey, { ...n });
       }
     });
     subMap.forEach((subNode) => result.push(subNode));

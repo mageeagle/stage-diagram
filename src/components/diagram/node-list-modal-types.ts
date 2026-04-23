@@ -5,6 +5,7 @@ export interface GroupedNode {
   type?: string;
   location?: string;
   quantity: number;
+  hasPower: boolean;
 }
 
 export interface NodeListModalProps {
