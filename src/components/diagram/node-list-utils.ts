@@ -87,7 +87,7 @@ export const groupByType = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
   map.forEach((group) => {
     const subMap = new Map<string, GroupedNode>();
     group.forEach((n) => {
-      const subKey = `${n.name}-${n.type}-${n.location}`;
+      const subKey = `${n.name}-${n.type}`;
       if (subMap.has(subKey)) {
         const existing = subMap.get(subKey)!;
         existing.quantity += 1;
