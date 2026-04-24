@@ -8,18 +8,15 @@ export const GroupNode = <T extends Node>(
   const { theme } = useThemeStore();
 
   return (
-    <div className={cn(
-      "flex w-full border-2 rounded-md p-2 select-none",
-      theme === 'dark'
-        ? "bg-stone-700 border-stone-500 text-stone-200"
-        : "bg-stone-100 border-stone-800 text-stone-800"
-    )}>
-      <div className={cn(
-        "font-semibold text-xs px-2 py-1 border rounded mb-1",
-        theme === 'dark'
-          ? "border-stone-400 text-stone-100"
-          : "border-stone-400 text-stone-900"
-      )}>
+    <div className={cn("flex w-full p-2 select-none")}>
+      <div
+        className={cn(
+          "font-semibold text-xs px-2 py-1 border rounded mb-1",
+          theme === "dark"
+            ? "border-stone-400 text-stone-100"
+            : "border-stone-400 text-stone-900",
+        )}
+      >
         {props.data?.label || "Group"}
       </div>
     </div>
