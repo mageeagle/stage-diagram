@@ -506,23 +506,95 @@ export const useStore = create<DiagramState>((set, get) => ({
 
   copyNodes: (nodeIds: string[]) => {
     get().recordHistory();
-    const newNodes = nodeIds
-      .map((nodeId) => {
-        const node = get().nodes.find((n) => n.id === nodeId);
+    const { nodes, edges } = get();
+
+    // 1. Expand nodeIds to include all nodes in any groups selected
+    let expandedNodeIds = [...nodeIds];
+    for (const id of nodeIds) {
+      if (id.startsWith("group-")) {
+        const nodesInGroup = nodes
+          .filter((n) => n.data.location === id)
+          .map((n) => n.id);
+        expandedNodeIds = Array.from(new Set([...expandedNodeIds, ...nodesInGroup]));
+      }
+    }
+
+    // 2. Create new nodes
+    const nodeMap = new Map<string, string>(); // oldId -> newId
+    const newNodes: Node<CustomNodeData>[] = expandedNodeIds
+      .map((oldId) => {
+        const node = nodes.find((n) => n.id === oldId);
         if (!node) return null;
-        return {
+
+        const newId = nanoid();
+        nodeMap.set(oldId, newId);
+
+        const newNode: Node<CustomNodeData> = {
           ...node,
-          id: nanoid(),
+          id: newId,
           position: {
             x: node.position.x + 20,
             y: node.position.y + 20,
           },
+          data: {
+            ...node.data,
+          },
         };
+        return newNode;
       })
       .filter((node): node is Node<CustomNodeData> => node !== null);
 
-    set({
-      nodes: [...get().nodes, ...newNodes],
+    // 3. Create new edges
+    const newEdges: Edge[] = edges
+      .map((edge) => {
+        const sourceInCopy = nodeMap.has(edge.source);
+        const targetInCopy = nodeMap.has(edge.target);
+
+        if (sourceInCopy && targetInCopy) {
+          // Both nodes are being copied
+          return {
+            ...edge,
+            id: nanoid(),
+            source: nodeMap.get(edge.source)!,
+            target: nodeMap.get(edge.target)!,
+          };
+        } else if (sourceInCopy) {
+          // Only source is being copied
+          return {
+            ...edge,
+            id: nanoid(),
+            source: nodeMap.get(edge.source)!,
+            target: edge.target,
+          };
+        } else if (targetInCopy) {
+          // Only target is being copied
+          return {
+            ...edge,
+            id: nanoid(),
+            source: edge.source,
+            target: nodeMap.get(edge.target)!,
+          };
+        }
+        // Neither is being copied
+        return null;
+      })
+      .filter((edge): edge is Edge => edge !== null);
+
+    // 4. Update state
+    set((state) => {
+      const updatedNodes = state.nodes.map((node) => {
+        if (expandedNodeIds.includes(node.id)) {
+          return { ...node, selected: false };
+        }
+        return node;
+      });
+
+      return {
+        nodes: [...updatedNodes, ...newNodes.map((n) => ({ ...n, selected: true }))],
+        edges: [...state.edges, ...newEdges],
+        selectedNodeIds: newNodes.map((n) => n.id),
+        selectedEdgeIds: [],
+      };
     });
   },
 
