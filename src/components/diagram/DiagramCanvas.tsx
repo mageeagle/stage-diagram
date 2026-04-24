@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useCallback, useMemo, useEffect, useRef } from "react";
+import React, { useCallback, useMemo, useEffect, useRef, useState } from "react";
 import {
   ReactFlow,
   Controls,
   Node,
   Edge,
-  applyNodeChanges,
   NodeChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -24,6 +23,8 @@ const nodeTypes = {
   custom: CustomNode,
   group: GroupNode,
 };
+
+const groupNodesStore = new Map<string, Node>();
 
 export const DiagramCanvas = () => {
   const nodes = useStore((state) => state.nodes);
@@ -52,7 +53,14 @@ export const DiagramCanvas = () => {
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
   const { theme } = useThemeStore();
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastDraggedNodePosition = useRef<{ x: number; y: number } | null>(null);
+  const groupNodesMap = useMemo(() => groupNodesStore, []);
+  const [groupNodesTick, setGroupNodesTick] = useState(0);
+
+  useEffect(() => {
+    if (!locationGroupsEnabled) {
+      groupNodesMap.clear();
+    }
+  }, [locationGroupsEnabled, groupNodesMap]);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
@@ -66,41 +74,8 @@ export const DiagramCanvas = () => {
     (event: React.MouseEvent, node: Node) => {
       setSelectedNodeIds([node.id]);
       setSelectedEdgeIds([]);
-      if (node.id.startsWith('group-')) {
-        lastDraggedNodePosition.current = { x: node.position.x, y: node.position.y };
-      }
     },
     [setSelectedNodeIds, setSelectedEdgeIds],
-  );
-
-  const onNodeDrag = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      if (node.id.startsWith('group-') && lastDraggedNodePosition.current) {
-        const delta = {
-          x: node.position.x - lastDraggedNodePosition.current.x,
-          y: node.position.y - lastDraggedNodePosition.current.y,
-        };
-
-        if (delta.x !== 0 || delta.y !== 0) {
-          const location = node.id.replace('group-', '');
-          const nodesToMove = nodes.filter((n) => n.data.location === location);
-          if (nodesToMove.length > 0) {
-            moveNodes(nodesToMove.map((n) => n.id), delta);
-            lastDraggedNodePosition.current = { x: node.position.x, y: node.position.y };
-          }
-        }
-      }
-    },
-    [nodes, moveNodes],
-  );
-
-  const onNodeDragStop = useCallback(
-    (_: React.MouseEvent, node: Node) => {
-      if (node.id.startsWith('group-')) {
-        lastDraggedNodePosition.current = null;
-      }
-    },
-    [],
   );
 
   const onEdgeClick = useCallback(
@@ -133,53 +108,40 @@ export const DiagramCanvas = () => {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      // Filter out changes for group nodes to prevent React Flow error
-      const filteredChanges = changes.filter((change) => {
-        if ('id' in change) {
-          return !change.id.startsWith('group-');
-        }
-        return true;
-      }) as NodeChange<Node<CustomNodeData>>[];
-
-      const newNodes = applyNodeChanges(filteredChanges, nodes);
-      const hasRelativePos = newNodes.some(
-        (node) => node.position !== undefined,
+      const groupChanges = changes.filter((c): c is NodeChange<Node<CustomNodeData>> & { type: 'position'; position: { x: number; y: number } } => 
+        'id' in c && c.id.startsWith('group-') && c.type === 'position'
       );
+      const otherChanges = changes.filter((c) => !('id' in c) || !c.id.startsWith('group-')) as NodeChange<Node<CustomNodeData>>[];
 
-      if (!locationGroupsEnabled || !hasRelativePos) {
-        onNodesChangeOrig(filteredChanges);
-        return;
+      if (groupChanges.length > 0) {
+        groupChanges.forEach((change) => {
+          const { id, position } = change;
+          const existingNode = groupNodesMap.get(id);
+          if (existingNode) {
+            const delta = {
+              x: position.x - existingNode.position.x,
+              y: position.y - existingNode.position.y,
+            };
+
+             if (delta.x !== 0 || delta.y !== 0) {
+               const location = id.replace('group-', '');
+               const nodesToMove = nodes.filter((n) => n.data.location === location);
+               if (nodesToMove.length > 0) {
+                 moveNodes(nodesToMove.map((n) => n.id), delta);
+               }
+             }
+             groupNodesMap.set(id, { ...existingNode, position });
+           }
+         });
+         setGroupNodesTick((t) => t + 1);
+       }
+
+
+      if (otherChanges.length > 0) {
+        onNodesChangeOrig(otherChanges);
       }
-
-      const updatedNodes = newNodes.map((node) => {
-        if (node.position !== undefined) {
-          return {
-            ...node,
-            position: {
-              ...node.position,
-              absolute: {
-                x:
-                  node.position.x -
-                  (node.parentId
-                    ? nodes.find((n) => n.id === node.parentId)?.position?.x ||
-                      0
-                    : 0),
-                y:
-                  node.position.y -
-                  (node.parentId
-                    ? nodes.find((n) => n.id === node.parentId)?.position?.y ||
-                      0
-                    : 0),
-              },
-            },
-          };
-        }
-        return node;
-      });
-      onNodesChangeOrig(filteredChanges);
-      return updatedNodes;
     },
-    [nodes, onNodesChangeOrig, locationGroupsEnabled],
+    [onNodesChangeOrig, groupNodesMap, nodes, moveNodes],
   );
 
   useEffect(() => {
@@ -293,41 +255,79 @@ export const DiagramCanvas = () => {
       ([, nodeGroup]) => nodeGroup.length > 1,
     );
 
-    const groupNodesList = groupEntries.map(([location, groupNodes]) => ({
-      id: `group-${location}`,
-      type: "group",
-      position: {
-        x: Math.min(...groupNodes.map((n) => n.position.x - 10 || 0)),
-        y: Math.min(...groupNodes.map((n) => n.position.y - 20 || 0)),
-      },
-      data: { label: location },
-      selected: false,
-      width:
-        Math.max(
-          ...groupNodes.map((n) => (n.position.x || 0) + (n.width || 200)),
-        ) -
-        Math.min(...groupNodes.map((n) => n.position.x || 0)) +
-        70,
-      height:
-        Math.max(
-          ...groupNodes.map((n) => (n.position.y || 0) + (n.height || 100)),
-        ) - Math.min(...groupNodes.map((n) => n.position.y || 0)),
-    }));
+    const groupNodesList = groupEntries.map(([location, groupNodes]) => {
+      const groupId = `group-${location}`;
+      const props = {
+        id: groupId,
+        type: "group" as const,
+        position: {
+          x: Math.min(...groupNodes.map((n) => n.position.x - 10 || 0)),
+          y: Math.min(...groupNodes.map((n) => n.position.y - 20 || 0)),
+        },
+        data: { label: location },
+        selected: false,
+        width:
+          Math.max(
+            ...groupNodes.map((n) => (n.position.x || 0) + (n.width || 200)),
+          ) -
+          Math.min(...groupNodes.map((n) => n.position.x || 0)) +
+          70,
+        height:
+          Math.max(
+            ...groupNodes.map((n) => (n.position.y || 0) + (n.height || 100)),
+          ) - Math.min(...groupNodes.map((n) => n.position.y || 0)),
+      };
+
+       const existingNode = groupNodesMap.get(groupId);
+       if (existingNode) {
+         const updatedNode = { ...existingNode, ...props };
+         groupNodesMap.set(groupId, updatedNode);
+         return updatedNode;
+       }
+
+       const newNode = props as Node;
+
+      groupNodesMap.set(groupId, newNode);
+      return newNode;
+    });
 
     const groupedNodeIds = new Set(groupNodesList.map((g) => g.id));
 
-    const displayNodes = [
+    const baseDisplayNodes = [
       ...groupNodesList,
       ...nodes.filter((node) => !groupedNodeIds.has(node.id)),
     ];
 
-    const displayEdges = edges;
+    const baseDisplayNodesMap = new Map(baseDisplayNodes.map((n) => [n.id, n]));
+
+    const displayNodes = baseDisplayNodes.map((node) => {
+      if (node.position && node.parentId) {
+        const parent = baseDisplayNodesMap.get(node.parentId);
+        if (parent && parent.position) {
+    // We use groupNodesTick to trigger re-calculation of transient nodes
+    // even though it's not directly used in the calculation.
+    void groupNodesTick;
+
+    return {
+            ...node,
+            position: {
+              ...node.position,
+              absolute: {
+                x: node.position.x - parent.position.x,
+                y: node.position.y - parent.position.y,
+              },
+            },
+          };
+        }
+      }
+      return node;
+    });
 
     return {
       displayNodes,
-      displayEdges,
+      displayEdges: edges,
     };
-  }, [nodes, edges, locationGroupsEnabled]);
+  }, [nodes, edges, locationGroupsEnabled, groupNodesMap, groupNodesTick]);
 
   return (
     <div className={cn("w-full h-full relative bg-background")}>
@@ -341,8 +341,6 @@ export const DiagramCanvas = () => {
           onSelectionChange={onSelectionChange}
           onNodeClick={onNodeClick}
           onNodeDragStart={onNodeDragStart}
-          onNodeDrag={onNodeDrag}
-          onNodeDragStop={onNodeDragStop}
           onEdgeClick={onEdgeClick}
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
