@@ -62,17 +62,24 @@ interface DiagramState {
   updateSubtitle: (subtitle: string) => void;
   updatePreparedBy: (preparedBy: string) => void;
 
-   // Node property updates
-   updateNodeLabel: (nodeId: string, label: string) => void;
-updateNodeType: (nodeIds: string[], type: string) => void;
-    updateNodeLocation: (nodeIds: string[], location: string) => void;
-    updateNodePower: (nodeIds: string[], power: boolean) => void;
-   addInput: (nodeId: string) => void;
-   removeInput: (nodeId: string, inputId: string) => void;
-   updateInputName: (nodeId: string, inputId: string, name: string) => void;
-   addOutput: (nodeId: string) => void;
-   removeOutput: (nodeId: string, outputId: string) => void;
-   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
+  // Node property updates
+  updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeType: (nodeIds: string[], type: string) => void;
+  updateNodeLocation: (nodeIds: string[], location: string) => void;
+  updateNodePower: (nodeIds: string[], power: boolean) => void;
+  moveNodes: (
+    nodeIds: string[],
+    delta: {
+      x: number;
+      y: number;
+    },
+  ) => void;
+  addInput: (nodeId: string) => void;
+  removeInput: (nodeId: string, inputId: string) => void;
+  updateInputName: (nodeId: string, inputId: string, name: string) => void;
+  addOutput: (nodeId: string) => void;
+  removeOutput: (nodeId: string, outputId: string) => void;
+  updateOutputName: (nodeId: string, outputId: string, name: string) => void;
 
   // Template actions
   addTemplate: (template: NodeTemplate) => void;
@@ -109,7 +116,7 @@ updateNodeType: (nodeIds: string[], type: string) => void;
   addLocation: (location: string) => void;
   removeLocation: (location: string) => void;
   restoreProjectState: (state: ProjectState) => void;
-   toggleLocationGroups: () => void;
+  toggleLocationGroups: () => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -260,39 +267,28 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-    moveNodes: (nodeIds, delta) => {
-      set({
-        nodes: get().nodes.map((node) => {
-          if (nodeIds.includes(node.id)) {
-            return {
-              ...node,
-              position: {
-                x: node.position.x + delta.x,
-                y: node.position.y + delta.y,
-              },
-            };
-          }
-          return node;
-        }),
-      });
+  moveNodes: (
+    nodeIds: string[],
+    delta: {
+      x: number;
+      y: number;
     },
-
-    moveNodes: (nodeIds, delta) => {
-      set({
-        nodes: get().nodes.map((node) => {
-          if (nodeIds.includes(node.id)) {
-            return {
-              ...node,
-              position: {
-                x: node.position.x + delta.x,
-                y: node.position.y + delta.y,
-              },
-            };
-          }
-          return node;
-        }),
-      });
-    },
+  ) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (nodeIds.includes(node.id)) {
+          return {
+            ...node,
+            position: {
+              x: node.position.x + delta.x,
+              y: node.position.y + delta.y,
+            },
+          };
+        }
+        return node;
+      }),
+    });
+  },
 
   addInput: (nodeId) => {
     set({
