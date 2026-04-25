@@ -81,11 +81,30 @@ export const DiagramCanvas = () => {
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      setSelectedNodeIds([node.id]);
-      setSelectedEdgeIds([]);
+      if (node.id.startsWith("group-")) {
+        const location = node.data.label;
+        const memberNodes = nodes.filter(
+          (n) => n.data.location === location && !n.id.startsWith("group-"),
+        );
+        const memberIds = memberNodes.map((n) => n.id);
+
+        setSelectedNodeIds(memberIds);
+
+        const connectedEdgeIds = edges
+          .filter(
+            (e) =>
+              memberIds.includes(e.source) || memberIds.includes(e.target),
+          )
+          .map((e) => e.id);
+        setSelectedEdgeIds(connectedEdgeIds);
+      } else {
+        setSelectedNodeIds([node.id]);
+        setSelectedEdgeIds([]);
+      }
     },
-    [setSelectedNodeIds, setSelectedEdgeIds],
+    [nodes, edges, setSelectedNodeIds, setSelectedEdgeIds],
   );
+
 
   const onNodeDragStart = useCallback(
     (event: React.MouseEvent, node: Node) => {
@@ -110,6 +129,12 @@ export const DiagramCanvas = () => {
 
   const onSelectionChange = useCallback(
     (params: { nodes: Node[]; edges: Edge[] }) => {
+      // If any of the newly selected nodes is a group node, we ignore the selection change
+      // because onNodeClick will handle the group selection logic.
+      if (params.nodes.some((n) => n.id.startsWith("group-"))) {
+        return;
+      }
+
       const newNodeIds = params.nodes.map((n) => n.id);
       const newEdgeIds = params.edges.map((e) => e.id);
 
