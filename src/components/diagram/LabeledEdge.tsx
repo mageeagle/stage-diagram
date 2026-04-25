@@ -1,30 +1,125 @@
-import { EdgeLabelRenderer, SmoothStepEdge, EdgeProps } from "@xyflow/react";
+import {
+  EdgeLabelRenderer,
+  SmoothStepEdge,
+  StepEdge,
+  StraightEdge,
+  BezierEdge,
+  BezierEdgeProps,
+  StraightEdgeProps,
+  SmoothStepEdgeProps,
+  StepEdgeProps,
+} from "@xyflow/react";
 import { cn } from "@/lib/utils";
 
-export function LabeledEdge(props: EdgeProps) {
-  const { data, sourceX, sourceY, targetX, targetY } = props;
-  const cableType = data?.cableType as string;
+interface EdgeLabelProps {
+  cableType?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  sourceX?: number;
+  sourceY?: number;
+  targetX?: number;
+  targetY?: number;
+}
+
+function EdgeLabel({
+  cableType,
+  className,
+  style,
+  sourceX = 0,
+  sourceY = 0,
+  targetX = 0,
+  targetY = 0,
+}: EdgeLabelProps) {
+  if (!cableType || cableType === "none") {
+    return null;
+  }
 
   return (
-    <>
-      <SmoothStepEdge {...props} />
-      {cableType && cableType !== 'none' && (
-        <EdgeLabelRenderer>
-          <div
-            style={{
-              position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${(sourceX + targetX) / 2}px, ${(sourceY + targetY) / 2}px)`,
-              pointerEvents: 'none',
-            }}
-            className={cn(
-              "bg-white px-1 rounded text-[10px] border shadow-sm select-none whitespace-nowrap"
-            )}
-          >
-            {cableType}
-          </div>
-        </EdgeLabelRenderer>
-      )}
-    </>
+    <EdgeLabelRenderer>
+      <div
+        style={
+          {
+            ...style,
+            position: "absolute",
+            transform: `translate(-50%, -50%) translate(${(sourceX + targetX) / 2}px, ${(sourceY + targetY) / 2}px)`,
+            pointerEvents: "none",
+          } as React.CSSProperties
+        }
+        className={cn(
+          "bg-white px-1 rounded text-[10px] border shadow-sm select-none whitespace-nowrap",
+          className,
+        )}
+      >
+        {cableType}
+      </div>
+    </EdgeLabelRenderer>
   );
 }
 
+const labeledSmoothstepEdge = (
+  props: SmoothStepEdgeProps & { data: { cableType: string } },
+) => (
+  <>
+    <SmoothStepEdge {...props} />
+    <EdgeLabel
+      cableType={props.data?.cableType}
+      sourceX={props.sourceX}
+      sourceY={props.sourceY}
+      targetX={props.targetX}
+      targetY={props.targetY}
+    />
+  </>
+);
+
+const labeledStepEdge = (
+  props: StepEdgeProps & { data: { cableType: string } },
+) => (
+  <>
+    <StepEdge {...props} />
+    <EdgeLabel
+      cableType={props.data?.cableType}
+      sourceX={props.sourceX}
+      sourceY={props.sourceY}
+      targetX={props.targetX}
+      targetY={props.targetY}
+    />
+  </>
+);
+
+const labeledStraightEdge = (
+  props: StraightEdgeProps & { data: { cableType: string } },
+) => (
+  <>
+    <StraightEdge {...props} />
+    <EdgeLabel
+      cableType={props.data?.cableType}
+      sourceX={props.sourceX}
+      sourceY={props.sourceY}
+      targetX={props.targetX}
+      targetY={props.targetY}
+    />
+  </>
+);
+
+const labeledBezierEdge = (
+  props: BezierEdgeProps & { data: { cableType: string } },
+) => (
+  <>
+    <BezierEdge {...props} />
+    <EdgeLabel
+      cableType={props.data?.cableType}
+      sourceX={props.sourceX}
+      sourceY={props.sourceY}
+      targetX={props.targetX}
+      targetY={props.targetY}
+    />
+  </>
+);
+
+export {
+  labeledSmoothstepEdge,
+  labeledStepEdge,
+  labeledStraightEdge,
+  labeledBezierEdge,
+};
+export type { EdgeLabelProps };

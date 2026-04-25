@@ -24,99 +24,100 @@ interface HistoryState {
 }
 
 interface DiagramState {
-  nodes: Node<CustomNodeData>[];
-  edges: Edge[];
-  selectedNodeIds: string[];
-  selectedEdgeIds: string[];
-  cableTypes: string[];
-  isModalOpen: boolean;
-  isSettingsModalOpen: boolean;
-  isNodeListModalOpen: boolean;
-  pendingPosition: { x: number; y: number } | null;
-  templates: NodeTemplate[];
-  types: string[];
-  locations: string[];
-  locationGroupsEnabled: boolean;
-  title: string;
-  subtitle: string;
-  preparedBy: string;
+   nodes: Node<CustomNodeData>[];
+   edges: Edge[];
+   selectedNodeIds: string[];
+   selectedEdgeIds: string[];
+   cableTypes: string[];
+   isModalOpen: boolean;
+   isSettingsModalOpen: boolean;
+   isNodeListModalOpen: boolean;
+   pendingPosition: { x: number; y: number } | null;
+   templates: NodeTemplate[];
+   types: string[];
+   locations: string[];
+   locationGroupsEnabled: boolean;
+   title: string;
+   subtitle: string;
+   preparedBy: string;
 
-  // Undo/Redo
-  undoStack: HistoryState[];
-  redoStack: HistoryState[];
-  undo: () => void;
-  redo: () => void;
-  recordHistory: () => void;
+   // Undo/Redo
+   undoStack: HistoryState[];
+   redoStack: HistoryState[];
+   undo: () => void;
+   redo: () => void;
+   recordHistory: () => void;
 
-  // React Flow actions
-  onNodesChange: OnNodesChange<Node<CustomNodeData>>;
-  onEdgesChange: OnEdgesChange<Edge>;
-  onConnect: OnConnect;
+   // React Flow actions
+   onNodesChange: OnNodesChange<Node<CustomNodeData>>;
+   onEdgesChange: OnEdgesChange<Edge>;
+   onConnect: OnConnect;
 
-  // Node selection
-  setSelectedNodeIds: (nodeIds: string[]) => void;
-  setSelectedEdgeIds: (edgeIds: string[]) => void;
+   // Node selection
+   setSelectedNodeIds: (nodeIds: string[]) => void;
+   setSelectedEdgeIds: (edgeIds: string[]) => void;
 
-  // Export settings
-  updateTitle: (title: string) => void;
-  updateSubtitle: (subtitle: string) => void;
-  updatePreparedBy: (preparedBy: string) => void;
+   // Export settings
+   updateTitle: (title: string) => void;
+   updateSubtitle: (subtitle: string) => void;
+   updatePreparedBy: (preparedBy: string) => void;
 
-  // Node property updates
-  updateNodeLabel: (nodeId: string, label: string) => void;
-  updateNodeType: (nodeIds: string[], type: string) => void;
-  updateNodeLocation: (nodeIds: string[], location: string) => void;
-  updateNodePower: (nodeIds: string[], power: boolean) => void;
-  moveNodes: (
-    nodeIds: string[],
-    delta: {
-      x: number;
-      y: number;
-    },
-  ) => void;
-  addInput: (nodeId: string) => void;
-  removeInput: (nodeId: string, inputId: string) => void;
-  updateInputName: (nodeId: string, inputId: string, name: string) => void;
-  addOutput: (nodeId: string) => void;
-  removeOutput: (nodeId: string, outputId: string) => void;
-  updateOutputName: (nodeId: string, outputId: string, name: string) => void;
+   // Node property updates
+   updateNodeLabel: (nodeId: string, label: string) => void;
+   updateNodeType: (nodeIds: string[], type: string) => void;
+   updateNodeLocation: (nodeIds: string[], location: string) => void;
+   updateNodePower: (nodeIds: string[], power: boolean) => void;
+   updateEdgeType: (edgeIds: string[], type: string) => void;
+   moveNodes: (
+     nodeIds: string[],
+     delta: {
+       x: number;
+       y: number;
+     },
+   ) => void;
+   addInput: (nodeId: string) => void;
+   removeInput: (nodeId: string, inputId: string) => void;
+   updateInputName: (nodeId: string, inputId: string, name: string) => void;
+   addOutput: (nodeId: string) => void;
+   removeOutput: (nodeId: string, outputId: string) => void;
+   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
 
-  // Template actions
-  addTemplate: (template: NodeTemplate) => void;
-  applyTemplate: (
-    template: NodeTemplate,
-    position: { x: number; y: number },
-  ) => void;
-  updateTemplate: (template: NodeTemplate) => void;
-  deleteTemplate: (templateId: string) => void;
+   // Template actions
+   addTemplate: (template: NodeTemplate) => void;
+   applyTemplate: (
+     template: NodeTemplate,
+     position: { x: number; y: number },
+   ) => void;
+   updateTemplate: (template: NodeTemplate) => void;
+   deleteTemplate: (templateId: string) => void;
 
-  // Canvas actions
-  addNode: (
-    type: string,
-    position: { x: number; y: number },
-    label: string,
-    inputsCount?: number,
-    outputsCount?: number,
-    typeProperty?: string,
-    locationProperty?: string,
-    power?: boolean,
-  ) => void;
-  copyNodes: (nodeIds: string[]) => void;
-  deleteNodes: (nodeIds: string[]) => void;
-  deleteEdge: (edgeIds: string[]) => void;
-  addCableType: (type: string) => void;
-  removeCableType: (type: string) => void;
-  updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
-  setIsModalOpen: (isOpen: boolean) => void;
-  setIsSettingsModalOpen: (isOpen: boolean) => void;
-  setIsNodeListModalOpen: (isOpen: boolean) => void;
-  setPendingPosition: (position: { x: number; y: number } | null) => void;
-  addType: (type: string) => void;
-  removeType: (type: string) => void;
-  addLocation: (location: string) => void;
-  removeLocation: (location: string) => void;
-  restoreProjectState: (state: ProjectState) => void;
-  toggleLocationGroups: () => void;
+   // Canvas actions
+   addNode: (
+     type: string,
+     position: { x: number; y: number },
+     label: string,
+     inputsCount?: number,
+     outputsCount?: number,
+     typeProperty?: string,
+     locationProperty?: string,
+     power?: boolean,
+   ) => void;
+   copyNodes: (nodeIds: string[]) => void;
+   deleteNodes: (nodeIds: string[]) => void;
+   deleteEdge: (edgeIds: string[]) => void;
+   addCableType: (type: string) => void;
+   removeCableType: (type: string) => void;
+   updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
+   setIsModalOpen: (isOpen: boolean) => void;
+   setIsSettingsModalOpen: (isOpen: boolean) => void;
+   setIsNodeListModalOpen: (isOpen: boolean) => void;
+   setPendingPosition: (position: { x: number; y: number } | null) => void;
+   addType: (type: string) => void;
+   removeType: (type: string) => void;
+   addLocation: (location: string) => void;
+   removeLocation: (location: string) => void;
+   restoreProjectState: (state: ProjectState) => void;
+   toggleLocationGroups: () => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -208,87 +209,103 @@ export const useStore = create<DiagramState>((set, get) => ({
   setSelectedNodeIds: (nodeIds) => set({ selectedNodeIds: nodeIds }),
   setSelectedEdgeIds: (edgeIds) => set({ selectedEdgeIds: edgeIds }),
 
-  // Node property updates
-  updateNodeLabel: (nodeId, label) => {
-    set({
-      nodes: get().nodes.map((node) => {
-        if (node.id === nodeId) {
-          return {
-            ...node,
-            data: { ...node.data, label },
-          };
-        }
-        return node;
-      }),
-    });
-  },
+   // Node property updates
+   updateNodeLabel: (nodeId, label) => {
+     set({
+       nodes: get().nodes.map((node) => {
+         if (node.id === nodeId) {
+           return {
+             ...node,
+             data: { ...node.data, label },
+           };
+         }
+         return node;
+       }),
+     });
+   },
 
-  updateNodeType: (nodeIds, type) => {
-    get().recordHistory();
-    set({
-      nodes: get().nodes.map((node) => {
-        if (nodeIds.includes(node.id)) {
-          return {
-            ...node,
-            data: { ...node.data, type },
-          };
-        }
-        return node;
-      }),
-    });
-  },
+   updateNodeType: (nodeIds, type) => {
+     get().recordHistory();
+     set({
+       nodes: get().nodes.map((node) => {
+         if (nodeIds.includes(node.id)) {
+           return {
+             ...node,
+             data: { ...node.data, type },
+           };
+         }
+         return node;
+       }),
+     });
+   },
 
-  updateNodeLocation: (nodeIds, location) => {
-    get().recordHistory();
-    set({
-      nodes: get().nodes.map((node) => {
-        if (nodeIds.includes(node.id)) {
-          return {
-            ...node,
-            data: { ...node.data, location },
-          };
-        }
-        return node;
-      }),
-    });
-  },
-  updateNodePower: (nodeIds, power) => {
-    get().recordHistory();
-    set({
-      nodes: get().nodes.map((node) => {
-        if (nodeIds.includes(node.id)) {
-          return {
-            ...node,
-            data: { ...node.data, power },
-          };
-        }
-        return node;
-      }),
-    });
-  },
+   updateNodeLocation: (nodeIds, location) => {
+     get().recordHistory();
+     set({
+       nodes: get().nodes.map((node) => {
+         if (nodeIds.includes(node.id)) {
+           return {
+             ...node,
+             data: { ...node.data, location },
+           };
+         }
+         return node;
+       }),
+     });
+   },
 
-  moveNodes: (
-    nodeIds: string[],
-    delta: {
-      x: number;
-      y: number;
-    },
-  ) => {
-    set({
-      nodes: get().nodes.map((node) => {
-        if (nodeIds.includes(node.id)) {
-          return {
-            ...node,
-            position: {
-              x: node.position.x + delta.x,
-              y: node.position.y + delta.y,
-            },
-          };
-        }
-        return node;
-      }),
-    });
-  },
+   updateNodePower: (nodeIds, power) => {
+     get().recordHistory();
+     set({
+       nodes: get().nodes.map((node) => {
+         if (nodeIds.includes(node.id)) {
+           return {
+             ...node,
+             data: { ...node.data, power },
+           };
+         }
+         return node;
+       }),
+     });
+   },
+
+   updateEdgeType: (edgeIds, type) => {
+     get().recordHistory();
+     set({
+       edges: get().edges.map((edge) => {
+         if (edgeIds.includes(edge.id)) {
+           return {
+             ...edge,
+             type,
+           };
+         }
+         return edge;
+       }),
+     });
+   },
+
+   moveNodes: (
+     nodeIds: string[],
+     delta: {
+       x: number;
+       y: number;
+     },
+   ) => {
+     set({
+       nodes: get().nodes.map((node) => {
+         if (nodeIds.includes(node.id)) {
+           return {
+             ...node,
+             position: {
+               x: node.position.x + delta.x,
+               y: node.position.y + delta.y,
+             },
+           };
+         }
+         return node;
+       }),
+     });
+   },
 
   addInput: (nodeId) => {
     set({

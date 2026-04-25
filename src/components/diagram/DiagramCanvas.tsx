@@ -1,20 +1,25 @@
 "use client";
 
-import React, { useCallback, useMemo, useEffect, useRef, useState } from "react";
-import {
-  ReactFlow,
-  Controls,
-  Node,
-  Edge,
-  NodeChange,
-} from "@xyflow/react";
+import React, {
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { ReactFlow, Controls, Node, Edge, NodeChange } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore } from "@/store/useStore";
 import { CustomNodeData } from "@/types/diagram";
 import { CustomNode } from "@/components/nodes/CustomNode";
 import { GroupNode } from "@/components/nodes/GroupNode";
 import { NodeCreationModal } from "@/components/diagram/NodeCreationModal";
-import { LabeledEdge } from "@/components/diagram/LabeledEdge";
+import {
+  labeledSmoothstepEdge,
+  labeledStepEdge,
+  labeledStraightEdge,
+  labeledBezierEdge,
+} from "@/components/diagram/LabeledEdge";
 import { ExportButton } from "@/components/diagram/ExportButton";
 import { useThemeStore } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
@@ -108,10 +113,17 @@ export const DiagramCanvas = () => {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      const groupChanges = changes.filter((c): c is NodeChange<Node<CustomNodeData>> & { type: 'position'; position: { x: number; y: number } } => 
-        'id' in c && c.id.startsWith('group-') && c.type === 'position'
+      const groupChanges = changes.filter(
+        (
+          c,
+        ): c is NodeChange<Node<CustomNodeData>> & {
+          type: "position";
+          position: { x: number; y: number };
+        } => "id" in c && c.id.startsWith("group-") && c.type === "position",
       );
-      const otherChanges = changes.filter((c) => !('id' in c) || !c.id.startsWith('group-')) as NodeChange<Node<CustomNodeData>>[];
+      const otherChanges = changes.filter(
+        (c) => !("id" in c) || !c.id.startsWith("group-"),
+      ) as NodeChange<Node<CustomNodeData>>[];
 
       if (groupChanges.length > 0) {
         groupChanges.forEach((change) => {
@@ -123,19 +135,23 @@ export const DiagramCanvas = () => {
               y: position.y - existingNode.position.y,
             };
 
-             if (delta.x !== 0 || delta.y !== 0) {
-               const location = id.replace('group-', '');
-               const nodesToMove = nodes.filter((n) => n.data.location === location);
-               if (nodesToMove.length > 0) {
-                 moveNodes(nodesToMove.map((n) => n.id), delta);
-               }
-             }
-             groupNodesMap.set(id, { ...existingNode, position });
-           }
-         });
-         setGroupNodesTick((t) => t + 1);
-       }
-
+            if (delta.x !== 0 || delta.y !== 0) {
+              const location = id.replace("group-", "");
+              const nodesToMove = nodes.filter(
+                (n) => n.data.location === location,
+              );
+              if (nodesToMove.length > 0) {
+                moveNodes(
+                  nodesToMove.map((n) => n.id),
+                  delta,
+                );
+              }
+            }
+            groupNodesMap.set(id, { ...existingNode, position });
+          }
+        });
+        setGroupNodesTick((t) => t + 1);
+      }
 
       if (otherChanges.length > 0) {
         onNodesChangeOrig(otherChanges);
@@ -278,14 +294,14 @@ export const DiagramCanvas = () => {
           ) - Math.min(...groupNodes.map((n) => n.position.y || 0)),
       };
 
-       const existingNode = groupNodesMap.get(groupId);
-       if (existingNode) {
-         const updatedNode = { ...existingNode, ...props };
-         groupNodesMap.set(groupId, updatedNode);
-         return updatedNode;
-       }
+      const existingNode = groupNodesMap.get(groupId);
+      if (existingNode) {
+        const updatedNode = { ...existingNode, ...props };
+        groupNodesMap.set(groupId, updatedNode);
+        return updatedNode;
+      }
 
-       const newNode = props as Node;
+      const newNode = props as Node;
 
       groupNodesMap.set(groupId, newNode);
       return newNode;
@@ -304,11 +320,11 @@ export const DiagramCanvas = () => {
       if (node.position && node.parentId) {
         const parent = baseDisplayNodesMap.get(node.parentId);
         if (parent && parent.position) {
-    // We use groupNodesTick to trigger re-calculation of transient nodes
-    // even though it's not directly used in the calculation.
-    void groupNodesTick;
+          // We use groupNodesTick to trigger re-calculation of transient nodes
+          // even though it's not directly used in the calculation.
+          void groupNodesTick;
 
-    return {
+          return {
             ...node,
             position: {
               ...node.position,
@@ -348,7 +364,13 @@ export const DiagramCanvas = () => {
           fitView
           snapToGrid
           snapGrid={[20, 20]}
-          edgeTypes={{ default: LabeledEdge }}
+          edgeTypes={{
+            default: labeledBezierEdge,
+            labeledSmoothstep: labeledSmoothstepEdge,
+            labeledStep: labeledStepEdge,
+            labeledStraight: labeledStraightEdge,
+            labeledBezier: labeledBezierEdge,
+          }}
         >
           <Controls />
         </ReactFlow>
