@@ -325,28 +325,28 @@ export const DiagramCanvas = () => {
     const groupEntries = Array.from(groupedNodes.entries()).filter(
       ([, nodeGroup]) => nodeGroup.length > 1,
     );
-
     const groupNodesList = groupEntries.map(([location, groupNodes]) => {
       const groupId = `group-${location}`;
+      console.log(groupNodes[0].position.y)
       const props = {
         id: groupId,
         type: "group" as const,
         position: {
-          x: Math.min(...groupNodes.map((n) => n.position.x - 10 || 0)),
-          y: Math.min(...groupNodes.map((n) => n.position.y - 20 || 0)),
+          x: Math.min(...groupNodes.map((n) => n.position.x - 20 || 0)),
+          y: Math.min(...groupNodes.map((n) => n.position.y - 50 || 0)),
         },
         data: { label: location },
         selected: false,
         width:
           Math.max(
-            ...groupNodes.map((n) => (n.position.x || 0) + (n.width || 200)),
+            ...groupNodes.map((n) => (n.position.x || 0) + (n.measured?.width || n.width || 200)),
           ) -
           Math.min(...groupNodes.map((n) => n.position.x || 0)) +
-          70,
+          40,
         height:
           Math.max(
-            ...groupNodes.map((n) => (n.position.y || 0) + (n.height || 100)),
-          ) - Math.min(...groupNodes.map((n) => n.position.y || 0)),
+            ...groupNodes.map((n) => (n.position.y || 0) + (n.measured?.height || n.height || 100)),
+          ) - Math.min(...groupNodes.map((n) => n.position.y || 0)) + 70,
       };
 
       const existingNode = groupNodesMap.get(groupId);
