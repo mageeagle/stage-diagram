@@ -64,6 +64,11 @@ export const PropertiesPanel = () => {
     addTemplate(template);
   };
 
+  // Helper functions to detect mixed types/locations
+  const selectedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id));
+  const hasMixedTypes = isMultiSelect && new Set(selectedNodes.map((n) => n.data.type)).size > 1;
+  const hasMixedLocations = isMultiSelect && new Set(selectedNodes.map((n) => n.data.location)).size > 1;
+
   return (
     <div
       className={cn(
@@ -122,6 +127,9 @@ export const PropertiesPanel = () => {
               </option>
             ))}
           </select>
+          {isMultiSelect && hasMixedTypes && (
+            <p className="text-[10px] text-gray-500 italic mt-1">Multiple types selected</p>
+          )}
         </div>
 
         <div className="mb-6">
@@ -155,6 +163,9 @@ export const PropertiesPanel = () => {
               </option>
             ))}
           </select>
+          {isMultiSelect && hasMixedLocations && (
+            <p className="text-[10px] text-gray-500 italic mt-1">Multiple locations selected</p>
+          )}
         </div>
 
         {!isMultiSelect && (
