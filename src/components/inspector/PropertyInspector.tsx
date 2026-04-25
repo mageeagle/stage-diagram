@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useStore } from '@/store/useStore';
-import { TemplateList } from './TemplateList';
-import { PropertiesPanel } from './PropertiesPanel';
-import { EdgePropertiesPanel } from './EdgePropertiesPanel';
+import { useStore } from "@/store/useStore";
+import { TemplateList } from "./TemplateList";
+import { PropertiesPanel } from "./PropertiesPanel";
+import { EdgePropertiesPanel } from "./EdgePropertiesPanel";
 
 export const PropertyInspector = () => {
   const selectedNodeIds = useStore((state) => state.selectedNodeIds);
@@ -13,7 +13,7 @@ export const PropertyInspector = () => {
     return <PropertiesPanel />;
   }
 
-  if (selectedEdgeIds.length > 0) {
+  if (selectedEdgeIds.length > 0 && selectedNodeIds.length === 0) {
     return <EdgePropertiesPanel />;
   }
 

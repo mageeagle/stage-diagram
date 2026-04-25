@@ -1,13 +1,15 @@
-'use client';
+"use client";
 
 import { cn } from "@/lib/utils";
-import { useStore } from '@/store/useStore';
-import { Trash2, Plus, Copy, Save } from 'lucide-react';
-import { NodeTemplate } from '@/types/diagram';
-import { nanoid } from 'nanoid';
+import { useStore } from "@/store/useStore";
+import { Trash2, Plus, Copy, Save } from "lucide-react";
+import { NodeTemplate } from "@/types/diagram";
+import { nanoid } from "nanoid";
+import { EdgeProperties } from "./EdgeProperties";
 
 export const PropertiesPanel = () => {
   const selectedNodeIds = useStore((state) => state.selectedNodeIds);
+  const selectedEdgeIds = useStore((state) => state.selectedEdgeIds);
   const nodes = useStore((state) => state.nodes);
   const updateNodeLabel = useStore((state) => state.updateNodeLabel);
   const updateNodeType = useStore((state) => state.updateNodeType);
@@ -34,7 +36,7 @@ export const PropertiesPanel = () => {
   const isMultiSelect = selectedNodeIds.length > 1;
 
   const handleAddNewType = () => {
-    const newType = window.prompt('Enter new type:');
+    const newType = window.prompt("Enter new type:");
     if (newType) {
       addType(newType);
       updateNodeType(selectedNodeIds, newType);
@@ -42,7 +44,7 @@ export const PropertiesPanel = () => {
   };
 
   const handleAddNewLocation = () => {
-    const newLocation = window.prompt('Enter new location:');
+    const newLocation = window.prompt("Enter new location:");
     if (newLocation) {
       addLocation(newLocation);
       updateNodeLocation(selectedNodeIds, newLocation);
@@ -55,7 +57,7 @@ export const PropertiesPanel = () => {
       name: primaryNode.data.label,
       inputs: [...(primaryNode.data.inputs || [])],
       outputs: [...(primaryNode.data.outputs || [])],
-      type: primaryNode.data.type || '',
+      type: primaryNode.data.type || "",
       nodeType: primaryNode.type!,
       power: primaryNode.data.power,
     };
@@ -63,13 +65,23 @@ export const PropertiesPanel = () => {
   };
 
   return (
-    <div className={cn("w-64 h-full p-4 overflow-y-auto flex flex-col border-l", "bg-white text-foreground border-gray-300 dark:bg-background dark:border-gray-700")}>
+    <div
+      className={cn(
+        "w-64 h-full p-4 overflow-y-auto flex flex-col border-l",
+        "bg-white text-foreground border-gray-300 dark:bg-background dark:border-gray-700",
+      )}
+    >
       <div className="grow">
         <h2 className="font-bold text-lg mb-4">Properties</h2>
 
         {!isMultiSelect && (
           <div className="mb-6">
-            <label className={cn("block text-xs font-medium uppercase mb-1", "text-gray-500 dark:text-gray-400")}>
+            <label
+              className={cn(
+                "block text-xs font-medium uppercase mb-1",
+                "text-gray-500 dark:text-gray-400",
+              )}
+            >
               Node Label
             </label>
             <input
@@ -78,12 +90,17 @@ export const PropertiesPanel = () => {
               value={primaryNode.data.label}
               onChange={(e) => updateNodeLabel(primaryNode.id, e.target.value)}
             />
-          </div >
+          </div>
         )}
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <label className={cn("block text-xs font-medium uppercase", "text-gray-500 dark:text-gray-400")}>
+            <label
+              className={cn(
+                "block text-xs font-medium uppercase",
+                "text-gray-500 dark:text-gray-400",
+              )}
+            >
               Type
             </label>
             <button
@@ -92,22 +109,29 @@ export const PropertiesPanel = () => {
             >
               <Plus size={16} />
             </button>
-          </div >
+          </div>
           <select
-            value={primaryNode.data.type || ''}
+            value={primaryNode.data.type || ""}
             onChange={(e) => updateNodeType(selectedNodeIds, e.target.value)}
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
           >
             <option value="none">None</option>
             {types.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
-        </div >
+        </div>
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <label className={cn("block text-xs font-medium uppercase", "text-gray-500 dark:text-gray-400")}>
+            <label
+              className={cn(
+                "block text-xs font-medium uppercase",
+                "text-gray-500 dark:text-gray-400",
+              )}
+            >
               Location
             </label>
             <button
@@ -116,18 +140,22 @@ export const PropertiesPanel = () => {
             >
               <Plus size={16} />
             </button>
-          </div >
+          </div>
           <select
-            value={primaryNode.data.location || ''}
-            onChange={(e) => updateNodeLocation(selectedNodeIds, e.target.value)}
+            value={primaryNode.data.location || ""}
+            onChange={(e) =>
+              updateNodeLocation(selectedNodeIds, e.target.value)
+            }
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
           >
             <option value="none">None</option>
             {locations.map((l) => (
-              <option key={l} value={l}>{l}</option>
+              <option key={l} value={l}>
+                {l}
+              </option>
             ))}
           </select>
-        </div >
+        </div>
 
         {!isMultiSelect && (
           <>
@@ -137,16 +165,26 @@ export const PropertiesPanel = () => {
                 id="node-power"
                 className="w-4 h-4 cursor-pointer"
                 checked={!!primaryNode.data.power}
-                onChange={(e) => updateNodePower(selectedNodeIds, e.target.checked)}
+                onChange={(e) =>
+                  updateNodePower(selectedNodeIds, e.target.checked)
+                }
               />
-              <label htmlFor="node-power" className="text-sm font-medium cursor-pointer">
+              <label
+                htmlFor="node-power"
+                className="text-sm font-medium cursor-pointer"
+              >
                 Require Power Plug?
               </label>
-            </div >
+            </div>
 
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <label className={cn("block text-xs font-medium uppercase", "text-gray-500 dark:text-gray-400")}>
+                <label
+                  className={cn(
+                    "block text-xs font-medium uppercase",
+                    "text-gray-500 dark:text-gray-400",
+                  )}
+                >
                   Inputs
                 </label>
                 <button
@@ -155,7 +193,7 @@ export const PropertiesPanel = () => {
                 >
                   <Plus size={16} />
                 </button>
-              </div >
+              </div>
               <div className="space-y-2">
                 {primaryNode.data.inputs?.map((input) => (
                   <div key={input.id} className="flex items-center gap-2">
@@ -163,7 +201,13 @@ export const PropertiesPanel = () => {
                       type="text"
                       className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs dark:border-gray-700 dark:bg-transparent"
                       value={input.name}
-                      onChange={(e) => updateInputName(primaryNode.id, input.id, e.target.value)}
+                      onChange={(e) =>
+                        updateInputName(
+                          primaryNode.id,
+                          input.id,
+                          e.target.value,
+                        )
+                      }
                     />
                     <button
                       onClick={() => removeInput(primaryNode.id, input.id)}
@@ -171,14 +215,19 @@ export const PropertiesPanel = () => {
                     >
                       <Trash2 size={14} />
                     </button>
-                  </div >
+                  </div>
                 ))}
-              </div >
-            </div >
+              </div>
+            </div>
 
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <label className={cn("block text-xs font-medium uppercase", "text-gray-500 dark:text-gray-400")}>
+                <label
+                  className={cn(
+                    "block text-xs font-medium uppercase",
+                    "text-gray-500 dark:text-gray-400",
+                  )}
+                >
                   Outputs
                 </label>
                 <button
@@ -187,7 +236,7 @@ export const PropertiesPanel = () => {
                 >
                   <Plus size={16} />
                 </button>
-              </div >
+              </div>
               <div className="space-y-2">
                 {primaryNode.data.outputs?.map((output) => (
                   <div key={output.id} className="flex items-center gap-2">
@@ -195,7 +244,13 @@ export const PropertiesPanel = () => {
                       type="text"
                       className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs dark:border-gray-700 dark:bg-transparent"
                       value={output.name}
-                      onChange={(e) => updateOutputName(primaryNode.id, output.id, e.target.value)}
+                      onChange={(e) =>
+                        updateOutputName(
+                          primaryNode.id,
+                          output.id,
+                          e.target.value,
+                        )
+                      }
                     />
                     <button
                       onClick={() => removeOutput(primaryNode.id, output.id)}
@@ -203,10 +258,10 @@ export const PropertiesPanel = () => {
                     >
                       <Trash2 size={14} />
                     </button>
-                  </div >
+                  </div>
                 ))}
-              </div >
-            </div >
+              </div>
+            </div>
           </>
         )}
 
@@ -218,15 +273,20 @@ export const PropertiesPanel = () => {
               id="node-power"
               className="w-4 h-4 cursor-pointer"
               checked={!!primaryNode.data.power}
-              onChange={(e) => updateNodePower(selectedNodeIds, e.target.checked)}
+              onChange={(e) =>
+                updateNodePower(selectedNodeIds, e.target.checked)
+              }
             />
-            <label htmlFor="node-power" className="text-sm font-medium cursor-pointer">
+            <label
+              htmlFor="node-power"
+              className="text-sm font-medium cursor-pointer"
+            >
               Require Power Plug?
             </label>
-          </div >
+          </div>
         )}
-      </div >
-
+      </div>
+      {selectedEdgeIds.length > 0 && <EdgeProperties />}
       <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
         {!isMultiSelect && (
           <button
@@ -242,16 +302,16 @@ export const PropertiesPanel = () => {
           className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 rounded-md transition-colors"
         >
           <Copy size={16} />
-          {isMultiSelect ? 'Copy Nodes' : 'Copy Node'}
+          {isMultiSelect ? "Copy Nodes" : "Copy Node"}
         </button>
         <button
           onClick={() => deleteNodes(selectedNodeIds)}
           className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50 rounded-md transition-colors"
         >
           <Trash2 size={16} />
-          {isMultiSelect ? 'Delete Nodes' : 'Delete Node'}
+          {isMultiSelect ? "Delete Nodes" : "Delete Node"}
         </button>
-      </div >
+      </div>
     </div>
   );
 };
