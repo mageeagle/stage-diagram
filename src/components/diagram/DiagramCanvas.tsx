@@ -1,12 +1,19 @@
 "use client";
 
-import React, { useCallback, useMemo, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ReactFlow,
   Controls,
   Node,
   Edge,
   NodeChange,
+  ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore } from "@/store/useStore";
@@ -52,7 +59,12 @@ export const DiagramCanvas = () => {
   );
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
   const { theme } = useThemeStore();
+  const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const onReactFlowApi = useCallback((instance: ReactFlowInstance) => {
+    flowInstanceRef.current = instance;
+  }, []);
   const groupNodesMap = useMemo(() => groupNodesStore, []);
   const [groupNodesTick, setGroupNodesTick] = useState(0);
 
@@ -108,10 +120,17 @@ export const DiagramCanvas = () => {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      const groupChanges = changes.filter((c): c is NodeChange<Node<CustomNodeData>> & { type: 'position'; position: { x: number; y: number } } => 
-        'id' in c && c.id.startsWith('group-') && c.type === 'position'
+      const groupChanges = changes.filter(
+        (
+          c,
+        ): c is NodeChange<Node<CustomNodeData>> & {
+          type: "position";
+          position: { x: number; y: number };
+        } => "id" in c && c.id.startsWith("group-") && c.type === "position",
       );
-      const otherChanges = changes.filter((c) => !('id' in c) || !c.id.startsWith('group-')) as NodeChange<Node<CustomNodeData>>[];
+      const otherChanges = changes.filter(
+        (c) => !("id" in c) || !c.id.startsWith("group-"),
+      ) as NodeChange<Node<CustomNodeData>>[];
 
       if (groupChanges.length > 0) {
         groupChanges.forEach((change) => {
@@ -123,19 +142,23 @@ export const DiagramCanvas = () => {
               y: position.y - existingNode.position.y,
             };
 
-             if (delta.x !== 0 || delta.y !== 0) {
-               const location = id.replace('group-', '');
-               const nodesToMove = nodes.filter((n) => n.data.location === location);
-               if (nodesToMove.length > 0) {
-                 moveNodes(nodesToMove.map((n) => n.id), delta);
-               }
-             }
-             groupNodesMap.set(id, { ...existingNode, position });
-           }
-         });
-         setGroupNodesTick((t) => t + 1);
-       }
-
+            if (delta.x !== 0 || delta.y !== 0) {
+              const location = id.replace("group-", "");
+              const nodesToMove = nodes.filter(
+                (n) => n.data.location === location,
+              );
+              if (nodesToMove.length > 0) {
+                moveNodes(
+                  nodesToMove.map((n) => n.id),
+                  delta,
+                );
+              }
+            }
+            groupNodesMap.set(id, { ...existingNode, position });
+          }
+        });
+        setGroupNodesTick((t) => t + 1);
+      }
 
       if (otherChanges.length > 0) {
         onNodesChangeOrig(otherChanges);
@@ -190,8 +213,26 @@ export const DiagramCanvas = () => {
 
       if (event.key === " " || event.key === "Enter") {
         event.preventDefault();
-        setPendingPosition({ x: 100, y: 100 });
-        setIsModalOpen(true);
+        const instance = flowInstanceRef.current;
+        const container = containerRef.current;
+
+        if (instance && container) {
+          // Calculate center coordinates in flow units
+          const viewPort = instance.getViewport();
+          const containerWidth = container.clientWidth;
+          const containerHeight = container.clientHeight;
+
+          // Calculate flow coordinates for the center
+          const x = (containerWidth / 2 - viewPort.x) / viewPort.zoom;
+          const y = (containerHeight / 2 - viewPort.y) / viewPort.zoom;
+
+          setPendingPosition({ x, y });
+          setIsModalOpen(true);
+        } else {
+          // Fallback to hardcoded position if instance or container is unavailable
+          setPendingPosition({ x: 100, y: 100 });
+          setIsModalOpen(true);
+        }
       }
     };
 
@@ -278,14 +319,14 @@ export const DiagramCanvas = () => {
           ) - Math.min(...groupNodes.map((n) => n.position.y || 0)),
       };
 
-       const existingNode = groupNodesMap.get(groupId);
-       if (existingNode) {
-         const updatedNode = { ...existingNode, ...props };
-         groupNodesMap.set(groupId, updatedNode);
-         return updatedNode;
-       }
+      const existingNode = groupNodesMap.get(groupId);
+      if (existingNode) {
+        const updatedNode = { ...existingNode, ...props };
+        groupNodesMap.set(groupId, updatedNode);
+        return updatedNode;
+      }
 
-       const newNode = props as Node;
+      const newNode = props as Node;
 
       groupNodesMap.set(groupId, newNode);
       return newNode;
@@ -304,11 +345,11 @@ export const DiagramCanvas = () => {
       if (node.position && node.parentId) {
         const parent = baseDisplayNodesMap.get(node.parentId);
         if (parent && parent.position) {
-    // We use groupNodesTick to trigger re-calculation of transient nodes
-    // even though it's not directly used in the calculation.
-    void groupNodesTick;
+          // We use groupNodesTick to trigger re-calculation of transient nodes
+          // even though it's not directly used in the calculation.
+          void groupNodesTick;
 
-    return {
+          return {
             ...node,
             position: {
               ...node.position,
@@ -349,6 +390,7 @@ export const DiagramCanvas = () => {
           snapToGrid
           snapGrid={[20, 20]}
           edgeTypes={{ default: LabeledEdge }}
+          onInit={onReactFlowApi}
         >
           <Controls />
         </ReactFlow>
