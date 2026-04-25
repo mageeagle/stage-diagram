@@ -95,6 +95,24 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
                 </kbd>
                 <span>Create New</span>
               </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Ctrl + Click
+                </kbd>
+                <span>Multiselect</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Shift + Drag
+                </kbd>
+                <span>Multiselect Area</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Esc
+                </kbd>
+                <span>Close Dialog</span>
+              </li>
             </ul>
           </div>
         </div>
