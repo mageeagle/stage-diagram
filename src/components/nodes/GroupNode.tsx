@@ -13,8 +13,8 @@ export const GroupNode = <T extends Node>(
         className={cn(
           "font-semibold text-xs px-2 py-1 border rounded mb-1",
           theme === "dark"
-            ? "border-stone-400 text-stone-100"
-            : "border-stone-400 text-stone-900",
+            ? "bg-stone-800/30 border-stone-700"
+            : "bg-stone-200/30 border-stone-300",
         )}
       >
         {props.data?.label || "Group"}
