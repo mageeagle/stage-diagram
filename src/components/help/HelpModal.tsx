@@ -58,6 +58,14 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
             organize technical requirements more effectively.
           </p>
         </div>
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
+            Troubleshooting
+          </h3>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            If Exporting PDF does not show connections, Check Print Background in Options
+          </p>
+        </div>
 
         <div className="mb-8">
           <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
