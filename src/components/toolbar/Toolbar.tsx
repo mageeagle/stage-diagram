@@ -1,6 +1,14 @@
 import React, { useRef, useCallback, useState } from "react";
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
-import { Settings, Undo, Redo, Download, Upload, List, HelpCircle } from "lucide-react";
+import {
+  Settings,
+  Undo,
+  Redo,
+  Download,
+  Upload,
+  List,
+  HelpCircle,
+} from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { exportProject, importProject } from "@/utils/projectIO";
 import { Tooltip } from "@/components/tooltip/Tooltip";
@@ -15,8 +23,12 @@ export const Toolbar = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
-  const setIsSettingsModalOpen = useStore((state) => state.setIsSettingsModalOpen);
-  const setIsNodeListModalOpen = useStore((state) => state.setIsNodeListModalOpen);
+  const setIsSettingsModalOpen = useStore(
+    (state) => state.setIsSettingsModalOpen,
+  );
+  const setIsNodeListModalOpen = useStore(
+    (state) => state.setIsNodeListModalOpen,
+  );
   const setIsHelpModalOpen = useStore((state) => state.setIsHelpModalOpen);
   const undo = useStore((state) => state.undo);
   const redo = useStore((state) => state.redo);
@@ -57,7 +69,7 @@ export const Toolbar = () => {
         console.error("Failed to import project:", error);
       }
     },
-    []
+    [],
   );
 
   const onHover = (key: string) => () => setHoveredKey(key);
@@ -65,13 +77,10 @@ export const Toolbar = () => {
   const onLeave = () => setHoveredKey(null);
 
   const getHoverState = (key: string) => hoveredKey === key;
-
+  const importFunction = () => {
+    fileInputRef.current?.click();
+  };
   const buttons: ToolbarButton[] = [
-    {
-      key: "import",
-      title: "Import Project",
-      onClick: () => fileInputRef.current?.click(),
-    },
     {
       key: "export",
       title: "Export Project",
@@ -79,7 +88,7 @@ export const Toolbar = () => {
     },
     {
       key: "node-list",
-      title: "Node List",
+      title: "List",
       onClick: () => setIsNodeListModalOpen(true),
     },
     {
@@ -102,12 +111,13 @@ export const Toolbar = () => {
     },
     {
       key: "help",
-      title: "Help",
+      title: "Info",
       onClick: () => setIsHelpModalOpen(true),
     },
   ];
 
-  const buttonStyle = "cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10";
+  const buttonStyle =
+    "cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10";
 
   return (
     <div className="absolute top-4 right-4 flex flex-col items-center gap-1 z-10">
@@ -119,6 +129,23 @@ export const Toolbar = () => {
         className="hidden"
       />
       <div className="flex items-center gap-1">
+        <div key={"import"} className="relative">
+          <Tooltip
+            position="bottom"
+            isVisible={getHoverState("import")}
+            content={"Import Project"}
+            className="absolute top-full mt-2"
+          />
+          <button
+            onMouseEnter={onHover("import")}
+            onMouseLeave={onLeave}
+            onClick={importFunction}
+            className={buttonStyle}
+            title={"Import Project"}
+          >
+            <Upload size={20} />
+          </button>
+        </div>
         {buttons.map((button) => (
           <div key={button.key} className="relative">
             <Tooltip
@@ -142,10 +169,22 @@ export const Toolbar = () => {
             </button>
           </div>
         ))}
-        <ThemeSwitcher />
+        <div
+          className="relative"
+          onMouseEnter={onHover("theme")}
+          onMouseLeave={onLeave}
+        >
+          <Tooltip
+            position="bottom"
+            isVisible={getHoverState("theme")}
+            content="Toggle Theme"
+            className="absolute top-full mt-2"
+          />
+          <ThemeSwitcher />
+        </div>
         <div className="flex items-center gap-1">
           {additionalButtons.map((button) => (
-          <div key={button.key} className="relative">
+            <div key={button.key} className="relative">
               <Tooltip
                 position="bottom"
                 isVisible={getHoverState(button.key)}
