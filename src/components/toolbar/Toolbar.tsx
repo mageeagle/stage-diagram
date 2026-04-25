@@ -177,7 +177,7 @@ export const Toolbar = () => {
           <Tooltip
             position="bottom"
             isVisible={getHoverState("theme")}
-            content="Toggle Theme"
+            content="Theme"
             className="absolute top-full mt-2"
           />
           <ThemeSwitcher />
