@@ -7,7 +7,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ReactFlow, Controls, Node, Edge, NodeChange } from "@xyflow/react";
+import {
+  ReactFlow,
+  Controls,
+  Node,
+  Edge,
+  NodeChange,
+  ReactFlowInstance,
+} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore } from "@/store/useStore";
 import { CustomNodeData } from "@/types/diagram";
@@ -57,7 +64,12 @@ export const DiagramCanvas = () => {
   );
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
   const { theme } = useThemeStore();
+  const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const onReactFlowApi = useCallback((instance: ReactFlowInstance) => {
+    flowInstanceRef.current = instance;
+  }, []);
   const groupNodesMap = useMemo(() => groupNodesStore, []);
   const [groupNodesTick, setGroupNodesTick] = useState(0);
 
@@ -206,8 +218,26 @@ export const DiagramCanvas = () => {
 
       if (event.key === " " || event.key === "Enter") {
         event.preventDefault();
-        setPendingPosition({ x: 100, y: 100 });
-        setIsModalOpen(true);
+        const instance = flowInstanceRef.current;
+        const container = containerRef.current;
+
+        if (instance && container) {
+          // Calculate center coordinates in flow units
+          const viewPort = instance.getViewport();
+          const containerWidth = container.clientWidth;
+          const containerHeight = container.clientHeight;
+
+          // Calculate flow coordinates for the center
+          const x = (containerWidth / 2 - viewPort.x) / viewPort.zoom;
+          const y = (containerHeight / 2 - viewPort.y) / viewPort.zoom;
+
+          setPendingPosition({ x, y });
+          setIsModalOpen(true);
+        } else {
+          // Fallback to hardcoded position if instance or container is unavailable
+          setPendingPosition({ x: 100, y: 100 });
+          setIsModalOpen(true);
+        }
       }
     };
 
@@ -371,6 +401,7 @@ export const DiagramCanvas = () => {
             labeledStraight: labeledStraightEdge,
             labeledBezier: labeledBezierEdge,
           }}
+          onInit={onReactFlowApi}
         >
           <Controls />
         </ReactFlow>
