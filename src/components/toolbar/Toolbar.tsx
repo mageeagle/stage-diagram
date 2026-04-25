@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
-import { Settings, Undo, Redo, Download, Upload, List } from "lucide-react";
+import { Settings, Undo, Redo, Download, Upload, List, HelpCircle } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { exportProject, importProject } from "@/utils/projectIO";
 
@@ -9,6 +9,7 @@ export const Toolbar = () => {
 
   const setIsSettingsModalOpen = useStore((state) => state.setIsSettingsModalOpen);
   const setIsNodeListModalOpen = useStore((state) => state.setIsNodeListModalOpen);
+  const setIsHelpModalOpen = useStore((state) => state.setIsHelpModalOpen);
   const undo = useStore((state) => state.undo);
   const redo = useStore((state) => state.redo);
 
@@ -99,6 +100,13 @@ export const Toolbar = () => {
         title="Settings"
       >
         <Settings size={20} />
+      </button>
+      <button
+        onClick={() => setIsHelpModalOpen(true)}
+        className="cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10"
+        title="Help"
+      >
+        <HelpCircle size={20} />
       </button>
     </div>
   );

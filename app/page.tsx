@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { NodeListModal } from "@/components/diagram/NodeListModal";
 import { Toolbar } from "@/components/toolbar/Toolbar";
+import { HelpModal } from "@/components/help/HelpModal";
 import { useShallow } from "zustand/shallow";
 
 export default function Home() {
@@ -17,6 +18,8 @@ export default function Home() {
     setIsSettingsModalOpen,
     isNodeListModalOpen,
     setIsNodeListModalOpen,
+    isHelpModalOpen,
+    setIsHelpModalOpen,
   } = useStore(
     useShallow((state) => ({
       setPendingPosition: state.setPendingPosition,
@@ -25,6 +28,8 @@ export default function Home() {
       setIsSettingsModalOpen: state.setIsSettingsModalOpen,
       isNodeListModalOpen: state.isNodeListModalOpen,
       setIsNodeListModalOpen: state.setIsNodeListModalOpen,
+      isHelpModalOpen: state.isHelpModalOpen,
+      setIsHelpModalOpen: state.setIsHelpModalOpen,
     }))
   );
 
@@ -55,6 +60,11 @@ export default function Home() {
         <NodeListModal
           isOpen={isNodeListModalOpen}
           onClose={() => setIsNodeListModalOpen(false)}
+        />
+
+        <HelpModal
+          isOpen={isHelpModalOpen}
+          onClose={() => setIsHelpModalOpen(false)}
         />
       </main>
 

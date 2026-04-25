@@ -31,7 +31,9 @@ interface DiagramState {
    cableTypes: string[];
    isModalOpen: boolean;
    isSettingsModalOpen: boolean;
-   isNodeListModalOpen: boolean;
+    isNodeListModalOpen: boolean;
+    isHelpModalOpen: boolean;
+    setIsHelpModalOpen: (isOpen: boolean) => void;
    pendingPosition: { x: number; y: number } | null;
    templates: NodeTemplate[];
    types: string[];
@@ -110,7 +112,8 @@ interface DiagramState {
    updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
    setIsModalOpen: (isOpen: boolean) => void;
    setIsSettingsModalOpen: (isOpen: boolean) => void;
-   setIsNodeListModalOpen: (isOpen: boolean) => void;
+    setIsNodeListModalOpen: (isOpen: boolean) => void;
+    setIsHelpModalOpen: (isOpen: boolean) => void;
    setPendingPosition: (position: { x: number; y: number } | null) => void;
    addType: (type: string) => void;
    removeType: (type: string) => void;
@@ -128,7 +131,8 @@ export const useStore = create<DiagramState>((set, get) => ({
   cableTypes: [],
   isModalOpen: false,
   isSettingsModalOpen: false,
-  isNodeListModalOpen: false,
+   isNodeListModalOpen: false,
+   isHelpModalOpen: false,
   pendingPosition: null,
   templates: [],
   types: [],
@@ -656,7 +660,8 @@ export const useStore = create<DiagramState>((set, get) => ({
 
   setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
   setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
-  setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
+   setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
+   setIsHelpModalOpen: (isOpen) => set({ isHelpModalOpen: isOpen }),
   setPendingPosition: (position) => set({ pendingPosition: position }),
   updateTitle: (title) => set({ title }),
   updateSubtitle: (subtitle) => set({ subtitle }),
