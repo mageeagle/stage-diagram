@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, FileImage, FileCode, FileType, FileText, ChevronDown } from 'lucide-react';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
+import { Tooltip } from '@/components/tooltip/Tooltip';
 
 interface ExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement | null>;
@@ -10,6 +11,7 @@ interface ExportButtonProps {
 
 export const ExportButton = ({ targetRef }: ExportButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -174,8 +176,16 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
 
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
+      <Tooltip
+        position="bottom"
+        isVisible={isTooltipVisible}
+        content="Export Diagram"
+        className="absolute top-full mt-2"
+      />
       <button
         onClick={() => setIsOpen(!isOpen)}
+        onMouseEnter={() => setIsTooltipVisible(true)}
+        onMouseLeave={() => setIsTooltipVisible(false)}
         className="cursor-pointer p-2 rounded-md bg-white dark:bg-stone-800 shadow-md border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors z-10 flex items-center gap-1"
         aria-label="Export Diagram"
       >
