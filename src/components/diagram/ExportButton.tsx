@@ -3,7 +3,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, FileImage, FileCode, FileType, FileText, ChevronDown } from 'lucide-react';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
+import { useStore } from '@/store/useStore';
+import * as XYFlow from '@xyflow/react';
 import { Tooltip } from '@/components/tooltip/Tooltip';
+import { CustomNodeData } from '@/types/diagram';
 
 interface ExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement | null>;
@@ -13,8 +16,8 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const nodes = useStore((state) => state.nodes);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -32,25 +35,62 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     link.click();
   };
 
-  const runExport = async (exportFn: (el: HTMLElement) => Promise<string>, filename: string, isJpeg: boolean = false) => {
+  const restoreNodeFromExport = useStore((state) => state.restoreNodeFromExport);
+  const prepareNodeForExport = useStore((state) => state.prepareNodeForExport);
+  const prepareNodesForExport = (nodeIds: string[]) => {
+    nodeIds.forEach((nodeId) => {
+      prepareNodeForExport(nodeId);
+    });
+  };
+  const restoreNodesFromExport = (nodeIds: string[]) => {
+    nodeIds.forEach((nodeId) => {
+      restoreNodeFromExport(nodeId);
+    });
+  };
+  const getNodesToHideForExport = (nodes: XYFlow.Node<CustomNodeData>[]) => {
+    return nodes.filter((n) => n.data.hidden);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const runExport = async (
+    exportFn: (el: HTMLElement) => Promise<string>,
+    filename: string,
+    isJpeg: boolean = false,
+  ) => {
     const el = targetRef.current;
     if (!el) return;
 
-    // Find and hide UI elements that shouldn't be in the export
+    // Collect nodes to be hidden for export
+    const nodesToHide = getNodesToHideForExport(nodes);
+    const nodeIdsToHide = nodesToHide.map((n) => n.id);
+    console.log(nodeIdsToHide)
+    const tempVisibility = nodeIdsToHide.length > 0;
+
+    if (tempVisibility) {
+      // Hide nodes marked for export
+      prepareNodesForExport(nodeIdsToHide);
+    }
+
     const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
     const hiddenElements: { element: HTMLElement; originalDisplay: string }[] = [];
-
     elementsToHide.forEach((element) => {
       const elementAsHtml = element as HTMLElement;
       hiddenElements.push({ element: elementAsHtml, originalDisplay: elementAsHtml.style.display });
       elementAsHtml.style.display = 'none';
     });
 
-    // Handle JPEG background color to avoid black background
     let originalBgColor = '';
     if (isJpeg) {
       originalBgColor = el.style.backgroundColor;
-      // Set background to white for JPEG to avoid black background issues with transparency
       el.style.backgroundColor = 'white';
     }
 
@@ -60,36 +100,56 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     } catch (error) {
       console.error(`Error exporting ${filename}:`, error);
     } finally {
-      // Restore original display styles
+      if (tempVisibility) {
+        restoreNodesFromExport(nodeIdsToHide);
+      }
+
       hiddenElements.forEach(({ element, originalDisplay }) => {
         element.style.display = originalDisplay;
       });
 
-      // Restore original background color
       if (isJpeg) {
         el.style.backgroundColor = originalBgColor;
       }
-      
+
       setIsOpen(false);
     }
   };
 
   const exportAsPng = async () => {
-    await runExport(async (el) => await toPng(el), 'diagram.png');
+    await runExport((el: HTMLElement) => toPng(el), 'diagram.png');
   };
 
   const exportAsJpeg = async () => {
-    await runExport(async (el) => await toJpeg(el), 'diagram.jpg', true);
+    await runExport((el: HTMLElement) => toJpeg(el), 'diagram.jpg', true);
   };
 
   const exportAsSvg = async () => {
-    await runExport(async (el) => await toSvg(el), 'diagram.svg');
+    await runExport((el: HTMLElement) => toSvg(el), 'diagram.svg');
   };
 
   const exportAsPdf = async () => {
+    await runExportPdf((el: HTMLElement) => toSvg(el), 'diagram.pdf');
+  };
+
+  const runExportPdf = async (
+    exportFn: (el: HTMLElement) => Promise<string>,
+    filename: string
+  ) => {
     const el = targetRef.current;
     if (!el) return;
-    
+
+    // Collect nodes to be hidden for export
+    const nodesToHide = getNodesToHideForExport(nodes);
+    const nodeIdsToHide = nodesToHide.map((n) => n.id);
+
+    const tempVisibility = nodeIdsToHide.length > 0;
+
+    if (tempVisibility) {
+      // Hide nodes marked for export
+      prepareNodesForExport(nodeIdsToHide);
+    }
+
     const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
     const hiddenElements: { element: HTMLElement; originalDisplay: string }[] = [];
     elementsToHide.forEach((element) => {
@@ -99,16 +159,11 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     });
 
     try {
-      // 1. Generate SVG Data URL
-      const svgDataUrl = await toSvg(el);
-      
-      // 2. Fetch the SVG content to get the raw XML string
+      const svgDataUrl = await exportFn(el);
       const response = await fetch(svgDataUrl);
       const svgContent = await response.text();
 
-      // 3. Open a new window and inject the SVG
       const printWindow = window.open('', '_blank');
-      
       if (!printWindow) {
         alert('Popup blocked! Please allow popups to export as PDF.');
         return;
@@ -152,7 +207,6 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
             ${svgContent}
             <script>
               window.onload = () => {
-                // Small delay to ensure the browser has rendered the SVG/foreignObject
                 setTimeout(() => {
                   window.print();
                   window.close();
@@ -163,10 +217,12 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
         </html>
       `);
       printWindow.document.close();
-
     } catch (error) {
       console.error('Error exporting PDF:', error);
     } finally {
+      // Restore nodes marked for export
+      restoreNodesFromExport(nodeIdsToHide);
+
       hiddenElements.forEach(({ element, originalDisplay }) => {
         element.style.display = originalDisplay;
       });
@@ -212,7 +268,7 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
             </button>
             <button
               onClick={exportAsSvg}
-              className="flex items-center w-full px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700"
+              className="flex items-center w-full px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-st-stone-700"
             >
               <FileCode size={16} className="mr-2" />
               SVG

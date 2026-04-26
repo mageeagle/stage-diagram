@@ -15,6 +15,7 @@ export const PropertiesPanel = () => {
   const updateNodeType = useStore((state) => state.updateNodeType);
   const updateNodeLocation = useStore((state) => state.updateNodeLocation);
   const updateNodePower = useStore((state) => state.updateNodePower);
+  const updateNodeHidden = useStore((state) => state.updateNodeHidden);
   const types = useStore((state) => state.types);
   const locations = useStore((state) => state.locations);
   const addType = useStore((state) => state.addType);
@@ -68,6 +69,8 @@ export const PropertiesPanel = () => {
   const selectedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id));
   const hasMixedTypes = isMultiSelect && new Set(selectedNodes.map((n) => n.data.type)).size > 1;
   const hasMixedLocations = isMultiSelect && new Set(selectedNodes.map((n) => n.data.location)).size > 1;
+  // Helper to check if all selected nodes have the same hidden status
+  const anyHidden = isMultiSelect && selectedNodes.some((n) => n.data.hidden === true);
 
   return (
     <div
@@ -297,6 +300,25 @@ export const PropertiesPanel = () => {
           </div>
         )}
       </div>
+
+      <div className="mb-6 flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="node-hidden"
+          className="w-4 h-4 cursor-pointer"
+          checked={isMultiSelect ? anyHidden : primaryNode.data.hidden}
+          onChange={(e) =>
+            updateNodeHidden(selectedNodeIds, e.target.checked)
+          }
+        />
+        <label
+          htmlFor="node-hidden"
+          className="text-sm font-medium cursor-pointer"
+        >
+          Hidden
+        </label>
+      </div>
+
       {selectedEdgeIds.length > 0 && <EdgeProperties />}
       <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
         {!isMultiSelect && (

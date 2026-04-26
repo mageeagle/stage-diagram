@@ -76,12 +76,15 @@ interface DiagramState {
       y: number;
     },
   ) => void;
+  updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   addInput: (nodeId: string) => void;
   removeInput: (nodeId: string, inputId: string) => void;
   updateInputName: (nodeId: string, inputId: string, name: string) => void;
   addOutput: (nodeId: string) => void;
   removeOutput: (nodeId: string, outputId: string) => void;
   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
+  prepareNodeForExport: (nodeId: string) => void;
+  restoreNodeFromExport: (nodeId: string) => void;
 
   // Template actions
   addTemplate: (template: NodeTemplate) => void;
@@ -184,6 +187,34 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  prepareNodeForExport: (nodeId: string) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: { ...node.data, exportingHidden: true },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+
+  restoreNodeFromExport: (nodeId: string) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: { ...node.data, exportingHidden: false },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+
   // React Flow actions
   onNodesChange: (changes) => {
     set({
@@ -265,6 +296,20 @@ export const useStore = create<DiagramState>((set, get) => ({
           return {
             ...node,
             data: { ...node.data, power },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+
+  updateNodeHidden: (nodeIds, hidden) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (nodeIds.includes(node.id)) {
+          return {
+            ...node,
+            data: { ...node.data, hidden },
           };
         }
         return node;
@@ -440,6 +485,7 @@ export const useStore = create<DiagramState>((set, get) => ({
         outputs: template.outputs,
         type: template.type,
         power: template.power,
+        hidden: false,
       },
     };
     set({
@@ -517,6 +563,7 @@ export const useStore = create<DiagramState>((set, get) => ({
         type: typeProperty,
         location: locationProperty,
         power,
+      hidden: false,
       },
     };
     set({
