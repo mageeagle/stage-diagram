@@ -14,11 +14,17 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
 
   const isDark = theme === 'dark';
 
+  // Return null to hide the node from the canvas during export
+  if (data.exportingHidden) {
+    return null;
+  }
+
   return (
     <div className={cn(
       "px-4 py-2 shadow-md rounded-md border-2 min-w-[250px]",
       isDark ? "bg-stone-800 text-stone-100 border-stone-600" : "bg-white text-stone-900 border-stone-400",
-      selected ? 'border-blue-500 ring-2 ring-blue-200' : ""
+      selected ? 'border-blue-500 ring-2 ring-blue-200' : "",
+      data.hidden ? "opacity-30" : ""
     )}>
       <div className="font-bold text-sm mb-2 text-center">{data.label}</div >
 

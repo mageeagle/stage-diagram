@@ -15,6 +15,8 @@ export interface CustomNodeData {
   type?: string;
   location?: string;
   power: boolean;
+  hidden?: boolean;
+  exportingHidden?: boolean; // Temporary flag for export-time hiding
   [key: string]: unknown;
 }
 
