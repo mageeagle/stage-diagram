@@ -68,15 +68,8 @@ interface DiagramState {
   updateNodeType: (nodeIds: string[], type: string) => void;
   updateNodeLocation: (nodeIds: string[], location: string) => void;
   updateNodePower: (nodeIds: string[], power: boolean) => void;
-  updateEdgeType: (edgeIds: string[], type: string) => void;
-  moveNodes: (
-    nodeIds: string[],
-    delta: {
-      x: number;
-      y: number;
-    },
-  ) => void;
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
+  updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
   addInput: (nodeId: string) => void;
   removeInput: (nodeId: string, inputId: string) => void;
   updateInputName: (nodeId: string, inputId: string, name: string) => void;
@@ -366,6 +359,38 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  updateNodeHideFromList: (nodeIds, hideFromList) => {
+    get().recordHistory();
+
+    const updatedNodes = get().nodes.map((node) => {
+      if (nodeIds.includes(node.id)) {
+        return {
+          ...node,
+          data: { ...node.data, hideFromList },
+        };
+      }
+      return node;
+    });
+
+    const updatedEdges = get().edges.map((edge) => {
+      if (nodeIds.includes(edge.source) || nodeIds.includes(edge.target)) {
+        return {
+          ...edge,
+          data: {
+            ...edge.data,
+            hideFromList,
+          },
+        };
+      }
+      return edge;
+    });
+
+    set({
+      nodes: updatedNodes,
+      edges: updatedEdges,
+    });
+  },
+
   updateEdgeType: (edgeIds, type) => {
     get().recordHistory();
     set({
@@ -535,6 +560,7 @@ export const useStore = create<DiagramState>((set, get) => ({
         type: template.type,
         power: template.power,
         hidden: false,
+        hideFromList: false,
       },
     };
     set({
@@ -613,6 +639,7 @@ export const useStore = create<DiagramState>((set, get) => ({
         location: locationProperty,
         power,
         hidden: false,
+        hideFromList: false,
       },
     };
     set({

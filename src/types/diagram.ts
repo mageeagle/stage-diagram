@@ -17,6 +17,7 @@ export interface CustomNodeData {
   power: boolean;
   hidden?: boolean;
   exportingHidden?: boolean; // Temporary flag for export-time hiding
+  hideFromList?: boolean;    // Hide node from NodeListModal report
   [key: string]: unknown;
 }
 

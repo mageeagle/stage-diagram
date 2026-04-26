@@ -21,13 +21,18 @@ export function generateNodeListReport(
 ): Report {
   const nodesReport: ReportRow[] = [];
   
+  // Filter out nodes marked to hide from list (including edges connected to them)
+  const visibleNodes = nodes.filter(
+    (node) => !(node.data?.hideFromList === true || node.data?.exportingHidden === true)
+  );
+  
   const aggregatedNodes =
-    nodes.length > 0
+    visibleNodes.length > 0
       ? groupBy === "none"
-        ? groupByName(nodes)
+        ? groupByName(visibleNodes)
         : groupBy === "location"
-          ? groupByLocation(nodes)
-          : groupByType(nodes)
+          ? groupByLocation(visibleNodes)
+          : groupByType(visibleNodes)
       : [];
 
   if (groupBy === "location") {
@@ -114,9 +119,13 @@ export function generateNodeListReport(
   // Cables section
   const cablesReport: ReportRow[] = [];
   
-  // Get unique cable types from edges
+  // Get unique cable types from edges connected to visible nodes only
+  const visibleEdges = visibleNodes.flatMap((n) =>
+    edges.filter((e) => e.source === n.id || e.target === n.id)
+  );
+  
   const cableTypeCounts = new Map<string, number>();
-  edges.forEach((edge) => {
+  visibleEdges.forEach((edge) => {
     const type = edge.data?.cableType as string;
     if (type && type !== 'none') {
       cableTypeCounts.set(type, (cableTypeCounts.get(type) || 0) + 1);

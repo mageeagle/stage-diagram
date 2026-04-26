@@ -16,6 +16,9 @@ export const PropertiesPanel = () => {
   const updateNodeLocation = useStore((state) => state.updateNodeLocation);
   const updateNodePower = useStore((state) => state.updateNodePower);
   const updateNodeHidden = useStore((state) => state.updateNodeHidden);
+  const updateNodeHideFromList = useStore(
+    (state) => state.updateNodeHideFromList,
+  );
   const types = useStore((state) => state.types);
   const locations = useStore((state) => state.locations);
   const addType = useStore((state) => state.addType);
@@ -67,10 +70,15 @@ export const PropertiesPanel = () => {
 
   // Helper functions to detect mixed types/locations
   const selectedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id));
-  const hasMixedTypes = isMultiSelect && new Set(selectedNodes.map((n) => n.data.type)).size > 1;
-  const hasMixedLocations = isMultiSelect && new Set(selectedNodes.map((n) => n.data.location)).size > 1;
-  // Helper to check if all selected nodes have the same hidden status
-  const anyHidden = isMultiSelect && selectedNodes.some((n) => n.data.hidden === true);
+  const hasMixedTypes =
+    isMultiSelect && new Set(selectedNodes.map((n) => n.data.type)).size > 1;
+  const hasMixedLocations =
+    isMultiSelect &&
+    new Set(selectedNodes.map((n) => n.data.location)).size > 1;
+  const anyHidden =
+    isMultiSelect && selectedNodes.some((n) => n.data.hidden === true);
+  const anyHideFromList =
+    isMultiSelect && selectedNodes.some((n) => n.data.hideFromList === true);
 
   return (
     <div
@@ -131,7 +139,9 @@ export const PropertiesPanel = () => {
             ))}
           </select>
           {isMultiSelect && hasMixedTypes && (
-            <p className="text-[10px] text-gray-500 italic mt-1">Multiple types selected</p>
+            <p className="text-[10px] text-gray-500 italic mt-1">
+              Multiple types selected
+            </p>
           )}
         </div>
 
@@ -167,7 +177,9 @@ export const PropertiesPanel = () => {
             ))}
           </select>
           {isMultiSelect && hasMixedLocations && (
-            <p className="text-[10px] text-gray-500 italic mt-1">Multiple locations selected</p>
+            <p className="text-[10px] text-gray-500 italic mt-1">
+              Multiple locations selected
+            </p>
           )}
         </div>
 
@@ -307,15 +319,34 @@ export const PropertiesPanel = () => {
           id="node-hidden"
           className="w-4 h-4 cursor-pointer"
           checked={isMultiSelect ? anyHidden : primaryNode.data.hidden}
-          onChange={(e) =>
-            updateNodeHidden(selectedNodeIds, e.target.checked)
-          }
+          onChange={(e) => updateNodeHidden(selectedNodeIds, e.target.checked)}
         />
         <label
           htmlFor="node-hidden"
           className="text-sm font-medium cursor-pointer"
         >
           Hidden
+        </label>
+      </div>
+
+      {/* Hide from List checkbox */}
+      <div className="mb-6 flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="node-hide-from-list"
+          className="w-4 h-4 cursor-pointer"
+          checked={
+            isMultiSelect ? anyHideFromList : primaryNode.data.hideFromList
+          }
+          onChange={(e) =>
+            updateNodeHideFromList(selectedNodeIds, e.target.checked)
+          }
+        />
+        <label
+          htmlFor="node-hide-from-list"
+          className="text-sm font-medium cursor-pointer"
+        >
+          Hide from List
         </label>
       </div>
 
