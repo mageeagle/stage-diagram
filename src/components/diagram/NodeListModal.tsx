@@ -18,7 +18,11 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [showDetails, setShowDetails] = useState(true);
 
-  const { title, subtitle, preparedBy, nodes, edges } = useStore();
+  const title = useStore(s => s.title);
+  const subtitle = useStore(s => s.subtitle);
+  const preparedBy = useStore(s => s.preparedBy);
+  const nodes = useStore(s => s.nodes);
+  const edges = useStore(s => s.edges);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

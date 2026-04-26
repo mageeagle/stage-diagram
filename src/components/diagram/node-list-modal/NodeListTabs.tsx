@@ -1,4 +1,3 @@
-import React from "react";
 import { MapPin, Tag } from "lucide-react";
 import { type NodeListTabsProps } from "../node-list-modal-types";
 import { cn } from "@/lib/utils";

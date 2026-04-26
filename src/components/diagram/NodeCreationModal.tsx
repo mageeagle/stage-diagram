@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useStore } from '../../store/useStore';
@@ -22,7 +22,10 @@ export const NodeCreationModal = ({
   const [selectedType, setSelectedType] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   
-  const { types, locations, addType, addLocation } = useStore();
+  const types = useStore(s => s.types);
+  const locations = useStore(s => s.locations);
+  const addType = useStore(s => s.addType);
+  const addLocation = useStore(s => s.addLocation);
 
   const nameRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);

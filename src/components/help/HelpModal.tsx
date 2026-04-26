@@ -11,7 +11,7 @@ interface HelpModalProps {
 }
 
 export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
-  const { setIsHelpModalOpen } = useStore();
+  const setIsHelpModalOpen = useStore((s) => s.setIsHelpModalOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -63,7 +63,8 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
             Troubleshooting
           </h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            If Exporting PDF does not show connections, Check Print Background in Options
+            If Exporting PDF does not show connections, Check Print Background
+            in Options
           </p>
         </div>
 

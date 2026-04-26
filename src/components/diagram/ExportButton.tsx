@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Download, FileImage, FileCode, FileType, FileText, ChevronDown } from 'lucide-react';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
 import { useStore } from '@/store/useStore';
