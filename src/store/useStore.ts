@@ -71,6 +71,13 @@ interface DiagramState {
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
   updateEdgeType: (edgeIds: string[], type: string) => void;
+  moveNodes: (
+    nodeIds: string[],
+    delta: {
+      x: number;
+      y: number;
+    },
+  ) => void;
   addInput: (nodeId: string) => void;
   removeInput: (nodeId: string, inputId: string) => void;
   updateInputName: (nodeId: string, inputId: string, name: string) => void;
