@@ -12,7 +12,6 @@ export const EdgeProperties = () => {
   const addCableType = useStore((state) => state.addCableType);
   const updateEdgeCableType = useStore((state) => state.updateEdgeCableType);
   const updateEdgeType = useStore((state) => state.updateEdgeType);
-  const deleteEdge = useStore((state) => state.deleteEdge);
 
   const selectedEdges = edges.filter((edge) =>
     selectedEdgeIds.includes(edge.id),

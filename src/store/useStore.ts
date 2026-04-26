@@ -70,6 +70,7 @@ interface DiagramState {
   updateNodePower: (nodeIds: string[], power: boolean) => void;
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
+  updateEdgeType: (edgeIds: string[], type: string) => void;
   addInput: (nodeId: string) => void;
   removeInput: (nodeId: string, inputId: string) => void;
   updateInputName: (nodeId: string, inputId: string, name: string) => void;
