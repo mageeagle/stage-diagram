@@ -347,28 +347,17 @@ export const useStore = create<DiagramState>((set, get) => ({
       return node;
     });
 
-    // Create a map of node IDs to their hidden state for quick lookup
-    const nodeHiddenMap = new Map(
-      get().nodes.map((node) => [node.id, node.data?.hidden ?? false]),
-    );
-
     const updatedEdges = get().edges.map((edge) => {
-      const sourceHidden = nodeHiddenMap.get(edge.source) ?? false;
-      const targetHidden = nodeHiddenMap.get(edge.target) ?? false;
-      const shouldHide = sourceHidden || targetHidden;
-
-      // Only update if the desired state is different
-      const currentHidden = edge.data?.hidden ?? false;
-      const newHidden = !(currentHidden === shouldHide
-        ? currentHidden
-        : shouldHide);
-      return {
-        ...edge,
-        data: {
-          ...edge.data,
-          hidden: newHidden,
-        },
-      };
+      if (nodeIds.includes(edge.source) || nodeIds.includes(edge.target)) {
+        return {
+          ...edge,
+          data: {
+            ...edge.data,
+            hidden: hidden,
+          },
+        };
+      }
+      return edge;
     });
 
     set({
