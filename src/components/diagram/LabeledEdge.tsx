@@ -46,7 +46,7 @@ function EdgeLabel({
           } as React.CSSProperties
         }
         className={cn(
-          "bg-white px-1 rounded text-[10px] border shadow-sm select-none whitespace-nowrap",
+          "dark:bg-stone-800 dark:text-stone-100 dark:border-stone-600 bg-white text-stone-900 border-stone-400 px-1 rounded text-[10px] border shadow-sm select-none whitespace-nowrap",
           className,
         )}
       >
