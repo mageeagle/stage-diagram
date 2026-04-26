@@ -14,6 +14,7 @@ import {
   Edge,
   NodeChange,
   ReactFlowInstance,
+  OnInit,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore } from "@/store/useStore";
@@ -63,7 +64,7 @@ export const DiagramCanvas = () => {
     (state) => state.locationGroupsEnabled,
   );
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
-  const { theme } = useThemeStore();
+  const theme = useThemeStore((state) => state.theme);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -305,10 +306,18 @@ export const DiagramCanvas = () => {
   };
 
   const { displayNodes, displayEdges } = useMemo(() => {
+    const hiddenEdgeIds = new Set(
+      edges
+        .filter((e) => e.data?.exportingHidden)
+        .map((e) => e.id)
+    );
     if (!locationGroupsEnabled) {
       return {
         displayNodes: nodes,
-        displayEdges: edges,
+        displayEdges: edges.map((edge) => ({
+          ...edge,
+          style: hiddenEdgeIds.has(edge.id) ? { display: 'none' } : edge.style,
+        })),
       };
     }
 
@@ -327,7 +336,6 @@ export const DiagramCanvas = () => {
     );
     const groupNodesList = groupEntries.map(([location, groupNodes]) => {
       const groupId = `group-${location}`;
-      console.log(groupNodes[0].position.y)
       const props = {
         id: groupId,
         type: "group" as const,
@@ -396,7 +404,10 @@ export const DiagramCanvas = () => {
 
     return {
       displayNodes,
-      displayEdges: edges,
+      displayEdges: edges.map((edge) => ({
+        ...edge,
+        style: hiddenEdgeIds.has(edge.id) ? { display: 'none' } : edge.style,
+      })),
     };
   }, [nodes, edges, locationGroupsEnabled, groupNodesMap, groupNodesTick]);
 
@@ -426,7 +437,7 @@ export const DiagramCanvas = () => {
             labeledStraight: labeledStraightEdge,
             labeledBezier: labeledBezierEdge,
           }}
-          onInit={onReactFlowApi}
+          onInit={onReactFlowApi as OnInit}
         >
           <Controls />
         </ReactFlow>

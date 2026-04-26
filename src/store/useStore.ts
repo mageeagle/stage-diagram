@@ -85,6 +85,8 @@ interface DiagramState {
   updateOutputName: (nodeId: string, outputId: string, name: string) => void;
   prepareNodeForExport: (nodeId: string) => void;
   restoreNodeFromExport: (nodeId: string) => void;
+  prepareEdgeForExport: (edgeId: string) => void;
+  restoreEdgeFromExport: (edgeId: string) => void;
 
   // Template actions
   addTemplate: (template: NodeTemplate) => void;
@@ -215,6 +217,34 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  prepareEdgeForExport: (edgeId: string) => {
+    set({
+      edges: get().edges.map((edge) => {
+        if (edge.id === edgeId) {
+          return {
+            ...edge,
+            data: { ...edge.data, exportingHidden: true },
+          };
+        }
+        return edge;
+      }),
+    });
+  },
+
+  restoreEdgeFromExport: (edgeId: string) => {
+    set({
+      edges: get().edges.map((edge) => {
+        if (edge.id === edgeId) {
+          return {
+            ...edge,
+            data: { ...edge.data, exportingHidden: false },
+          };
+        }
+        return edge;
+      }),
+    });
+  },
+
   // React Flow actions
   onNodesChange: (changes) => {
     set({
@@ -232,7 +262,10 @@ export const useStore = create<DiagramState>((set, get) => ({
       edges: addEdge(
         {
           ...connection,
-          data: { cableType: "none" },
+          data: {
+            cableType: "none",
+            hidden: false,
+          },
         },
         get().edges,
       ),
@@ -304,16 +337,43 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   updateNodeHidden: (nodeIds, hidden) => {
+    const updatedNodes = get().nodes.map((node) => {
+      if (nodeIds.includes(node.id)) {
+        return {
+          ...node,
+          data: { ...node.data, hidden },
+        };
+      }
+      return node;
+    });
+
+    // Create a map of node IDs to their hidden state for quick lookup
+    const nodeHiddenMap = new Map(
+      get().nodes.map((node) => [node.id, node.data?.hidden ?? false]),
+    );
+
+    const updatedEdges = get().edges.map((edge) => {
+      const sourceHidden = nodeHiddenMap.get(edge.source) ?? false;
+      const targetHidden = nodeHiddenMap.get(edge.target) ?? false;
+      const shouldHide = sourceHidden || targetHidden;
+
+      // Only update if the desired state is different
+      const currentHidden = edge.data?.hidden ?? false;
+      const newHidden = !(currentHidden === shouldHide
+        ? currentHidden
+        : shouldHide);
+      return {
+        ...edge,
+        data: {
+          ...edge.data,
+          hidden: newHidden,
+        },
+      };
+    });
+
     set({
-      nodes: get().nodes.map((node) => {
-        if (nodeIds.includes(node.id)) {
-          return {
-            ...node,
-            data: { ...node.data, hidden },
-          };
-        }
-        return node;
-      }),
+      nodes: updatedNodes,
+      edges: updatedEdges,
     });
   },
 
@@ -563,7 +623,7 @@ export const useStore = create<DiagramState>((set, get) => ({
         type: typeProperty,
         location: locationProperty,
         power,
-      hidden: false,
+        hidden: false,
       },
     };
     set({

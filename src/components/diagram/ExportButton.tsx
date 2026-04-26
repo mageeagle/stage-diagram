@@ -6,7 +6,7 @@ import { toPng, toJpeg, toSvg } from 'html-to-image';
 import { useStore } from '@/store/useStore';
 import * as XYFlow from '@xyflow/react';
 import { Tooltip } from '@/components/tooltip/Tooltip';
-import { CustomNodeData } from '@/types/diagram';
+import { CustomNodeData, EdgeData } from '@/types/diagram';
 
 interface ExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement | null>;
@@ -37,6 +37,9 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
 
   const restoreNodeFromExport = useStore((state) => state.restoreNodeFromExport);
   const prepareNodeForExport = useStore((state) => state.prepareNodeForExport);
+  const restoreEdgeFromExport = useStore((state) => state.restoreEdgeFromExport);
+  const prepareEdgeForExport = useStore((state) => state.prepareEdgeForExport);
+  const edges = useStore((state) => state.edges);
   const prepareNodesForExport = (nodeIds: string[]) => {
     nodeIds.forEach((nodeId) => {
       prepareNodeForExport(nodeId);
@@ -47,8 +50,30 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
       restoreNodeFromExport(nodeId);
     });
   };
+  const prepareEdgesForExport = (edgeIds: string[]) => {
+    edgeIds.forEach((edgeId) => {
+      prepareEdgeForExport(edgeId);
+    });
+  };
+  const restoreEdgesFromExport = (edgeIds: string[]) => {
+    edgeIds.forEach((edgeId) => {
+      restoreEdgeFromExport(edgeId);
+    });
+  };
   const getNodesToHideForExport = (nodes: XYFlow.Node<CustomNodeData>[]) => {
     return nodes.filter((n) => n.data.hidden);
+  };
+  const getEdgesToHideForExport = (edges: XYFlow.Edge[], nodes: XYFlow.Node<CustomNodeData>[]) => {
+    return edges.filter((edge) => {
+      const edgeData = edge.data as EdgeData | undefined;
+      const edgeHidden = edgeData?.hidden ?? false;
+      if (edgeHidden) return true;
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      const targetNode = nodes.find((n) => n.id === edge.target);
+      const sourceHidden = sourceNode?.data?.hidden ?? false;
+      const targetHidden = targetNode?.data?.hidden ?? false;
+      return sourceHidden || targetHidden;
+    });
   };
 
   useEffect(() => {
@@ -72,12 +97,14 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     // Collect nodes to be hidden for export
     const nodesToHide = getNodesToHideForExport(nodes);
     const nodeIdsToHide = nodesToHide.map((n) => n.id);
-    console.log(nodeIdsToHide)
-    const tempVisibility = nodeIdsToHide.length > 0;
+    const edgesToHide = getEdgesToHideForExport(edges, nodes);
+    const edgeIdsToHide = edgesToHide.map((e) => e.id);
+    const tempVisibility = nodeIdsToHide.length > 0 || edgeIdsToHide.length > 0;
 
     if (tempVisibility) {
-      // Hide nodes marked for export
+      // Hide nodes and edges marked for export
       prepareNodesForExport(nodeIdsToHide);
+      prepareEdgesForExport(edgeIdsToHide);
     }
 
     const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
@@ -102,6 +129,7 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     } finally {
       if (tempVisibility) {
         restoreNodesFromExport(nodeIdsToHide);
+        restoreEdgesFromExport(edgeIdsToHide);
       }
 
       hiddenElements.forEach(({ element, originalDisplay }) => {
@@ -129,25 +157,28 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
   };
 
   const exportAsPdf = async () => {
-    await runExportPdf((el: HTMLElement) => toSvg(el), 'diagram.pdf');
+    await runExportPdf((el: HTMLElement) => toSvg(el));
   };
 
   const runExportPdf = async (
     exportFn: (el: HTMLElement) => Promise<string>,
-    filename: string
+
   ) => {
     const el = targetRef.current;
     if (!el) return;
 
-    // Collect nodes to be hidden for export
+    // Collect nodes and edges to be hidden for export
     const nodesToHide = getNodesToHideForExport(nodes);
     const nodeIdsToHide = nodesToHide.map((n) => n.id);
+    const edgesToHide = getEdgesToHideForExport(edges, nodes);
+    const edgeIdsToHide = edgesToHide.map((e) => e.id);
 
-    const tempVisibility = nodeIdsToHide.length > 0;
+    const tempVisibility = nodeIdsToHide.length > 0 || edgeIdsToHide.length > 0;
 
     if (tempVisibility) {
-      // Hide nodes marked for export
+      // Hide nodes and edges marked for export
       prepareNodesForExport(nodeIdsToHide);
+      prepareEdgesForExport(edgeIdsToHide);
     }
 
     const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
@@ -220,8 +251,11 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     } catch (error) {
       console.error('Error exporting PDF:', error);
     } finally {
-      // Restore nodes marked for export
-      restoreNodesFromExport(nodeIdsToHide);
+      // Restore nodes and edges marked for export
+      if (tempVisibility) {
+        restoreNodesFromExport(nodeIdsToHide);
+        restoreEdgesFromExport(edgeIdsToHide);
+      }
 
       hiddenElements.forEach(({ element, originalDisplay }) => {
         element.style.display = originalDisplay;

@@ -57,64 +57,80 @@ function EdgeLabel({
 }
 
 const labeledSmoothstepEdge = (
-  props: SmoothStepEdgeProps & { data: { cableType: string } },
-) => (
-  <>
-    <SmoothStepEdge {...props} />
-    <EdgeLabel
-      cableType={props.data?.cableType}
-      sourceX={props.sourceX}
-      sourceY={props.sourceY}
-      targetX={props.targetX}
-      targetY={props.targetY}
-    />
-  </>
-);
+  props: SmoothStepEdgeProps & {
+    data: { cableType: string; exportingHidden: boolean; hidden: boolean };
+  },
+) =>
+  props.data.exportingHidden ? null : (
+    <>
+      <SmoothStepEdge {...props} />
+      <EdgeLabel
+        className={cn("", { "opacity-50": props.data.hidden })}
+        cableType={props.data?.cableType}
+        sourceX={props.sourceX}
+        sourceY={props.sourceY}
+        targetX={props.targetX}
+        targetY={props.targetY}
+      />
+    </>
+  );
 
 const labeledStepEdge = (
-  props: StepEdgeProps & { data: { cableType: string } },
-) => (
-  <>
-    <StepEdge {...props} />
-    <EdgeLabel
-      cableType={props.data?.cableType}
-      sourceX={props.sourceX}
-      sourceY={props.sourceY}
-      targetX={props.targetX}
-      targetY={props.targetY}
-    />
-  </>
-);
+  props: StepEdgeProps & {
+    data: { cableType: string; exportingHidden: boolean; hidden: boolean };
+  },
+) =>
+  props.data.exportingHidden ? null : (
+    <>
+      <StepEdge {...props} />
+      <EdgeLabel
+        className={cn("", { "opacity-50": props.data.hidden })}
+        cableType={props.data?.cableType}
+        sourceX={props.sourceX}
+        sourceY={props.sourceY}
+        targetX={props.targetX}
+        targetY={props.targetY}
+      />
+    </>
+  );
 
 const labeledStraightEdge = (
-  props: StraightEdgeProps & { data: { cableType: string } },
-) => (
-  <>
-    <StraightEdge {...props} />
-    <EdgeLabel
-      cableType={props.data?.cableType}
-      sourceX={props.sourceX}
-      sourceY={props.sourceY}
-      targetX={props.targetX}
-      targetY={props.targetY}
-    />
-  </>
-);
+  props: StraightEdgeProps & {
+    data: { cableType: string; exportingHidden: boolean; hidden: boolean };
+  },
+) =>
+  props.data.exportingHidden ? null : (
+    <>
+      <StraightEdge {...props} />
+      <EdgeLabel
+        className={cn("", { "opacity-50": props.data.hidden })}
+        cableType={props.data?.cableType}
+        sourceX={props.sourceX}
+        sourceY={props.sourceY}
+        targetX={props.targetX}
+        targetY={props.targetY}
+      />
+    </>
+  );
 
 const labeledBezierEdge = (
-  props: BezierEdgeProps & { data: { cableType: string } },
-) => (
-  <>
-    <BezierEdge {...props} />
-    <EdgeLabel
-      cableType={props.data?.cableType}
-      sourceX={props.sourceX}
-      sourceY={props.sourceY}
-      targetX={props.targetX}
-      targetY={props.targetY}
-    />
-  </>
-);
+  props: BezierEdgeProps & {
+    data: { cableType: string; exportingHidden: boolean; hidden: boolean };
+  },
+) =>
+  props.data.exportingHidden ? null : (
+    <>
+      <BezierEdge {...props} />
+      <EdgeLabel
+        className={cn("", { "opacity-50": props.data.hidden })}
+        cableType={props.data?.cableType}
+        sourceX={props.sourceX}
+        sourceY={props.sourceY}
+        targetX={props.targetX}
+        targetY={props.targetY}
+      />
+    </>
+  );
 
 export {
   labeledSmoothstepEdge,

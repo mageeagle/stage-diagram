@@ -20,6 +20,12 @@ export interface CustomNodeData {
   [key: string]: unknown;
 }
 
+export interface EdgeData {
+  cableType: string;
+  hidden?: boolean; // New property for hidden edges
+  exportingHidden?: boolean; // Temporary flag for export-time hiding
+}
+
 export interface NodeTemplate {
   id: string;
   name: string;
