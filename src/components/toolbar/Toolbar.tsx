@@ -10,6 +10,7 @@ import {
   HelpCircle,
   Layers,
   Plus,
+  Workflow,
 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
@@ -167,9 +168,9 @@ export const Toolbar = () => {
     },
     {
       key: "stage-plan",
-      title: "Stage Plan",
+      title: isStagePlanEnabled ? "Signal Flow" : "Stage Plan",
       onClick: () => setIsStagePlanEnabled(!isStagePlanEnabled),
-      icon: <Layers size={20} />,
+      icon: isStagePlanEnabled ? <Workflow size={20} /> : <Layers size={20} />,
     },
   ];
   const buttons: ToolbarButton[] = [
