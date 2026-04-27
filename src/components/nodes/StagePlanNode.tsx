@@ -1,7 +1,5 @@
 import React, { useCallback, useRef, useEffect } from "react";
 import {
-  Handle,
-  Position,
   NodeProps,
   useUpdateNodeInternals,
   Node,
@@ -27,7 +25,7 @@ export const StagePlanNode = ({
   height: nodeHeight,
 }: NodeProps<Node<StagePlanNodeData>>) => {
   const update = useUpdateNodeInternals();
-  const { updateNodeRotation, updateNodeShape } = useStagePlanStore();
+  const { updateNodeRotation } = useStagePlanStore();
 
   const nodeRef = useRef<HTMLDivElement>(null);
 
