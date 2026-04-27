@@ -9,6 +9,7 @@ import { CustomNodeData } from "@/types/diagram";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
 import { cn } from "@/lib/utils";
 import { RotateCw } from "lucide-react";
+import { useThemeStore } from "@/store/useThemeStore";
 
 export type StagePlanNodeData = CustomNodeData & {
   shape?: "rectangle" | "circle" | "triangle";
@@ -24,19 +25,12 @@ export const StagePlanNode = ({
   width: nodeWidth,
   height: nodeHeight,
 }: NodeProps<Node<StagePlanNodeData>>) => {
-export const StagePlanNode = ({
-  data,
-  id,
-  selected,
-  width: nodeWidth,
-  height: nodeHeight,
-}: NodeProps<Node<StagePlanNodeData>>) => {
   const update = useUpdateNodeInternals();
   const { updateNodeRotation } = useStagePlanStore();
-
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
   const nodeRef = useRef<HTMLDivElement>(null);
 
-  const shape = data.shape || "rectangle";
   const shape = data.shape || "rectangle";
   const rotation = data.rotation || 0;
   const width = nodeWidth || data.width || 200;
@@ -62,20 +56,11 @@ export const StagePlanNode = ({
       e.preventDefault();
       e.stopPropagation();
       if (!nodeRef.current) return;
-  const onRotationMouseDown = useCallback(
-    (e: React.PointerEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!nodeRef.current) return;
 
       const rect = nodeRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
-      const rect = nodeRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
 
-      const startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
       const startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
 
       rotationRef.current = {
@@ -83,14 +68,7 @@ export const StagePlanNode = ({
         startAngle,
         startRotation: rotation,
       };
-      rotationRef.current = {
-        isDragging: true,
-        startAngle,
-        startRotation: rotation,
-      };
 
-      const onPointerMove = (moveEvent: PointerEvent) => {
-        if (!rotationRef.current.isDragging) return;
       const onPointerMove = (moveEvent: PointerEvent) => {
         if (!rotationRef.current.isDragging) return;
 
@@ -105,14 +83,7 @@ export const StagePlanNode = ({
 
         updateNodeRotation([id], newRotation);
       };
-        updateNodeRotation([id], newRotation);
-      };
 
-      const onPointerUp = () => {
-        rotationRef.current.isDragging = false;
-        window.removeEventListener("pointermove", onPointerMove);
-        window.removeEventListener("pointerup", onPointerUp);
-      };
       const onPointerUp = () => {
         rotationRef.current.isDragging = false;
         window.removeEventListener("pointermove", onPointerMove);
@@ -130,16 +101,11 @@ export const StagePlanNode = ({
   }
   return (
     <div
-    <div
       ref={nodeRef}
       style={{
         width,
         height,
-      style={{
-        width,
-        height,
         transform: `rotate(${rotation}deg)`,
-        position: "relative",
         position: "relative",
       }}
       className="group"
@@ -164,7 +130,7 @@ export const StagePlanNode = ({
               y="1"
               width="98"
               height="98"
-              fill="white"
+              fill={isDark ? "grey" : "white"}
               stroke="#a8a29e"
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
