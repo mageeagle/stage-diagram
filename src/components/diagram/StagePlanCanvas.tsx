@@ -14,19 +14,18 @@ import "@xyflow/react/dist/style.css";
 
 import { useStagePlanStore } from "@/store/useStagePlanStore";
 import { useThemeStore } from "@/store/useThemeStore";
-import { cn } from "@/lib/utils";
-
-import { CustomNode } from "@/components/nodes/CustomNode";
 import { StagePlanNode } from "@/components/nodes/StagePlanNode";
 import { ExportButton } from "@/components/diagram/ExportButton";
 import { CustomNodeData } from "@/types/diagram";
 import { useStore } from "@/store/useStore";
+import { GroupNode } from "../nodes/GroupNode";
 
 const nodeTypes = {
   custom: StagePlanNode,
+  group: GroupNode,
 };
 
-// const groupNodesStore = new Map<string, Node>();
+const groupNodesStore = new Map<string, Node>();
 
 export const StagePlanCanvas = () => {
   const originalNodes = useStore((s) => s.nodes);
@@ -40,8 +39,20 @@ export const StagePlanCanvas = () => {
   const setSelectedNodeIds = useStagePlanStore(
     (state) => state.setSelectedNodeIds,
   );
-  // const groupNodesMap = useMemo(() => groupNodesStore, []);
-  // const [groupNodesTick, setGroupNodesTick] = useState(0);
+  const locationGroupsEnabled = useStagePlanStore(
+    (state) => state.locationGroupsEnabled,
+  );
+  const toggleLocationGroups = useStagePlanStore(
+    (state) => state.toggleLocationGroups,
+  );
+  const groupNodesMap = useMemo(() => groupNodesStore, []);
+  useEffect(() => {
+    if (!locationGroupsEnabled) {
+      groupNodesMap.clear();
+    }
+  }, [locationGroupsEnabled, groupNodesMap]);
+
+  const [groupNodesTick, setGroupNodesTick] = useState(0);
   // const setSelectedEdgeIds = useStagePlanStore(
   //   (state) => state.setSelectedEdgeIds,
   // );
@@ -149,60 +160,154 @@ export const StagePlanCanvas = () => {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      // const groupChanges = changes.filter(
-      //   (
-      //     c,
-      //   ): c is NodeChange<Node<CustomNodeData>> & {
-      //     type: "position";
-      //     position: { x: number; y: number };
-      //   } => "id" in c && c.id.startsWith("group-") && c.type === "position",
-      // );
-      // const otherChanges = changes.filter(
-      //   (c) => !("id" in c) || !c.id.startsWith("group-"),
-      // ) as NodeChange<Node<CustomNodeData>>[];
+      const groupChanges = changes.filter(
+        (
+          c,
+        ): c is NodeChange<Node<CustomNodeData>> & {
+          type: "position";
+          position: { x: number; y: number };
+        } => "id" in c && c.id.startsWith("group-") && c.type === "position",
+      );
+      const otherChanges = changes.filter(
+        (c) => !("id" in c) || !c.id.startsWith("group-"),
+      ) as NodeChange<Node<CustomNodeData>>[];
 
-      // if (groupChanges.length > 0) {
-      //   groupChanges.forEach((change) => {
-      //     const { id, position } = change;
-      //     const existingNode = groupNodesMap.get(id);
-      //     if (existingNode) {
-      //       const delta = {
-      //         x: position.x - existingNode.position.x,
-      //         y: position.y - existingNode.position.y,
-      //       };
+      if (groupChanges.length > 0) {
+        groupChanges.forEach((change) => {
+          const { id, position } = change;
+          const existingNode = groupNodesMap.get(id);
+          if (existingNode) {
+            const delta = {
+              x: position.x - existingNode.position.x,
+              y: position.y - existingNode.position.y,
+            };
 
-      //       if (delta.x !== 0 || delta.y !== 0) {
-      //         const location = id.replace("group-", "");
-      //         const nodesToMove = nodes.filter(
-      //           (n) => n.data.location === location,
-      //         );
-      //         if (nodesToMove.length > 0) {
-      //           moveNodes(
-      //             nodesToMove.map((n) => n.id),
-      //             delta,
-      //           );
-      //         }
-      //       }
-      //       groupNodesMap.set(id, { ...existingNode, position });
-      //     }
-      //   });
-      //   setGroupNodesTick((t) => t + 1);
-      // }
+            if (delta.x !== 0 || delta.y !== 0) {
+              const location = id.replace("group-", "");
+              const nodesToMove = nodes.filter(
+                (n) => n.data.location === location,
+              );
+              if (nodesToMove.length > 0) {
+                moveNodes(
+                  nodesToMove.map((n) => n.id),
+                  delta,
+                );
+              }
+            }
+            groupNodesMap.set(id, { ...existingNode, position });
+          }
+        });
+        setGroupNodesTick((t) => t + 1);
+      }
 
-      // if (otherChanges.length > 0) {
-      //   onNodesChangeOrig(otherChanges);
-      // }
+      if (otherChanges.length > 0) {
+        onNodesChangeOrig(otherChanges);
+      }
       onNodesChangeOrig(changes as NodeChange<Node<CustomNodeData>>[]);
     },
-    // [onNodesChangeOrig, groupNodesMap, nodes, moveNodes],
-    [onNodesChangeOrig],
+    [onNodesChangeOrig, groupNodesMap, nodes, moveNodes],
+    // [onNodesChangeOrig],
   );
 
+  const displayNodes = useMemo(() => {
+    if (!locationGroupsEnabled) return nodes;
+
+    const groupedNodes = new Map<string, Node[]>();
+
+    nodes.forEach((node) => {
+      const location = node.data.location!;
+      if (!groupedNodes.has(location)) {
+        groupedNodes.set(location, []);
+      }
+      groupedNodes.get(location)?.push(node);
+    });
+
+    const groupEntries = Array.from(groupedNodes.entries()).filter(
+      ([, nodeGroup]) => nodeGroup.length > 1,
+    );
+    const groupNodesList = groupEntries.map(([location, groupNodes]) => {
+      const groupId = `group-${location}`;
+      const props = {
+        id: groupId,
+        type: "group" as const,
+        position: {
+          x: Math.min(...groupNodes.map((n) => n.position.x - 20 || 0)),
+          y: Math.min(...groupNodes.map((n) => n.position.y - 50 || 0)),
+        },
+        data: { label: location },
+        selected: false,
+        width:
+          Math.max(
+            ...groupNodes.map(
+              (n) =>
+                (n.position.x || 0) + (n.measured?.width || n.width || 200),
+            ),
+          ) -
+          Math.min(...groupNodes.map((n) => n.position.x || 0)) +
+          40,
+        height:
+          Math.max(
+            ...groupNodes.map(
+              (n) =>
+                (n.position.y || 0) + (n.measured?.height || n.height || 100),
+            ),
+          ) -
+          Math.min(...groupNodes.map((n) => n.position.y || 0)) +
+          70,
+      };
+
+      const existingNode = groupNodesMap.get(groupId);
+      if (existingNode) {
+        const updatedNode = { ...existingNode, ...props };
+        groupNodesMap.set(groupId, updatedNode);
+        return updatedNode;
+      }
+
+      const newNode = props as Node;
+
+      groupNodesMap.set(groupId, newNode);
+      return newNode;
+    });
+
+    const groupedNodeIds = new Set(groupNodesList.map((g) => g.id));
+
+    const baseDisplayNodes = [
+      ...groupNodesList,
+      ...nodes.filter((node) => !groupedNodeIds.has(node.id)),
+    ];
+
+    const baseDisplayNodesMap = new Map(baseDisplayNodes.map((n) => [n.id, n]));
+
+    const displayNodes = baseDisplayNodes.map((node) => {
+      if (node.position && node.parentId) {
+        const parent = baseDisplayNodesMap.get(node.parentId);
+        if (parent && parent.position) {
+          // We use groupNodesTick to trigger re-calculation of transient nodes
+          // even though it's not directly used in the calculation.
+          void groupNodesTick;
+
+          return {
+            ...node,
+            position: {
+              ...node.position,
+              absolute: {
+                x: node.position.x - parent.position.x,
+                y: node.position.y - parent.position.y,
+              },
+            },
+          };
+        }
+      }
+      return node;
+    });
+
+    return displayNodes;
+  }, [nodes, locationGroupsEnabled, groupNodesMap, groupNodesTick]);
   return (
     <div className="w-full h-full relative">
       <div ref={containerRef} className="w-full h-full">
         <ReactFlow
-          nodes={nodes}
+          nodes={displayNodes}
           onNodesChange={onNodesChange}
           onSelectionChange={onSelectionChange}
           onNodeClick={onNodeClick}
@@ -218,8 +323,19 @@ export const StagePlanCanvas = () => {
           <Controls />
         </ReactFlow>
       </div>
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
         <ExportButton targetRef={containerRef} isStagePlanMode={true} />
+        <label className="flex items-center gap-2 cursor-pointer bg-stone-200 dark:bg-stone-700 px-3 py-1 rounded border border-stone-400">
+          <input
+            type="checkbox"
+            checked={locationGroupsEnabled}
+            onChange={() => toggleLocationGroups()}
+            className="accent-stone-600"
+          />
+          <span className="text-sm text-stone-700 dark:text-stone-300">
+            Group by Location
+          </span>
+        </label>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ interface DiagramState {
   title: string;
   subtitle: string;
   preparedBy: string;
-
+  locationGroupsEnabled: boolean;
   // Undo/Redo
   undoStack: HistoryState[];
   redoStack: HistoryState[];
@@ -36,9 +36,16 @@ interface DiagramState {
 
   // Node property updates
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
-  updateNodeShape: (nodeIds: string[], shape: 'rectangle' | 'circle' | 'triangle') => void;
+  updateNodeShape: (
+    nodeIds: string[],
+    shape: "rectangle" | "circle" | "triangle",
+  ) => void;
   updateNodeRotation: (nodeIds: string[], rotation: number) => void;
-  updateNodeDimensions: (nodeIds: string[], width: number, height: number) => void;
+  updateNodeDimensions: (
+    nodeIds: string[],
+    width: number,
+    height: number,
+  ) => void;
   matchNode: (nodes: Node<CustomNodeData>[]) => void;
   moveNodes: (
     nodeIds: string[],
@@ -49,7 +56,7 @@ interface DiagramState {
   ) => void;
   prepareNodeForExport: (nodeId: string) => void;
   restoreNodeFromExport: (nodeId: string) => void;
-  
+  toggleLocationGroups: () => void;
   // Canvas actions
   restoreProjectState: (state: ProjectState) => void;
 }
@@ -63,7 +70,9 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
   preparedBy: "",
   undoStack: [],
   redoStack: [],
-
+  toggleLocationGroups: () =>
+    set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
+  locationGroupsEnabled: false,
   undo: () => {
     const { undoStack, redoStack, nodes } = get();
     if (undoStack.length === 0) return;
@@ -133,14 +142,16 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
   onNodesChange: (changes) => {
     set((state) => {
       const newNodes = applyNodeChanges(changes, state.nodes);
-      
-      const hasDimensionChange = changes.some(c => c.type === 'dimensions');
+
+      const hasDimensionChange = changes.some((c) => c.type === "dimensions");
       if (!hasDimensionChange) {
         return { nodes: newNodes };
       }
 
-      const updatedNodes = newNodes.map(node => {
-        const dimChange = changes.find(c => c.type === 'dimensions' && c.id === node.id);
+      const updatedNodes = newNodes.map((node) => {
+        const dimChange = changes.find(
+          (c) => c.type === "dimensions" && c.id === node.id,
+        );
         if (dimChange) {
           return {
             ...node,
@@ -148,7 +159,7 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
               ...node.data,
               width: node.width,
               height: node.height,
-            }
+            },
           };
         }
         return node;
@@ -157,7 +168,6 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
       return { nodes: updatedNodes };
     });
   },
-
 
   // Node selection
   setSelectedNodeIds: (nodeIds) => set({ selectedNodeIds: nodeIds }),
