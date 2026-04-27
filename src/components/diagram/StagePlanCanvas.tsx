@@ -36,7 +36,7 @@ export const StagePlanCanvas = () => {
   useEffect(() => {
     useStagePlanStore.getState().matchNode(originalNodes);
   }, [originalNodes]);
-  // const moveNodes = useStagePlanStore((state) => state.moveNodes);
+  const moveNodes = useStagePlanStore((state) => state.moveNodes);
   const onNodesChangeOrig = useStagePlanStore((state) => state.onNodesChange);
   const selectedNodeIds = useStagePlanStore((state) => state.selectedNodeIds);
   const setSelectedNodeIds = useStagePlanStore(
