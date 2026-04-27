@@ -18,9 +18,9 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [showDetails, setShowDetails] = useState(true);
 
-  const title = useStore(s => s.title);
-  const subtitle = useStore(s => s.subtitle);
-  const preparedBy = useStore(s => s.preparedBy);
+   const title = useStore(s => s.canvasTitle);
+   const subtitle = useStore(s => s.canvasSubtitle);
+   const preparedBy = useStore(s => s.canvasPreparedBy);
   const nodes = useStore(s => s.nodes);
   const edges = useStore(s => s.edges);
 

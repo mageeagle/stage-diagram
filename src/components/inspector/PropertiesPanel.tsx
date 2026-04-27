@@ -63,7 +63,7 @@ export const PropertiesPanel = () => {
       outputs: [...(primaryNode.data.outputs || [])],
       type: primaryNode.data.type || "",
       nodeType: primaryNode.type!,
-      power: primaryNode.data.power!,
+      power: primaryNode.data.power ?? false,
     };
     addTemplate(template);
   };

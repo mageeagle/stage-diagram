@@ -30,10 +30,13 @@ const groupNodesStore = new Map<string, Node>();
 export const StagePlanCanvas = () => {
   const originalNodes = useStore((s) => s.nodes);
   const nodes = useStagePlanStore((state) => state.nodes);
+  const title = useStagePlanStore((state) => state.title);
+  const subtitle = useStagePlanStore((state) => state.subtitle);
+  const preparedBy = useStagePlanStore((state) => state.preparedBy);
   useEffect(() => {
     useStagePlanStore.getState().matchNode(originalNodes);
   }, [originalNodes]);
-  const moveNodes = useStagePlanStore((state) => state.moveNodes);
+  // const moveNodes = useStagePlanStore((state) => state.moveNodes);
   const onNodesChangeOrig = useStagePlanStore((state) => state.onNodesChange);
   const selectedNodeIds = useStagePlanStore((state) => state.selectedNodeIds);
   const setSelectedNodeIds = useStagePlanStore(
@@ -320,8 +323,19 @@ export const StagePlanCanvas = () => {
           snapGrid={[20, 20]}
           onInit={onReactFlowApi as OnInit}
         >
-          <Controls />
+          <Controls position="bottom-right" />
         </ReactFlow>
+        <div className="absolute bottom-6 left-6 z-10">
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+            {title}
+          </div>
+          <div className="text-lg text-zinc-600 dark:text-zinc-400">
+            {subtitle}
+          </div>
+          <div className="text-sm text-zinc-500 dark:text-zinc-500">
+            {preparedBy}
+          </div>
+        </div>
       </div>
       <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
         <ExportButton targetRef={containerRef} isStagePlanMode={true} />

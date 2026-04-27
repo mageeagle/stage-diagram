@@ -315,11 +315,12 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
       selectedNodeIds: [],
     });
 
-    // 2. Templates: Restore saved templates
-    set({
-      title: projectState.title,
-      subtitle: projectState.subtitle,
-      preparedBy: projectState.preparedBy,
-    });
-  },
+     // 2. Templates: Restore saved templates
+     set({
+       title: projectState.stagePlanTitle,
+       subtitle: projectState.stagePlanSubtitle,
+       preparedBy: projectState.stagePlanPreparedBy,
+     });
+   },
+
 }));

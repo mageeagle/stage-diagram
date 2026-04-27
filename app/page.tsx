@@ -44,7 +44,7 @@ export default function Home() {
       <main className="relative flex-1">
         {isStagePlanEnabled ? null : <DiagramCanvas />}
         {isStagePlanEnabled ? <StagePlanCanvas /> : null}
-
+{/* 
         <button
           onClick={() => {
             setPendingPosition({ x: 100, y: 100 });
@@ -54,7 +54,7 @@ export default function Home() {
         >
           <Plus size={20} />
           Add Node
-        </button>
+        </button> */}
 
         <Toolbar />
         <SettingsModal
