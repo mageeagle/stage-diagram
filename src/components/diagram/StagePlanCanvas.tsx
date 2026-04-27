@@ -110,12 +110,20 @@ export const StagePlanCanvas = () => {
         return;
       }
 
-      if ((event.ctrlKey || event.metaKey) && (event.key === "z" || event.key === "Z")) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === "z" || event.key === "Z")
+      ) {
         undo();
         return;
       }
 
-      if ((event.ctrlKey || event.metaKey) && (event.key === "y" || event.key === "Y" || (event.shiftKey && event.key === "Z"))) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === "y" ||
+          event.key === "Y" ||
+          (event.shiftKey && event.key === "Z"))
+      ) {
         redo();
         return;
       }
@@ -191,25 +199,27 @@ export const StagePlanCanvas = () => {
 
   return (
     <div className="w-full h-full relative">
-      <ReactFlow
-        nodes={nodes}
-        onNodesChange={onNodesChange}
-        onSelectionChange={onSelectionChange}
-        onNodeClick={onNodeClick}
-        onNodeDragStart={onNodeDragStart}
-        onPaneClick={onPaneClick}
-        nodeTypes={nodeTypes}
-        colorMode={theme}
-        fitView
-        snapToGrid
-        snapGrid={[20, 20]}
-        onInit={onReactFlowApi as OnInit}
-      >
-        <Controls />
-        <div className="absolute top-4 left-4 z-10">
-          <ExportButton targetRef={containerRef} isStagePlanMode={true} />
-        </div>
-      </ReactFlow>
+      <div ref={containerRef} className="w-full h-full">
+        <ReactFlow
+          nodes={nodes}
+          onNodesChange={onNodesChange}
+          onSelectionChange={onSelectionChange}
+          onNodeClick={onNodeClick}
+          onNodeDragStart={onNodeDragStart}
+          onPaneClick={onPaneClick}
+          nodeTypes={nodeTypes}
+          colorMode={theme}
+          fitView
+          snapToGrid
+          snapGrid={[20, 20]}
+          onInit={onReactFlowApi as OnInit}
+        >
+          <Controls />
+        </ReactFlow>
+      </div>
+      <div className="absolute top-4 left-4 z-10">
+        <ExportButton targetRef={containerRef} isStagePlanMode={true} />
+      </div>
     </div>
   );
 };

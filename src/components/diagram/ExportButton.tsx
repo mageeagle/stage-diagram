@@ -1,64 +1,91 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { Download, FileImage, FileCode, FileType, FileText, ChevronDown } from 'lucide-react';
-import { toPng, toJpeg, toSvg } from 'html-to-image';
-import { useStore } from '@/store/useStore';
-import { useStagePlanStore } from '@/store/useStagePlanStore';
-import * as XYFlow from '@xyflow/react';
-import { Tooltip } from '@/components/tooltip/Tooltip';
-import { CustomNodeData, EdgeData } from '@/types/diagram';
+import { useState, useRef, useEffect } from "react";
+import {
+  Download,
+  FileImage,
+  FileCode,
+  FileType,
+  FileText,
+  ChevronDown,
+} from "lucide-react";
+import { toPng, toJpeg, toSvg } from "html-to-image";
+import { useStore } from "@/store/useStore";
+import { useStagePlanStore } from "@/store/useStagePlanStore";
+import * as XYFlow from "@xyflow/react";
+import { Tooltip } from "@/components/tooltip/Tooltip";
+import { CustomNodeData, EdgeData } from "@/types/diagram";
 
 interface ExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement | null>;
-  stagePlanTargetRef?: React.RefObject<HTMLDivElement | null>;
   isStagePlanMode?: boolean;
 }
 
-export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = false }: ExportButtonProps) => {
+export const ExportButton = ({
+  targetRef,
+  isStagePlanMode = false,
+}: ExportButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const nodes = isStagePlanMode ? useStagePlanStore((state) => state.nodes) : useStore((state) => state.nodes);
+  const nodes = useStore((state) => state.nodes);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const downloadFile = async (url: string, filename: string) => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     link.click();
   };
 
-  const restoreNodeFromExport = isStagePlanMode ? useStagePlanStore((state) => state.restoreNodeFromExport) : useStore((state) => state.restoreNodeFromExport);
-  const prepareNodeForExport = isStagePlanMode ? useStagePlanStore((state) => state.prepareNodeForExport) : useStore((state) => state.prepareNodeForExport);
-  const restoreEdgeFromExport = isStagePlanMode ? useStagePlanStore((state) => state.restoreEdgeFromExport) : useStore((state) => state.restoreEdgeFromExport);
-  const prepareEdgeForExport = isStagePlanMode ? useStagePlanStore((state) => state.prepareEdgeForExport) : useStore((state) => state.prepareEdgeForExport);
-  const edges = isStagePlanMode ? useStagePlanStore((state) => state.edges) : useStore((state) => state.edges);
+  const restoreNodeFromExport = useStore(
+    (state) => state.restoreNodeFromExport,
+  );
+  const prepareNodeForExport = useStore((state) => state.prepareNodeForExport);
+  const restoreEdgeFromExport = useStore(
+    (state) => state.restoreEdgeFromExport,
+  );
+  const prepareEdgeForExport = useStore((state) => state.prepareEdgeForExport);
+  const restoreNodeFromExportStage = useStagePlanStore(
+    (state) => state.restoreNodeFromExport,
+  );
+  const prepareNodeForExportStage = useStagePlanStore(
+    (state) => state.prepareNodeForExport,
+  );
+  const edges = useStore((state) => state.edges);
+
   const prepareNodesForExport = (nodeIds: string[]) => {
     nodeIds.forEach((nodeId) => {
-      prepareNodeForExport(nodeId);
+      if (isStagePlanMode) prepareNodeForExportStage(nodeId);
+      if (!isStagePlanMode) prepareNodeForExport(nodeId);
     });
   };
   const restoreNodesFromExport = (nodeIds: string[]) => {
     nodeIds.forEach((nodeId) => {
-      restoreNodeFromExport(nodeId);
+      if (isStagePlanMode) restoreNodeFromExportStage(nodeId);
+      if (!isStagePlanMode) restoreNodeFromExport(nodeId);
     });
   };
   const prepareEdgesForExport = (edgeIds: string[]) => {
+    if (isStagePlanMode) return;
     edgeIds.forEach((edgeId) => {
       prepareEdgeForExport(edgeId);
     });
   };
   const restoreEdgesFromExport = (edgeIds: string[]) => {
+    if (isStagePlanMode) return;
     edgeIds.forEach((edgeId) => {
       restoreEdgeFromExport(edgeId);
     });
@@ -66,7 +93,11 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
   const getNodesToHideForExport = (nodes: XYFlow.Node<CustomNodeData>[]) => {
     return nodes.filter((n) => n.data.hidden);
   };
-  const getEdgesToHideForExport = (edges: XYFlow.Edge[], nodes: XYFlow.Node<CustomNodeData>[]) => {
+  const getEdgesToHideForExport = (
+    edges: XYFlow.Edge[],
+    nodes: XYFlow.Node<CustomNodeData>[],
+  ) => {
+    if (isStagePlanMode) return [];
     return edges.filter((edge) => {
       const edgeData = edge.data as EdgeData | undefined;
       const edgeHidden = edgeData?.hidden ?? false;
@@ -81,21 +112,23 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const runExport = async (
     exportFn: (el: HTMLElement) => Promise<string>,
     filename: string,
     isJpeg: boolean = false,
-    stagePlanExport = false
   ) => {
-    const el = stagePlanExport ? stagePlanTargetRef.current : targetRef.current;
+    const el = targetRef.current;
     if (!el) return;
 
     // Collect nodes to be hidden for export
@@ -111,18 +144,24 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
       prepareEdgesForExport(edgeIdsToHide);
     }
 
-    const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
-    const hiddenElements: { element: HTMLElement; originalDisplay: string }[] = [];
+    const elementsToHide = el.querySelectorAll(
+      ".react-flow__controls, .react-flow__minimap, .react-flow__attribution",
+    );
+    const hiddenElements: { element: HTMLElement; originalDisplay: string }[] =
+      [];
     elementsToHide.forEach((element) => {
       const elementAsHtml = element as HTMLElement;
-      hiddenElements.push({ element: elementAsHtml, originalDisplay: elementAsHtml.style.display });
-      elementAsHtml.style.display = 'none';
+      hiddenElements.push({
+        element: elementAsHtml,
+        originalDisplay: elementAsHtml.style.display,
+      });
+      elementAsHtml.style.display = "none";
     });
 
-    let originalBgColor = '';
+    let originalBgColor = "";
     if (isJpeg) {
       originalBgColor = el.style.backgroundColor;
-      el.style.backgroundColor = 'white';
+      el.style.backgroundColor = "white";
     }
 
     try {
@@ -149,15 +188,15 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
   };
 
   const exportAsPng = async () => {
-    await runExport((el: HTMLElement) => toPng(el), 'diagram.png');
+    await runExport((el: HTMLElement) => toPng(el), "diagram.png");
   };
 
   const exportAsJpeg = async () => {
-    await runExport((el: HTMLElement) => toJpeg(el), 'diagram.jpg', true);
+    await runExport((el: HTMLElement) => toJpeg(el), "diagram.jpg", true);
   };
 
   const exportAsSvg = async () => {
-    await runExport((el: HTMLElement) => toSvg(el), 'diagram.svg');
+    await runExport((el: HTMLElement) => toSvg(el), "diagram.svg");
   };
 
   const exportAsPdf = async () => {
@@ -166,7 +205,6 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
 
   const runExportPdf = async (
     exportFn: (el: HTMLElement) => Promise<string>,
-
   ) => {
     const el = targetRef.current;
     if (!el) return;
@@ -185,12 +223,18 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
       prepareEdgesForExport(edgeIdsToHide);
     }
 
-    const elementsToHide = el.querySelectorAll('.react-flow__controls, .react-flow__minimap, .react-flow__attribution');
-    const hiddenElements: { element: HTMLElement; originalDisplay: string }[] = [];
+    const elementsToHide = el.querySelectorAll(
+      ".react-flow__controls, .react-flow__minimap, .react-flow__attribution",
+    );
+    const hiddenElements: { element: HTMLElement; originalDisplay: string }[] =
+      [];
     elementsToHide.forEach((element) => {
       const elementAsHtml = element as HTMLElement;
-      hiddenElements.push({ element: elementAsHtml, originalDisplay: elementAsHtml.style.display });
-      elementAsHtml.style.display = 'none';
+      hiddenElements.push({
+        element: elementAsHtml,
+        originalDisplay: elementAsHtml.style.display,
+      });
+      elementAsHtml.style.display = "none";
     });
 
     try {
@@ -198,9 +242,9 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
       const response = await fetch(svgDataUrl);
       const svgContent = await response.text();
 
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open("", "_blank");
       if (!printWindow) {
-        alert('Popup blocked! Please allow popups to export as PDF.');
+        alert("Popup blocked! Please allow popups to export as PDF.");
         return;
       }
 
@@ -253,7 +297,7 @@ export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = 
       `);
       printWindow.document.close();
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+      console.error("Error exporting PDF:", error);
     } finally {
       // Restore nodes and edges marked for export
       if (tempVisibility) {

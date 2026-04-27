@@ -44,7 +44,9 @@ interface DiagramState {
       y: number;
     },
   ) => void;
-
+  prepareNodeForExport: (nodeId: string) => void;
+  restoreNodeFromExport: (nodeId: string) => void;
+  
   // Canvas actions
   restoreProjectState: (state: ProjectState) => void;
 }
