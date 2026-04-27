@@ -17,12 +17,13 @@ import { useThemeStore } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
 
 import { CustomNode } from "@/components/nodes/CustomNode";
+import { StagePlanNode } from "@/components/nodes/StagePlanNode";
 import { ExportButton } from "@/components/diagram/ExportButton";
 import { CustomNodeData } from "@/types/diagram";
 import { useStore } from "@/store/useStore";
 
 const nodeTypes = {
-  custom: CustomNode,
+  custom: StagePlanNode,
 };
 
 // const groupNodesStore = new Map<string, Node>();
