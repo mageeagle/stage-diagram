@@ -4,19 +4,22 @@ import { useState, useRef, useEffect } from 'react';
 import { Download, FileImage, FileCode, FileType, FileText, ChevronDown } from 'lucide-react';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
 import { useStore } from '@/store/useStore';
+import { useStagePlanStore } from '@/store/useStagePlanStore';
 import * as XYFlow from '@xyflow/react';
 import { Tooltip } from '@/components/tooltip/Tooltip';
 import { CustomNodeData, EdgeData } from '@/types/diagram';
 
 interface ExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement | null>;
+  stagePlanTargetRef?: React.RefObject<HTMLDivElement | null>;
+  isStagePlanMode?: boolean;
 }
 
-export const ExportButton = ({ targetRef }: ExportButtonProps) => {
+export const ExportButton = ({ targetRef, stagePlanTargetRef, isStagePlanMode = false }: ExportButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const nodes = useStore((state) => state.nodes);
+  const nodes = isStagePlanMode ? useStagePlanStore((state) => state.nodes) : useStore((state) => state.nodes);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,11 +38,11 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     link.click();
   };
 
-  const restoreNodeFromExport = useStore((state) => state.restoreNodeFromExport);
-  const prepareNodeForExport = useStore((state) => state.prepareNodeForExport);
-  const restoreEdgeFromExport = useStore((state) => state.restoreEdgeFromExport);
-  const prepareEdgeForExport = useStore((state) => state.prepareEdgeForExport);
-  const edges = useStore((state) => state.edges);
+  const restoreNodeFromExport = isStagePlanMode ? useStagePlanStore((state) => state.restoreNodeFromExport) : useStore((state) => state.restoreNodeFromExport);
+  const prepareNodeForExport = isStagePlanMode ? useStagePlanStore((state) => state.prepareNodeForExport) : useStore((state) => state.prepareNodeForExport);
+  const restoreEdgeFromExport = isStagePlanMode ? useStagePlanStore((state) => state.restoreEdgeFromExport) : useStore((state) => state.restoreEdgeFromExport);
+  const prepareEdgeForExport = isStagePlanMode ? useStagePlanStore((state) => state.prepareEdgeForExport) : useStore((state) => state.prepareEdgeForExport);
+  const edges = isStagePlanMode ? useStagePlanStore((state) => state.edges) : useStore((state) => state.edges);
   const prepareNodesForExport = (nodeIds: string[]) => {
     nodeIds.forEach((nodeId) => {
       prepareNodeForExport(nodeId);
@@ -90,8 +93,9 @@ export const ExportButton = ({ targetRef }: ExportButtonProps) => {
     exportFn: (el: HTMLElement) => Promise<string>,
     filename: string,
     isJpeg: boolean = false,
+    stagePlanExport = false
   ) => {
-    const el = targetRef.current;
+    const el = stagePlanExport ? stagePlanTargetRef.current : targetRef.current;
     if (!el) return;
 
     // Collect nodes to be hidden for export

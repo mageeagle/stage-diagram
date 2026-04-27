@@ -8,8 +8,12 @@ import {
   Upload,
   List,
   HelpCircle,
+  Layers,
+  Trash2,
+  RotateCw,
 } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useStagePlanStore } from "@/store/useStagePlanStore";
 import { exportProject, importProject } from "@/utils/projectIO";
 import { Tooltip } from "@/components/tooltip/Tooltip";
 
@@ -32,6 +36,10 @@ export const Toolbar = () => {
   const setIsHelpModalOpen = useStore((state) => state.setIsHelpModalOpen);
   const undo = useStore((state) => state.undo);
   const redo = useStore((state) => state.redo);
+  const isStagePlanEnabled = useStagePlanStore((state) => state.isStagePlanEnabled);
+  const setIsStagePlanEnabled = useStagePlanStore(
+    (state) => state.setIsStagePlanEnabled,
+  );
 
   const handleExport = () => {
     const {
@@ -42,6 +50,7 @@ export const Toolbar = () => {
       locations,
       cableTypes,
       title,
+      subtitle,
       preparedBy,
     } = useStore.getState();
 
@@ -53,6 +62,7 @@ export const Toolbar = () => {
       locations,
       cableTypes,
       title,
+      subtitle,
       preparedBy,
     });
   };
@@ -104,6 +114,11 @@ export const Toolbar = () => {
   ];
 
   const additionalButtons: ToolbarButton[] = [
+    {
+      key: "stage-plan",
+      title: "Stage Plan",
+      onClick: () => setIsStagePlanEnabled(!isStagePlanEnabled),
+    },
     {
       key: "settings",
       title: "Settings",
@@ -200,6 +215,7 @@ export const Toolbar = () => {
               >
                 {button.key === "settings" && <Settings size={20} />}
                 {button.key === "help" && <HelpCircle size={20} />}
+                {button.key === "stage-plan" && <Layers size={20} />}
               </button>
             </div>
           ))}

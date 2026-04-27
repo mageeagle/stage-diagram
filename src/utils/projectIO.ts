@@ -9,6 +9,7 @@ export interface ProjectState {
   locations: string[];
   cableTypes: string[];
   title: string;
+  subtitle: string;
   preparedBy: string;
 }
 
