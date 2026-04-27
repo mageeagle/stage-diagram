@@ -68,7 +68,7 @@ export const Toolbar = () => {
     (state) => state.setIsNodeListModalOpen,
   );
   const setIsHelpModalOpen = useStore((state) => state.setIsHelpModalOpen);
-  const setIsModalOpen = useStore((state) => state.setIsHelpModalOpen);
+  const setIsModalOpen = useStore((state) => state.setIsModalOpen);
   const undo = useStore((state) => state.undo);
   const redo = useStore((state) => state.redo);
   const isStagePlanEnabled = useStagePlanStore(
@@ -145,12 +145,6 @@ export const Toolbar = () => {
 
   const frontButtons: ToolbarButton[] = [
     {
-      key: "add",
-      title: "Add Node",
-      onClick: () => setIsModalOpen(true),
-      icon: <Plus size={20} />,
-    },
-    {
       key: "undo",
       title: "Undo",
       onClick: handleUndo,
@@ -212,6 +206,16 @@ export const Toolbar = () => {
         className="hidden"
       />
       <div className="flex items-center gap-1">
+        {!isStagePlanEnabled && (
+          <Button
+            button={{
+              key: "add",
+              title: "Add Node",
+              onClick: () => setIsModalOpen(true),
+              icon: <Plus size={20} />,
+            }}
+          />
+        )}
         {frontButtons.map((button) => (
           <Button key={button.key} button={button} />
         ))}
