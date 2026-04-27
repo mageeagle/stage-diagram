@@ -36,13 +36,16 @@ interface DiagramState {
   pendingPosition: { x: number; y: number } | null;
   templates: NodeTemplate[];
   types: string[];
-  locations: string[];
-  locationGroupsEnabled: boolean;
-  title: string;
-  subtitle: string;
-  preparedBy: string;
+   locations: string[];
+   locationGroupsEnabled: boolean;
+   riderListTitle: string;
+   riderListSubtitle: string;
+   riderListPreparedBy: string;
+   canvasTitle: string;
+   canvasSubtitle: string;
+   canvasPreparedBy: string;
 
-  // Undo/Redo
+   // Undo/Redo
   undoStack: HistoryState[];
   redoStack: HistoryState[];
   undo: () => void;
@@ -58,12 +61,15 @@ interface DiagramState {
   setSelectedNodeIds: (nodeIds: string[]) => void;
   setSelectedEdgeIds: (edgeIds: string[]) => void;
 
-  // Export settings
-  updateTitle: (title: string) => void;
-  updateSubtitle: (subtitle: string) => void;
-  updatePreparedBy: (preparedBy: string) => void;
+   // Export settings
+   updateRiderListTitle: (title: string) => void;
+   updateRiderListSubtitle: (subtitle: string) => void;
+   updateRiderListPreparedBy: (preparedBy: string) => void;
+   updateCanvasTitle: (title: string) => void;
+   updateCanvasSubtitle: (subtitle: string) => void;
+   updateCanvasPreparedBy: (preparedBy: string) => void;
 
-  // Node property updates
+   // Node property updates
   updateNodeLabel: (nodeId: string, label: string) => void;
   updateNodeType: (nodeIds: string[], type: string) => void;
   updateNodeLocation: (nodeIds: string[], location: string) => void;
@@ -140,12 +146,15 @@ export const useStore = create<DiagramState>((set, get) => ({
   isHelpModalOpen: false,
   pendingPosition: null,
   templates: [],
-  types: [],
-  locations: [],
-  title: "Technical Rider",
-  subtitle: "I go to school by bus",
-  preparedBy: "",
-  undoStack: [],
+   types: [],
+   locations: [],
+   riderListTitle: "Technical Rider",
+   riderListSubtitle: "I go to school by bus",
+   riderListPreparedBy: "",
+   canvasTitle: "Signal Flow",
+   canvasSubtitle: "I go to school by bus",
+   canvasPreparedBy: "",
+   undoStack: [],
   redoStack: [],
 
   toggleLocationGroups: () =>
@@ -599,15 +608,19 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
 
     // 2. Templates: Restore saved templates
-    set({
-      templates: projectState.templates,
-      types: projectState.types,
-      locations: projectState.locations,
-      cableTypes: projectState.cableTypes,
-      title: projectState.title,
-      preparedBy: projectState.preparedBy,
-    });
-  },
+     set({
+       templates: projectState.templates,
+       types: projectState.types,
+       locations: projectState.locations,
+       cableTypes: projectState.cableTypes,
+       riderListTitle: projectState.riderListTitle,
+       riderListSubtitle: projectState.riderListSubtitle,
+       riderListPreparedBy: projectState.riderListPreparedBy,
+       canvasTitle: projectState.canvasTitle,
+       canvasSubtitle: projectState.canvasSubtitle,
+       canvasPreparedBy: projectState.canvasPreparedBy,
+     });
+   },
   deleteTemplate: (templateId) => {
     set({
       templates: get().templates.filter((t) => t.id !== templateId),
@@ -798,9 +811,12 @@ export const useStore = create<DiagramState>((set, get) => ({
   setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
   setIsHelpModalOpen: (isOpen) => set({ isHelpModalOpen: isOpen }),
   setPendingPosition: (position) => set({ pendingPosition: position }),
-  updateTitle: (title) => set({ title }),
-  updateSubtitle: (subtitle) => set({ subtitle }),
-  updatePreparedBy: (preparedBy) => set({ preparedBy }),
+  updateRiderListTitle: (title) => set({ riderListTitle: title }),
+  updateRiderListSubtitle: (subtitle) => set({ riderListSubtitle: subtitle }),
+  updateRiderListPreparedBy: (preparedBy) => set({ riderListPreparedBy: preparedBy }),
+  updateCanvasTitle: (title) => set({ canvasTitle: title }),
+  updateCanvasSubtitle: (subtitle) => set({ canvasSubtitle: subtitle }),
+  updateCanvasPreparedBy: (preparedBy) => set({ canvasPreparedBy: preparedBy }),
   addType: (type) => set({ types: [...get().types, type] }),
   removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),
   addLocation: (location) => set({ locations: [...get().locations, location] }),

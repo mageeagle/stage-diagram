@@ -9,9 +9,9 @@ export const NodeListHeader = ({
   subtitle,
   preparedBy,
 }: NodeListHeaderProps) => {
-  const updateTitle = useStore((s) => s.updateTitle);
-  const updateSubtitle = useStore((s) => s.updateSubtitle);
-  const updatePreparedBy = useStore((s) => s.updatePreparedBy);
+   const updateTitle = useStore((s) => s.updateCanvasTitle);
+   const updateSubtitle = useStore((s) => s.updateCanvasSubtitle);
+   const updatePreparedBy = useStore((s) => s.updateCanvasPreparedBy);
   return (
     <div className=" p-6 pb-4">
       <div className="flex items-center justify-between">

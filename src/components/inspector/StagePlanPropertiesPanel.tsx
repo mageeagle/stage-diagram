@@ -31,7 +31,8 @@ export const StagePlanPropertiesPanel = () => {
             Shape
           </label>
           <select
-            value={primaryNode.data.shape || "rectangle"}
+             value={(primaryNode.data.shape as string) || "rectangle"}
+
             onChange={(e) =>
               updateNodeShape(selectedNodeIds, e.target.value as 'rectangle' | 'circle' | 'triangle')
             }
@@ -50,13 +51,14 @@ export const StagePlanPropertiesPanel = () => {
 
         <div className="mb-6">
           <label className="block text-xs font-medium uppercase mb-1 text-gray-500 dark:text-gray-400">
-            Rotation ({primaryNode.data.rotation || 0}°)
+             Rotation ({((primaryNode.data.rotation as number) || 0)}°)
+
           </label>
           <input
             type="range"
             min="0"
             max="360"
-            value={primaryNode.data.rotation || 0}
+             value={(primaryNode.data.rotation as number) || 0}
             onChange={(e) =>
               updateNodeRotation(selectedNodeIds, parseInt(e.target.value, 10))
             }
@@ -72,7 +74,7 @@ export const StagePlanPropertiesPanel = () => {
             <input
               type="number"
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
-              value={primaryNode.data.width || 150}
+               value={(primaryNode.data.width as number) || 150}
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val)) {
@@ -88,7 +90,7 @@ export const StagePlanPropertiesPanel = () => {
             <input
               type="number"
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
-              value={primaryNode.data.height || 50}
+               value={(primaryNode.data.height as number) || 50}
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val)) {

@@ -46,31 +46,46 @@ export const Toolbar = () => {
   const handleUndo = () => (isStagePlanEnabled ? spUndo() : undo());
   const handleRedo = () => (isStagePlanEnabled ? spRedo() : redo());
 
-  const handleExport = () => {
-    const {
-      templates,
-      nodes,
-      edges,
-      types,
-      locations,
-      cableTypes,
-      title,
-      subtitle,
-      preparedBy,
-    } = useStore.getState();
+   const handleExport = () => {
+      const {
+        templates,
+        nodes,
+        edges,
+        types,
+        locations,
+        cableTypes,
+        riderListTitle,
+        riderListSubtitle,
+        riderListPreparedBy,
+        canvasTitle,
+        canvasSubtitle,
+        canvasPreparedBy,
+      } = useStore.getState();
 
-    exportProject({
-      templates,
-      nodes,
-      edges,
-      types,
-      locations,
-      cableTypes,
-      title,
-      subtitle,
-      preparedBy,
-    });
-  };
+      const {
+        title: stagePlanTitle,
+        subtitle: stagePlanSubtitle,
+        preparedBy: stagePlanPreparedBy,
+      } = useStagePlanStore.getState();
+  
+      exportProject({
+        templates,
+        nodes,
+        edges,
+        types,
+        locations,
+        cableTypes,
+        riderListTitle,
+        riderListSubtitle,
+        riderListPreparedBy,
+        canvasTitle,
+        canvasSubtitle,
+        canvasPreparedBy,
+        stagePlanTitle,
+        stagePlanSubtitle,
+        stagePlanPreparedBy,
+      });
+    };
 
   const handleImport = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {

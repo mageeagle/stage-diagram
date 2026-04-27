@@ -56,6 +56,9 @@ export const DiagramCanvas = () => {
   const copyNodes = useStore((state) => state.copyNodes);
   const isModalOpen = useStore((state) => state.isModalOpen);
   const pendingPosition = useStore((state) => state.pendingPosition);
+  const canvasTitle = useStore((state) => state.canvasTitle);
+  const canvasSubtitle = useStore((state) => state.canvasSubtitle);
+  const canvasPreparedBy = useStore((state) => state.canvasPreparedBy);
   const setIsModalOpen = useStore((state) => state.setIsModalOpen);
   const setPendingPosition = useStore((state) => state.setPendingPosition);
   const undo = useStore((state) => state.undo);
@@ -93,8 +96,7 @@ export const DiagramCanvas = () => {
 
         const connectedEdgeIds = edges
           .filter(
-            (e) =>
-              memberIds.includes(e.source) || memberIds.includes(e.target),
+            (e) => memberIds.includes(e.source) || memberIds.includes(e.target),
           )
           .map((e) => e.id);
         setSelectedEdgeIds(connectedEdgeIds);
@@ -105,7 +107,6 @@ export const DiagramCanvas = () => {
     },
     [nodes, edges, setSelectedNodeIds, setSelectedEdgeIds],
   );
-
 
   const onNodeDragStart = useCallback(
     (event: React.MouseEvent, node: Node) => {
@@ -307,16 +308,14 @@ export const DiagramCanvas = () => {
 
   const { displayNodes, displayEdges } = useMemo(() => {
     const hiddenEdgeIds = new Set(
-      edges
-        .filter((e) => e.data?.exportingHidden)
-        .map((e) => e.id)
+      edges.filter((e) => e.data?.exportingHidden).map((e) => e.id),
     );
     if (!locationGroupsEnabled) {
       return {
         displayNodes: nodes,
         displayEdges: edges.map((edge) => ({
           ...edge,
-          style: hiddenEdgeIds.has(edge.id) ? { display: 'none' } : edge.style,
+          style: hiddenEdgeIds.has(edge.id) ? { display: "none" } : edge.style,
         })),
       };
     }
@@ -347,14 +346,22 @@ export const DiagramCanvas = () => {
         selected: false,
         width:
           Math.max(
-            ...groupNodes.map((n) => (n.position.x || 0) + (n.measured?.width || n.width || 200)),
+            ...groupNodes.map(
+              (n) =>
+                (n.position.x || 0) + (n.measured?.width || n.width || 200),
+            ),
           ) -
           Math.min(...groupNodes.map((n) => n.position.x || 0)) +
           40,
         height:
           Math.max(
-            ...groupNodes.map((n) => (n.position.y || 0) + (n.measured?.height || n.height || 100)),
-          ) - Math.min(...groupNodes.map((n) => n.position.y || 0)) + 70,
+            ...groupNodes.map(
+              (n) =>
+                (n.position.y || 0) + (n.measured?.height || n.height || 100),
+            ),
+          ) -
+          Math.min(...groupNodes.map((n) => n.position.y || 0)) +
+          70,
       };
 
       const existingNode = groupNodesMap.get(groupId);
@@ -406,7 +413,7 @@ export const DiagramCanvas = () => {
       displayNodes,
       displayEdges: edges.map((edge) => ({
         ...edge,
-        style: hiddenEdgeIds.has(edge.id) ? { display: 'none' } : edge.style,
+        style: hiddenEdgeIds.has(edge.id) ? { display: "none" } : edge.style,
       })),
     };
   }, [nodes, edges, locationGroupsEnabled, groupNodesMap, groupNodesTick]);
@@ -439,8 +446,19 @@ export const DiagramCanvas = () => {
           }}
           onInit={onReactFlowApi as OnInit}
         >
-          <Controls />
+          <Controls position="bottom-right" />
         </ReactFlow>
+        <div className="absolute bottom-6 left-6 z-10">
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+            {canvasTitle}
+          </div>
+          <div className="text-lg text-zinc-600 dark:text-zinc-400">
+            {canvasSubtitle}
+          </div>
+          <div className="text-sm text-zinc-500 dark:text-zinc-500">
+            {canvasPreparedBy}
+          </div>
+        </div>
       </div>
       <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
         <ExportButton targetRef={containerRef} />
