@@ -307,7 +307,7 @@ export const StagePlanCanvas = () => {
     return displayNodes;
   }, [nodes, locationGroupsEnabled, groupNodesMap, groupNodesTick]);
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative bg-background">
       <div ref={containerRef} className="w-full h-full">
         <ReactFlow
           nodes={displayNodes}
