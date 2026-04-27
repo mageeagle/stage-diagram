@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData>>) => {
   const update = useUpdateNodeInternals();
-  const { theme } = useThemeStore();
+  const theme = useThemeStore(s => s.theme);
 
   useEffect(() => {
     update(id);

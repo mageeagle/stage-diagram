@@ -29,6 +29,7 @@ export const ExportButton = ({
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const nodes = useStore((state) => state.nodes);
+  const stageNodes = useStagePlanStore((state) => state.nodes);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -91,6 +92,7 @@ export const ExportButton = ({
     });
   };
   const getNodesToHideForExport = (nodes: XYFlow.Node<CustomNodeData>[]) => {
+    if (isStagePlanMode) return stageNodes.filter((n) => n.data.hidden);
     return nodes.filter((n) => n.data.hidden);
   };
   const getEdgesToHideForExport = (

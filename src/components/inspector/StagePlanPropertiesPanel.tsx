@@ -7,15 +7,22 @@ export const StagePlanPropertiesPanel = () => {
   const selectedNodeIds = useStagePlanStore((state) => state.selectedNodeIds);
   const nodes = useStagePlanStore((state) => state.nodes);
   const updateNodeShape = useStagePlanStore((state) => state.updateNodeShape);
-  const updateNodeRotation = useStagePlanStore((state) => state.updateNodeRotation);
-  const updateNodeDimensions = useStagePlanStore((state) => state.updateNodeDimensions);
+  const updateNodeRotation = useStagePlanStore(
+    (state) => state.updateNodeRotation,
+  );
+  const updateNodeDimensions = useStagePlanStore(
+    (state) => state.updateNodeDimensions,
+  );
+  const updateNodeHidden = useStagePlanStore((state) => state.updateNodeHidden);
 
   const primaryNode = nodes.find((n) => n.id === selectedNodeIds[0]);
 
   if (!primaryNode) return null;
 
   const isMultiSelect = selectedNodeIds.length > 1;
-
+  const selectedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id));
+  const anyHidden =
+    isMultiSelect && selectedNodes.some((n) => n.data.hidden === true);
   return (
     <div
       className={cn(
@@ -33,7 +40,10 @@ export const StagePlanPropertiesPanel = () => {
           <select
             value={primaryNode.data.shape || "rectangle"}
             onChange={(e) =>
-              updateNodeShape(selectedNodeIds, e.target.value as 'rectangle' | 'circle' | 'triangle')
+              updateNodeShape(
+                selectedNodeIds,
+                e.target.value as "rectangle" | "circle" | "triangle",
+              )
             }
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
           >
@@ -107,6 +117,21 @@ export const StagePlanPropertiesPanel = () => {
             </p>
           )}
         </div>
+              <div className="mb-6 flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="node-hidden"
+          className="w-4 h-4 cursor-pointer"
+          checked={isMultiSelect ? anyHidden : primaryNode.data.hidden}
+          onChange={(e) => updateNodeHidden(selectedNodeIds, e.target.checked)}
+        />
+        <label
+          htmlFor="node-hidden"
+          className="text-sm font-medium cursor-pointer"
+        >
+          Hidden
+        </label>
+      </div>
       </div>
     </div>
   );
