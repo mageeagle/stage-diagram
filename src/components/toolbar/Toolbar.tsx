@@ -103,6 +103,7 @@ export const Toolbar = () => {
       title: stagePlanTitle,
       subtitle: stagePlanSubtitle,
       preparedBy: stagePlanPreparedBy,
+      nodes: stagePlanNodes,
     } = useStagePlanStore.getState();
 
     exportProject({
@@ -121,6 +122,7 @@ export const Toolbar = () => {
       stagePlanTitle,
       stagePlanSubtitle,
       stagePlanPreparedBy,
+      stagePlanNodes,
     });
   };
 
@@ -132,6 +134,7 @@ export const Toolbar = () => {
       try {
         const state = await importProject(loadedFile);
         useStore.getState().restoreProjectState(state);
+        useStagePlanStore.getState().restoreProjectState(state)
       } catch (error) {
         console.error("Failed to import project:", error);
       }

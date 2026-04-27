@@ -311,7 +311,7 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
 
     // 1. Nodes/Edges: Restore the main canvas data
     set({
-      nodes: projectState.nodes,
+      nodes: projectState.stagePlanNodes,
       selectedNodeIds: [],
     });
 

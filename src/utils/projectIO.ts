@@ -6,19 +6,19 @@ export interface ProjectState {
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
   types: string[];
-   locations: string[];
-   cableTypes: string[];
-   riderListTitle: string;
-   riderListSubtitle: string;
-   riderListPreparedBy: string;
-    canvasTitle: string;
-    canvasSubtitle: string;
-    canvasPreparedBy: string;
-    stagePlanTitle: string;
-    stagePlanSubtitle: string;
-    stagePlanPreparedBy: string;
-  }
-
+  locations: string[];
+  cableTypes: string[];
+  riderListTitle: string;
+  riderListSubtitle: string;
+  riderListPreparedBy: string;
+  canvasTitle: string;
+  canvasSubtitle: string;
+  canvasPreparedBy: string;
+  stagePlanTitle: string;
+  stagePlanSubtitle: string;
+  stagePlanPreparedBy: string;
+  stagePlanNodes: Node<CustomNodeData>[];
+}
 
 /**
  * Exports the current project state to a downloadable JSON file.
