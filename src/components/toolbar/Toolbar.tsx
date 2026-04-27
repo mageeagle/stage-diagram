@@ -40,6 +40,11 @@ export const Toolbar = () => {
   const setIsStagePlanEnabled = useStagePlanStore(
     (state) => state.setIsStagePlanEnabled,
   );
+  const spUndo = useStagePlanStore((state) => state.undo);
+  const spRedo = useStagePlanStore((state) => state.redo);
+
+  const handleUndo = () => (isStagePlanEnabled ? spUndo() : undo());
+  const handleRedo = () => (isStagePlanEnabled ? spRedo() : redo());
 
   const handleExport = () => {
     const {
@@ -104,12 +109,12 @@ export const Toolbar = () => {
     {
       key: "undo",
       title: "Undo",
-      onClick: undo,
+      onClick: handleUndo,
     },
     {
       key: "redo",
       title: "Redo",
-      onClick: redo,
+      onClick: handleRedo,
     },
   ];
 

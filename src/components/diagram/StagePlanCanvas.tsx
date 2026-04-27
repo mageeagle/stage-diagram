@@ -110,6 +110,16 @@ export const StagePlanCanvas = () => {
         return;
       }
 
+      if ((event.ctrlKey || event.metaKey) && (event.key === "z" || event.key === "Z")) {
+        undo();
+        return;
+      }
+
+      if ((event.ctrlKey || event.metaKey) && (event.key === "y" || event.key === "Y" || (event.shiftKey && event.key === "Z"))) {
+        redo();
+        return;
+      }
+
       if (
         (event.key === "Delete" || event.key === "Backspace") &&
         selectedNodeIds.length > 0
@@ -118,7 +128,7 @@ export const StagePlanCanvas = () => {
       }
     },
     // [selectedNodeIds, deleteNodes, setPendingPosition, setIsModalOpen],
-    [selectedNodeIds],
+    [selectedNodeIds, undo, redo],
   );
 
   useEffect(() => {
@@ -197,7 +207,7 @@ export const StagePlanCanvas = () => {
       >
         <Controls />
         <div className="absolute top-4 left-4 z-10">
-          <ExportButton targetRef={containerRef} />
+          <ExportButton targetRef={containerRef} isStagePlanMode={true} />
         </div>
       </ReactFlow>
     </div>
