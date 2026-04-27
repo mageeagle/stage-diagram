@@ -64,8 +64,8 @@ export const StagePlanPropertiesPanel = () => {
           </label>
           <input
             type="range"
-            min="0"
-            max="360"
+            min="-180"
+            max="180"
             value={primaryNode.data.rotation || 0}
             onChange={(e) =>
               updateNodeRotation(selectedNodeIds, parseInt(e.target.value, 10))

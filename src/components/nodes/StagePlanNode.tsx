@@ -78,7 +78,8 @@ export const StagePlanNode = ({
         );
         const deltaAngle =
           (currentAngle - rotationRef.current.startAngle) * (180 / Math.PI);
-        const newRotation = rotationRef.current.startRotation + deltaAngle;
+        const newRotation =
+          (((rotationRef.current.startRotation + deltaAngle + 180) % 360 + 360) % 360) - 180;
 
         updateNodeRotation([id], newRotation);
       };
