@@ -5,7 +5,6 @@ import { StagePlanCanvas } from "@/components/diagram/StagePlanCanvas";
 import { PropertyInspector } from "@/components/inspector/PropertyInspector";
 import { useStore } from "@/store/useStore";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
-import { Plus } from "lucide-react";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { NodeListModal } from "@/components/diagram/NodeListModal";
 import { Toolbar } from "@/components/toolbar/Toolbar";
@@ -14,8 +13,6 @@ import { useShallow } from "zustand/shallow";
 
 export default function Home() {
   const {
-    setPendingPosition,
-    setIsModalOpen,
     isSettingsModalOpen,
     setIsSettingsModalOpen,
     isNodeListModalOpen,
