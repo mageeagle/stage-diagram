@@ -36,6 +36,9 @@ interface DiagramState {
 
   // Node property updates
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
+  updateNodeShape: (nodeIds: string[], shape: 'rectangle' | 'circle' | 'triangle') => void;
+  updateNodeRotation: (nodeIds: string[], rotation: number) => void;
+  updateNodeDimensions: (nodeIds: string[], width: number, height: number) => void;
   matchNode: (nodes: Node<CustomNodeData>[]) => void;
   moveNodes: (
     nodeIds: string[],
@@ -128,10 +131,33 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
 
   // React Flow actions
   onNodesChange: (changes) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
+    set((state) => {
+      const newNodes = applyNodeChanges(changes, state.nodes);
+      
+      const hasDimensionChange = changes.some(c => c.type === 'dimensions');
+      if (!hasDimensionChange) {
+        return { nodes: newNodes };
+      }
+
+      const updatedNodes = newNodes.map(node => {
+        const dimChange = changes.find(c => c.type === 'dimensions' && c.id === node.id);
+        if (dimChange) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              width: node.width,
+              height: node.height,
+            }
+          };
+        }
+        return node;
+      });
+
+      return { nodes: updatedNodes };
     });
   },
+
 
   // Node selection
   setSelectedNodeIds: (nodeIds) => set({ selectedNodeIds: nodeIds }),
@@ -142,6 +168,57 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
         return {
           ...node,
           data: { ...node.data, hidden },
+        };
+      }
+      return node;
+    });
+
+    set({
+      nodes: updatedNodes,
+    });
+  },
+
+  updateNodeShape: (nodeIds, shape) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (nodeIds.includes(node.id)) {
+        return {
+          ...node,
+          data: { ...node.data, shape },
+        };
+      }
+      return node;
+    });
+
+    set({
+      nodes: updatedNodes,
+    });
+  },
+
+  updateNodeRotation: (nodeIds, rotation) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (nodeIds.includes(node.id)) {
+        return {
+          ...node,
+          data: { ...node.data, rotation },
+        };
+      }
+      return node;
+    });
+
+    set({
+      nodes: updatedNodes,
+    });
+  },
+
+  updateNodeDimensions: (nodeIds, width, height) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (nodeIds.includes(node.id)) {
+        return {
+          ...node,
+          data: { ...node.data, width, height },
         };
       }
       return node;
@@ -190,6 +267,13 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
         data: {
           label: node.data.label,
           location: node.data.location,
+          shape: node.data.shape,
+          rotation: node.data.rotation,
+          width: node.data.width,
+          height: node.data.height,
+          inputs: node.data.inputs,
+          outputs: node.data.outputs,
+          power: node.data.power,
           hidden: false,
         },
       };
