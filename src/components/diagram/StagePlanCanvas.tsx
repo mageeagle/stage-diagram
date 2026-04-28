@@ -38,7 +38,7 @@ export const StagePlanCanvas = () => {
   }, [originalNodes]);
   const moveNodes = useStagePlanStore((state) => state.moveNodes);
   const onNodesChangeOrig = useStagePlanStore((state) => state.onNodesChange);
-  const selectedNodeIds = useStagePlanStore((state) => state.selectedNodeIds);
+  const hideTitle = useStagePlanStore((state) => state.hideStagePlanTitle);
   const setSelectedNodeIds = useStagePlanStore(
     (state) => state.setSelectedNodeIds,
   );
@@ -56,15 +56,7 @@ export const StagePlanCanvas = () => {
   }, [locationGroupsEnabled, groupNodesMap]);
 
   const [groupNodesTick, setGroupNodesTick] = useState(0);
-  // const setSelectedEdgeIds = useStagePlanStore(
-  //   (state) => state.setSelectedEdgeIds,
-  // );
-  // const addNode = useStagePlanStore((state) => state.addNode);
-  // const pendingPosition = useStagePlanStore((state) => state.pendingPosition);
-  // const setIsModalOpen = useStagePlanStore((state) => state.setIsModalOpen);
-  // const setPendingPosition = useStagePlanStore(
-  //   (state) => state.setPendingPosition,
-  // );
+
   const undo = useStagePlanStore((state) => state.undo);
   const redo = useStagePlanStore((state) => state.redo);
   const theme = useThemeStore((state) => state.theme);
@@ -104,17 +96,6 @@ export const StagePlanCanvas = () => {
     [setSelectedNodeIds],
   );
 
-  // const handleCreateNode = useCallback(
-  //   (name: string, location: string) => {
-  //     if (pendingPosition) {
-  //       addNode("custom", pendingPosition, name, location);
-  //     }
-  //     setIsModalOpen(false);
-  //     setPendingPosition(null);
-  //   },
-  //   [pendingPosition, setIsModalOpen, setPendingPosition, addNode],
-  // );
-
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
@@ -142,16 +123,8 @@ export const StagePlanCanvas = () => {
         redo();
         return;
       }
-
-      if (
-        (event.key === "Delete" || event.key === "Backspace") &&
-        selectedNodeIds.length > 0
-      ) {
-        // deleteNodes(selectedNodeIds);
-      }
     },
-    // [selectedNodeIds, deleteNodes, setPendingPosition, setIsModalOpen],
-    [selectedNodeIds, undo, redo],
+    [undo, redo],
   );
 
   useEffect(() => {
@@ -209,7 +182,6 @@ export const StagePlanCanvas = () => {
       onNodesChangeOrig(changes as NodeChange<Node<CustomNodeData>>[]);
     },
     [onNodesChangeOrig, groupNodesMap, nodes, moveNodes],
-    // [onNodesChangeOrig],
   );
 
   const displayNodes = useMemo(() => {
@@ -325,17 +297,19 @@ export const StagePlanCanvas = () => {
         >
           <Controls position="bottom-right" />
         </ReactFlow>
-        <div className="absolute bottom-6 left-6 z-10">
-          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
-            {title}
+        {!hideTitle && (
+          <div className="absolute bottom-6 left-6 z-10">
+            <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+              {title}
+            </div>
+            <div className="text-lg text-zinc-600 dark:text-zinc-400">
+              {subtitle}
+            </div>
+            <div className="text-sm text-zinc-500 dark:text-zinc-500">
+              {preparedBy}
+            </div>
           </div>
-          <div className="text-lg text-zinc-600 dark:text-zinc-400">
-            {subtitle}
-          </div>
-          <div className="text-sm text-zinc-500 dark:text-zinc-500">
-            {preparedBy}
-          </div>
-        </div>
+        )}
       </div>
       <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
         <ExportButton targetRef={containerRef} isStagePlanMode={true} />

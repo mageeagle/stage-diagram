@@ -7,6 +7,7 @@ export function exportToPdf(
   subtitle: string,
   preparedBy: string,
   report: Report,
+  hideTitle: boolean,
 ): void {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -30,23 +31,24 @@ export function exportToPdf(
     doc.setFont("helvetica", fontStyle);
     doc.text(text, x, y);
   };
-
-  // Title
-  drawText(title || "Technical Rider", margin + 5, currentY, 18, "bold");
-  currentY += 5;
-
-  // Subtitle
-  if (subtitle) {
-    drawText(`${subtitle}`, margin + 5, currentY, 10);
+  if (!hideTitle) {
+    // Title
+    drawText(title || "Technical Rider", margin + 5, currentY, 18, "bold");
     currentY += 5;
+
+    // Subtitle
+    if (subtitle) {
+      drawText(`${subtitle}`, margin + 5, currentY, 10);
+      currentY += 5;
+    }
+    // Prepared By
+    if (preparedBy) {
+      drawText(`Prepared by: ${preparedBy}`, margin + 5, currentY, 10);
+      currentY += 5;
+    }
+    drawText(format(new Date(), "yyyy.MM.dd"), margin + 5, currentY, 10);
+    currentY += 25;
   }
-  // Prepared By
-  if (preparedBy) {
-    drawText(`Prepared by: ${preparedBy}`, margin + 5, currentY, 10);
-    currentY += 5;
-  }
-  drawText(format(new Date(), "yyyy.MM.dd"), margin + 5, currentY, 10);
-  currentY += 25;
 
   const renderRows = (rows: ReportRow[]) => {
     rows.forEach((row) => {

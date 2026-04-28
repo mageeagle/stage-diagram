@@ -44,7 +44,8 @@ interface DiagramState {
   canvasTitle: string;
   canvasSubtitle: string;
   canvasPreparedBy: string;
-
+  hideTitle: boolean;
+  hideRiderTitle: boolean;
   // Undo/Redo
   undoStack: HistoryState[];
   redoStack: HistoryState[];
@@ -132,6 +133,8 @@ interface DiagramState {
   removeLocation: (location: string) => void;
   restoreProjectState: (state: ProjectState) => void;
   toggleLocationGroups: () => void;
+  toggleHideTitle: () => void;
+  toggleHideRiderTitle: () => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -156,7 +159,10 @@ export const useStore = create<DiagramState>((set, get) => ({
   canvasPreparedBy: "",
   undoStack: [],
   redoStack: [],
-
+  hideTitle: false,
+  hideRiderTitle: false,
+  toggleHideTitle: () => set((state) => ({ hideTitle: !state.hideTitle })),
+  toggleHideRiderTitle: () => set((state) => ({ hideRiderTitle: !state.hideRiderTitle })),
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
   locationGroupsEnabled: false,
@@ -789,10 +795,10 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   addCableType: (type) => {
-  if (!get().cableTypes.includes(type)) {
-    set({ cableTypes: [...get().cableTypes, type] });
-  }
-},
+    if (!get().cableTypes.includes(type)) {
+      set({ cableTypes: [...get().cableTypes, type] });
+    }
+  },
   removeCableType: (type) =>
     set({ cableTypes: get().cableTypes.filter((t) => t !== type) }),
   updateEdgeCableType: (edgeIds, cableType) => {
@@ -823,16 +829,16 @@ export const useStore = create<DiagramState>((set, get) => ({
   updateCanvasSubtitle: (subtitle) => set({ canvasSubtitle: subtitle }),
   updateCanvasPreparedBy: (preparedBy) => set({ canvasPreparedBy: preparedBy }),
   addType: (type) => {
-  if (!get().types.includes(type)) {
-    set({ types: [...get().types, type] });
-  }
-},
+    if (!get().types.includes(type)) {
+      set({ types: [...get().types, type] });
+    }
+  },
   removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),
   addLocation: (location) => {
-  if (!get().locations.includes(location)) {
-    set({ locations: [...get().locations, location] });
-  }
-},
+    if (!get().locations.includes(location)) {
+      set({ locations: [...get().locations, location] });
+    }
+  },
   removeLocation: (location) =>
     set({ locations: get().locations.filter((l) => l !== location) }),
 }));

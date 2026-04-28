@@ -63,6 +63,7 @@ export const DiagramCanvas = () => {
   const setPendingPosition = useStore((state) => state.setPendingPosition);
   const undo = useStore((state) => state.undo);
   const redo = useStore((state) => state.redo);
+  const hideTitle = useStore((state) => state.hideTitle);
   const locationGroupsEnabled = useStore(
     (state) => state.locationGroupsEnabled,
   );
@@ -448,17 +449,19 @@ export const DiagramCanvas = () => {
         >
           <Controls position="bottom-right" />
         </ReactFlow>
-        <div className="absolute bottom-6 left-6 z-10">
-          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
-            {canvasTitle}
+        { !hideTitle &&
+          <div className="absolute bottom-6 left-6 z-10">
+            <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+              {canvasTitle}
+            </div>
+            <div className="text-lg text-zinc-600 dark:text-zinc-400">
+              {canvasSubtitle}
+            </div>
+            <div className="text-sm text-zinc-500 dark:text-zinc-500">
+              {canvasPreparedBy}
+            </div>
           </div>
-          <div className="text-lg text-zinc-600 dark:text-zinc-400">
-            {canvasSubtitle}
-          </div>
-          <div className="text-sm text-zinc-500 dark:text-zinc-500">
-            {canvasPreparedBy}
-          </div>
-        </div>
+        }
       </div>
       <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
         <ExportButton targetRef={containerRef} />

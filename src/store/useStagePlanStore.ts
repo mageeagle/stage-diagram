@@ -18,6 +18,7 @@ interface DiagramState {
   // Undo/Redo
   undoStack: HistoryState[];
   redoStack: HistoryState[];
+  hideStagePlanTitle: boolean;
   undo: () => void;
   redo: () => void;
   recordHistory: () => void;
@@ -59,6 +60,7 @@ interface DiagramState {
   toggleLocationGroups: () => void;
   // Canvas actions
   restoreProjectState: (state: ProjectState) => void;
+  toggleHideStagePlanTitle: () => void;
 }
 
 export const useStagePlanStore = create<DiagramState>((set, get) => ({
@@ -70,6 +72,8 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
   preparedBy: "",
   undoStack: [],
   redoStack: [],
+  hideStagePlanTitle: false,
+  toggleHideStagePlanTitle: () => set((state) => ({ hideStagePlanTitle: !state.hideStagePlanTitle })),
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
   locationGroupsEnabled: false,
@@ -315,12 +319,11 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
       selectedNodeIds: [],
     });
 
-     // 2. Templates: Restore saved templates
-     set({
-       title: projectState.stagePlanTitle,
-       subtitle: projectState.stagePlanSubtitle,
-       preparedBy: projectState.stagePlanPreparedBy,
-     });
-   },
-
+    // 2. Templates: Restore saved templates
+    set({
+      title: projectState.stagePlanTitle,
+      subtitle: projectState.stagePlanSubtitle,
+      preparedBy: projectState.stagePlanPreparedBy,
+    });
+  },
 }));

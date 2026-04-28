@@ -21,7 +21,9 @@ const PropertyInput = ({
   onChange: (val: string) => void;
 }) => (
   <div className="space-y-1">
-    <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{label}</label>
+    <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+      {label}
+    </label>
     <input
       type="text"
       value={value}
@@ -54,6 +56,10 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     updateCanvasTitle,
     updateCanvasSubtitle,
     updateCanvasPreparedBy,
+    hideTitle,
+    hideRiderTitle,
+    toggleHideTitle,
+    toggleHideRiderTitle,
   } = useStore();
 
   const {
@@ -63,6 +69,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     updateTitle: updateStagePlanTitle,
     updateSubtitle: updateStagePlanSubtitle,
     updatePreparedBy: updateStagePlanPreparedBy,
+    hideStagePlanTitle: hideStagePlanTitle,
+    toggleHideStagePlanTitle: toggleHideStagePlanTitle,
   } = useStagePlanStore();
 
   const [newType, setNewType] = useState("");
@@ -263,6 +271,21 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
                 Rider List
               </h3>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="hideRider"
+                  className="w-4 h-4 cursor-pointer"
+                  checked={hideRiderTitle}
+                  onChange={toggleHideRiderTitle}
+                />
+                <label
+                  htmlFor="hideRider"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Hide Title
+                </label>
+              </div>
               <div className="space-y-3">
                 <PropertyInput
                   label="Title"
@@ -285,8 +308,23 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             {/* Diagram Canvas Properties */}
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Diagram Canvas
+                Signal FLow
               </h3>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="hideSignal"
+                  className="w-4 h-4 cursor-pointer"
+                  checked={hideTitle}
+                  onChange={toggleHideTitle}
+                />
+                <label
+                  htmlFor="hideSignal"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Hide Title
+                </label>
+              </div>
               <div className="space-y-3">
                 <PropertyInput
                   label="Title"
@@ -309,8 +347,23 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             {/* Stage Plan Canvas Properties */}
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Stage Plan Canvas
+                Stage Plan
               </h3>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="hideStage"
+                  className="w-4 h-4 cursor-pointer"
+                  checked={hideStagePlanTitle}
+                  onChange={toggleHideStagePlanTitle}
+                />
+                <label
+                  htmlFor="hideStage"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Hide Title
+                </label>
+              </div>
               <div className="space-y-3">
                 <PropertyInput
                   label="Title"
