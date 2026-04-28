@@ -1,0 +1,46 @@
+THIRD-PARTY NOTICES
+
+This application includes software from the following third-party components:
+
+@xyflow/react
+Licensed under the MIT License.
+
+clsx
+Copyright (c) Luke Edwards
+Licensed under the MIT License.
+
+date-fns
+Copyright (c) Sasha Koss and Lesha Koss
+Licensed under the MIT License.
+
+html-to-image
+Copyright (c) bubkooo
+Licensed under the MIT License.
+
+jspdf
+Licensed under the MIT License.
+
+lucide-react
+Copyright (c) Eric Fennis
+Licensed under the ISC License.
+
+nanoid
+Copyright (c) Andrey Sitnik
+Licensed under the MIT License.
+
+next
+Licensed under the MIT License.
+
+react
+Licensed under the MIT License.
+
+react-dom
+Licensed under the MIT License.
+
+tailwind-merge
+Copyright (c) Dany Castillo
+Licensed under the MIT License.
+
+zustand
+Copyright (c) Paul Henschel, Jeremy Holcomb, and Daishi Kato
+Licensed under the MIT License.
