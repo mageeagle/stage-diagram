@@ -60,6 +60,10 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     hideRiderTitle,
     toggleHideTitle,
     toggleHideRiderTitle,
+    hideDate,
+    hideRiderDate,
+    toggleHideDate,
+    toggleHideRiderDate,
   } = useStore();
 
   const {
@@ -71,6 +75,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     updatePreparedBy: updateStagePlanPreparedBy,
     hideStagePlanTitle: hideStagePlanTitle,
     toggleHideStagePlanTitle: toggleHideStagePlanTitle,
+    hideStagePlanDate: hideStagePlanDate,
+    toggleHideStagePlanDate: toggleHideStagePlanDate,
   } = useStagePlanStore();
 
   const [newType, setNewType] = useState("");
@@ -271,20 +277,37 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
                 Rider List
               </h3>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="hideRider"
-                  className="w-4 h-4 cursor-pointer"
-                  checked={hideRiderTitle}
-                  onChange={toggleHideRiderTitle}
-                />
-                <label
-                  htmlFor="hideRider"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Hide Title
-                </label>
+              <div className="flex gap-8">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hideRider"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={hideRiderTitle}
+                    onChange={toggleHideRiderTitle}
+                  />
+                  <label
+                    htmlFor="hideRider"
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    Hide Title
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hideRiderDate"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={hideRiderDate}
+                    onChange={toggleHideRiderDate}
+                  />
+                  <label
+                    htmlFor="hideRiderDate"
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    Hide Date
+                  </label>
+                </div>
               </div>
               <div className="space-y-3">
                 <PropertyInput
@@ -310,20 +333,37 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
                 Signal FLow
               </h3>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="hideSignal"
-                  className="w-4 h-4 cursor-pointer"
-                  checked={hideTitle}
-                  onChange={toggleHideTitle}
-                />
-                <label
-                  htmlFor="hideSignal"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Hide Title
-                </label>
+              <div className="flex gap-8">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hideSignal"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={hideTitle}
+                    onChange={toggleHideTitle}
+                  />
+                  <label
+                    htmlFor="hideSignal"
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    Hide Title
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hideSignalDate"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={hideDate}
+                    onChange={toggleHideDate}
+                  />
+                  <label
+                    htmlFor="hideSignalDate"
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    Hide Date
+                  </label>
+                </div>
               </div>
               <div className="space-y-3">
                 <PropertyInput
@@ -349,20 +389,37 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
                 Stage Plan
               </h3>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="hideStage"
-                  className="w-4 h-4 cursor-pointer"
-                  checked={hideStagePlanTitle}
-                  onChange={toggleHideStagePlanTitle}
-                />
-                <label
-                  htmlFor="hideStage"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Hide Title
-                </label>
+              <div className="flex gap-8">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hideStage"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={hideStagePlanTitle}
+                    onChange={toggleHideStagePlanTitle}
+                  />
+                  <label
+                    htmlFor="hideStage"
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    Hide Title
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hideStageDate"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={hideStagePlanDate}
+                    onChange={toggleHideStagePlanDate}
+                  />
+                  <label
+                    htmlFor="hideStageDate"
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    Hide Date
+                  </label>
+                </div>
               </div>
               <div className="space-y-3">
                 <PropertyInput

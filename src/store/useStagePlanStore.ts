@@ -19,6 +19,7 @@ interface DiagramState {
   undoStack: HistoryState[];
   redoStack: HistoryState[];
   hideStagePlanTitle: boolean;
+  hideStagePlanDate: boolean;
   undo: () => void;
   redo: () => void;
   recordHistory: () => void;
@@ -61,6 +62,7 @@ interface DiagramState {
   // Canvas actions
   restoreProjectState: (state: ProjectState) => void;
   toggleHideStagePlanTitle: () => void;
+  toggleHideStagePlanDate: () => void;
 }
 
 export const useStagePlanStore = create<DiagramState>((set, get) => ({
@@ -68,12 +70,14 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
   selectedNodeIds: [],
   isStagePlanEnabled: false,
   title: "Stage Plan",
-  subtitle: "I go to school by bus",
+  subtitle: "",
   preparedBy: "",
   undoStack: [],
   redoStack: [],
   hideStagePlanTitle: false,
   toggleHideStagePlanTitle: () => set((state) => ({ hideStagePlanTitle: !state.hideStagePlanTitle })),
+  hideStagePlanDate: false,
+  toggleHideStagePlanDate: () => set((state) => ({ hideStagePlanDate: !state.hideStagePlanDate })),
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
   locationGroupsEnabled: false,

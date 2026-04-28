@@ -24,6 +24,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const nodes = useStore(s => s.nodes);
   const edges = useStore(s => s.edges);
   const hideTitle = useStore(s => s.hideRiderTitle);
+  const hideDate = useStore(s => s.hideRiderDate);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -39,7 +40,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
 
   const handleExport = () => {
     const report = generateNodeListReport(nodes, groupBy, edges);
-    exportToPdf(title, subtitle, preparedBy, report, hideTitle);
+    exportToPdf(title, subtitle, preparedBy, report, hideTitle, hideDate);
   };
 
   if (!isOpen) return null;

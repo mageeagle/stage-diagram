@@ -19,6 +19,7 @@ import { ExportButton } from "@/components/diagram/ExportButton";
 import { CustomNodeData } from "@/types/diagram";
 import { useStore } from "@/store/useStore";
 import { GroupNode } from "../nodes/GroupNode";
+import { format } from "date-fns/format";
 
 const nodeTypes = {
   custom: StagePlanNode,
@@ -39,6 +40,7 @@ export const StagePlanCanvas = () => {
   const moveNodes = useStagePlanStore((state) => state.moveNodes);
   const onNodesChangeOrig = useStagePlanStore((state) => state.onNodesChange);
   const hideTitle = useStagePlanStore((state) => state.hideStagePlanTitle);
+  const hideDate = useStagePlanStore((state) => state.hideStagePlanDate);
   const setSelectedNodeIds = useStagePlanStore(
     (state) => state.setSelectedNodeIds,
   );
@@ -308,6 +310,14 @@ export const StagePlanCanvas = () => {
             <div className="text-sm text-zinc-500 dark:text-zinc-500">
               {preparedBy}
             </div>
+            <div className="text-sm text-zinc-500 dark:text-zinc-500">
+              {preparedBy}
+            </div>
+            {!hideDate && (
+              <div className="text-sm text-zinc-500 dark:text-zinc-500">
+                {format(new Date(), "yyyy.MM.dd")}
+              </div>
+            )}
           </div>
         )}
       </div>

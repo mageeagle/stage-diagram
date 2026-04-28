@@ -46,6 +46,8 @@ interface DiagramState {
   canvasPreparedBy: string;
   hideTitle: boolean;
   hideRiderTitle: boolean;
+  hideDate: boolean;
+  hideRiderDate: boolean;
   // Undo/Redo
   undoStack: HistoryState[];
   redoStack: HistoryState[];
@@ -135,6 +137,8 @@ interface DiagramState {
   toggleLocationGroups: () => void;
   toggleHideTitle: () => void;
   toggleHideRiderTitle: () => void;
+  toggleHideDate: () => void;
+  toggleHideRiderDate: () => void;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
@@ -152,10 +156,10 @@ export const useStore = create<DiagramState>((set, get) => ({
   types: [],
   locations: [],
   riderListTitle: "Technical Rider",
-  riderListSubtitle: "I go to school by bus",
+  riderListSubtitle: "",
   riderListPreparedBy: "",
   canvasTitle: "Signal Flow",
-  canvasSubtitle: "I go to school by bus",
+  canvasSubtitle: "",
   canvasPreparedBy: "",
   undoStack: [],
   redoStack: [],
@@ -163,6 +167,10 @@ export const useStore = create<DiagramState>((set, get) => ({
   hideRiderTitle: false,
   toggleHideTitle: () => set((state) => ({ hideTitle: !state.hideTitle })),
   toggleHideRiderTitle: () => set((state) => ({ hideRiderTitle: !state.hideRiderTitle })),
+  hideDate: false,
+  hideRiderDate: false,
+  toggleHideDate: () => set((state) => ({ hideDate: !state.hideDate })),
+  toggleHideRiderDate: () => set((state) => ({ hideRiderDate: !state.hideRiderDate })),
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
   locationGroupsEnabled: false,

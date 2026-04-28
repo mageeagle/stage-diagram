@@ -31,6 +31,7 @@ import {
 import { ExportButton } from "@/components/diagram/ExportButton";
 import { useThemeStore } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns/format";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -64,6 +65,7 @@ export const DiagramCanvas = () => {
   const undo = useStore((state) => state.undo);
   const redo = useStore((state) => state.redo);
   const hideTitle = useStore((state) => state.hideTitle);
+  const hideDate = useStore((state) => state.hideDate);
   const locationGroupsEnabled = useStore(
     (state) => state.locationGroupsEnabled,
   );
@@ -449,7 +451,7 @@ export const DiagramCanvas = () => {
         >
           <Controls position="bottom-right" />
         </ReactFlow>
-        { !hideTitle &&
+        {!hideTitle && (
           <div className="absolute bottom-6 left-6 z-10">
             <div className="text-2xl font-bold text-zinc-900 dark:text-white">
               {canvasTitle}
@@ -460,8 +462,13 @@ export const DiagramCanvas = () => {
             <div className="text-sm text-zinc-500 dark:text-zinc-500">
               {canvasPreparedBy}
             </div>
+            {!hideDate &&
+              <div className="text-sm text-zinc-500 dark:text-zinc-500">
+                {format(new Date(), "yyyy.MM.dd")}
+              </div>
+            }
           </div>
-        }
+        )}
       </div>
       <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
         <ExportButton targetRef={containerRef} />

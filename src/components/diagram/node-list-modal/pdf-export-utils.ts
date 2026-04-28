@@ -8,6 +8,7 @@ export function exportToPdf(
   preparedBy: string,
   report: Report,
   hideTitle: boolean,
+  hideDate: boolean,
 ): void {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -46,7 +47,9 @@ export function exportToPdf(
       drawText(`Prepared by: ${preparedBy}`, margin + 5, currentY, 10);
       currentY += 5;
     }
-    drawText(format(new Date(), "yyyy.MM.dd"), margin + 5, currentY, 10);
+    if (!hideDate) {
+      drawText(format(new Date(), "yyyy.MM.dd"), margin + 5, currentY, 10);
+    }
     currentY += 25;
   }
 
