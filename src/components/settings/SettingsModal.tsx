@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Plus, Trash2 } from "lucide-react";
 import { useStore } from "../../store/useStore";
@@ -30,103 +30,190 @@ const PropertyInput = ({
       onChange={(e) => onChange(e.target.value)}
       className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
     />
-  </div>
+  </div >
 );
 
+const ListSection = ({
+  title,
+  items,
+  onAdd,
+  onRemove,
+  placeholder,
+  autoFocus = false,
+}: {
+  title: string;
+  items: string[];
+  onAdd: (item: string) => void;
+  onRemove: (item: string) => void;
+  placeholder: string;
+  autoFocus?: boolean;
+}) => {
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = inputValue.trim();
+    if (trimmed) {
+      onAdd(trimmed);
+      setInputValue("");
+      inputRef.current?.focus();
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
+        {title}
+      </h3>
+      <form onSubmit={handleAdd} className="flex gap-2 mb-4">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder={placeholder}
+          autoFocus={autoFocus}
+          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+        />
+        <button
+          type="submit"
+          className="cursor-pointer rounded-md bg-blue-400 p-1.5 text-white hover:bg-blue-300"
+        >
+          <Plus size={18} />
+        </button>
+      </form>
+      <ul className="space-y-2 max-h-40 overflow-y-auto">
+        {items.map((item) => (
+          <li
+            key={item}
+            className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+          >
+            <span>{item}</span>
+            <button
+              onClick={() => onRemove(item)}
+              className="cursor-pointer text-zinc-400 hover:text-red-500"
+            >
+              <Trash2 size={16} />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const PropertySection = ({
+  title,
+  hideTitle,
+  onToggleHideTitle,
+  hideDate,
+  onToggleHideDate,
+  properties,
+}: {
+  title: string;
+  hideTitle: boolean;
+  onToggleHideTitle: () => void;
+  hideDate: boolean;
+  onToggleHideDate: () => void;
+  properties: {
+    label: string;
+    value: string;
+    onChange: (val: string) => void;
+  }[];
+}) => {
+  const safeId = (id: string) => id.replace(/\s+/g, "-").toLowerCase();
+  const titleId = safeId(title);
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
+        {title}
+      </h3>
+      <div className="flex gap-8">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id={`${titleId}-hide-title`}
+            className="w-4 h-4 cursor-pointer"
+            checked={hideTitle}
+            onChange={onToggleHideTitle}
+          />
+          <label htmlFor={`${titleId}-hide-title`} className="text-sm font-medium cursor-pointer">
+            Hide Title
+          </label>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id={`${titleId}-hide-date`}
+            className="w-4 h-4 cursor-pointer"
+            checked={hideDate}
+            onChange={onToggleHideDate}
+          />
+          <label htmlFor={`${titleId}-hide-date`} className="text-sm font-medium cursor-pointer">
+            Hide Date
+          </label>
+        </div>
+      </div>
+      <div className="space-y-3">
+        {properties.map((prop) => (
+          <PropertyInput key={prop.label} {...prop} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
-  const {
-    types,
-    locations,
-    cableTypes,
-    addType,
-    removeType,
-    addLocation,
-    removeLocation,
-    addCableType,
-    removeCableType,
-    riderListTitle,
-    riderListSubtitle,
-    riderListPreparedBy,
-    updateRiderListTitle,
-    updateRiderListSubtitle,
-    updateRiderListPreparedBy,
-    canvasTitle,
-    canvasSubtitle,
-    canvasPreparedBy,
-    updateCanvasTitle,
-    updateCanvasSubtitle,
-    updateCanvasPreparedBy,
-    hideTitle,
-    hideRiderTitle,
-    toggleHideTitle,
-    toggleHideRiderTitle,
-    hideDate,
-    hideRiderDate,
-    toggleHideDate,
-    toggleHideRiderDate,
-  } = useStore();
+  const types = useStore((s) => s.types);
+  const locations = useStore((s) => s.locations);
+  const cableTypes = useStore((s) => s.cableTypes);
+  const addType = useStore((s) => s.addType);
+  const removeType = useStore((s) => s.removeType);
+  const addLocation = useStore((s) => s.addLocation);
+  const removeLocation = useStore((s) => s.removeLocation);
+  const addCableType = useStore((s) => s.addCableType);
+  const removeCableType = useStore((s) => s.removeCableType);
+  const riderListTitle = useStore((s) => s.riderListTitle);
+  const riderListSubtitle = useStore((s) => s.riderListSubtitle);
+  const riderListPreparedBy = useStore((s) => s.riderListPreparedBy);
+  const updateRiderListTitle = useStore((s) => s.updateRiderListTitle);
+  const updateRiderListSubtitle = useStore((s) => s.updateRiderListSubtitle);
+  const updateRiderListPreparedBy = useStore((s) => s.updateRiderListPreparedBy);
+  const canvasTitle = useStore((s) => s.canvasTitle);
+  const canvasSubtitle = useStore((s) => s.canvasSubtitle);
+  const canvasPreparedBy = useStore((s) => s.canvasPreparedBy);
+  const updateCanvasTitle = useStore((s) => s.updateCanvasTitle);
+  const updateCanvasSubtitle = useStore((s) => s.updateCanvasSubtitle);
+  const updateCanvasPreparedBy = useStore((s) => s.updateCanvasPreparedBy);
+  const hideTitle = useStore((s) => s.hideTitle);
+  const hideRiderTitle = useStore((s) => s.hideRiderTitle);
+  const toggleHideTitle = useStore((s) => s.toggleHideTitle);
+  const toggleHideRiderTitle = useStore((s) => s.toggleHideRiderTitle);
+  const hideDate = useStore((s) => s.hideDate);
+  const hideRiderDate = useStore((s) => s.hideRiderDate);
+  const toggleHideDate = useStore((s) => s.toggleHideDate);
+  const toggleHideRiderDate = useStore((s) => s.toggleHideRiderDate);
 
-  const {
-    title: stagePlanTitle,
-    subtitle: stagePlanSubtitle,
-    preparedBy: stagePlanPreparedBy,
-    updateTitle: updateStagePlanTitle,
-    updateSubtitle: updateStagePlanSubtitle,
-    updatePreparedBy: updateStagePlanPreparedBy,
-    hideStagePlanTitle: hideStagePlanTitle,
-    toggleHideStagePlanTitle: toggleHideStagePlanTitle,
-    hideStagePlanDate: hideStagePlanDate,
-    toggleHideStagePlanDate: toggleHideStagePlanDate,
-  } = useStagePlanStore();
-
-  const [newType, setNewType] = useState("");
-  const [newLocation, setNewLocation] = useState("");
-  const [newCableType, setNewCableType] = useState("");
-
-  const typeInputRef = useRef<HTMLInputElement>(null);
-  const locationInputRef = useRef<HTMLInputElement>(null);
-  const cableTypeInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      typeInputRef.current?.focus();
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const handleAddType = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newType.trim()) {
-      addType(newType.trim());
-      setNewType("");
-      typeInputRef.current?.focus();
-    }
-  };
-
-  const handleAddLocation = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newLocation.trim()) {
-      addLocation(newLocation.trim());
-      setNewLocation("");
-      locationInputRef.current?.focus();
-    }
-  };
-
-  const handleAddCableType = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newCableType.trim()) {
-      addCableType(newCableType.trim());
-      setNewCableType("");
-      cableTypeInputRef.current?.focus();
-    }
-  };
+  const stagePlanTitle = useStagePlanStore((s) => s.title);
+  const stagePlanSubtitle = useStagePlanStore((s) => s.subtitle);
+  const stagePlanPreparedBy = useStagePlanStore((s) => s.preparedBy);
+  const updateStagePlanTitle = useStagePlanStore((s) => s.updateTitle);
+  const updateStagePlanSubtitle = useStagePlanStore((s) => s.updateSubtitle);
+  const updateStagePlanPreparedBy = useStagePlanStore((s) => s.updatePreparedBy);
+  const hideStagePlanTitle = useStagePlanStore((s) => s.hideStagePlanTitle);
+  const toggleHideStagePlanTitle = useStagePlanStore((s) => s.toggleHideStagePlanTitle);
+  const hideStagePlanDate = useStagePlanStore((s) => s.hideStagePlanDate);
+  const toggleHideStagePlanDate = useStagePlanStore((s) => s.toggleHideStagePlanDate);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       onClose();
     }
   };
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div
@@ -152,293 +239,68 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         <div className="space-y-10">
           {/* Lists Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Type List */}
-            <div>
-              <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Type
-              </h3>
-              <form onSubmit={handleAddType} className="flex gap-2 mb-4">
-                <input
-                  ref={typeInputRef}
-                  type="text"
-                  value={newType}
-                  onChange={(e) => setNewType(e.target.value)}
-                  placeholder="Add type"
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                />
-                <button
-                  type="submit"
-                  className="cursor-pointer rounded-md bg-blue-400 p-1.5 text-white hover:bg-blue-300"
-                >
-                  <Plus size={18} />
-                </button>
-              </form>
-              <ul className="space-y-2 max-h-40 overflow-y-auto">
-                {types.map((type) => (
-                  <li
-                    key={type}
-                    className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-                  >
-                    <span>{type}</span>
-                    <button
-                      onClick={() => removeType(type)}
-                      className="cursor-pointer text-zinc-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Location List */}
-            <div>
-              <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Location
-              </h3>
-              <form onSubmit={handleAddLocation} className="flex gap-2 mb-4">
-                <input
-                  ref={locationInputRef}
-                  type="text"
-                  value={newLocation}
-                  onChange={(e) => setNewLocation(e.target.value)}
-                  placeholder="Add location"
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                />
-                <button
-                  type="submit"
-                  className="cursor-pointer rounded-md bg-blue-400 p-1.5 text-white hover:bg-blue-300"
-                >
-                  <Plus size={18} />
-                </button>
-              </form>
-              <ul className="space-y-2 max-h-40 overflow-y-auto">
-                {locations.map((location) => (
-                  <li
-                    key={location}
-                    className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-                  >
-                    <span>{location}</span>
-                    <button
-                      onClick={() => removeLocation(location)}
-                      className="cursor-pointer text-zinc-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Cable Type List */}
-            <div>
-              <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Cable Type
-              </h3>
-              <form onSubmit={handleAddCableType} className="flex gap-2 mb-4">
-                <input
-                  ref={cableTypeInputRef}
-                  type="text"
-                  value={newCableType}
-                  onChange={(e) => setNewCableType(e.target.value)}
-                  placeholder="Add cable type"
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                />
-                <button
-                  type="submit"
-                  className="cursor-pointer rounded-md bg-blue-400 p-1.5 text-white hover:bg-blue-300"
-                >
-                  <Plus size={18} />
-                </button>
-              </form>
-              <ul className="space-y-2 max-h-40 overflow-y-auto">
-                {cableTypes.map((cableType) => (
-                  <li
-                    key={cableType}
-                    className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-                  >
-                    <span>{cableType}</span>
-                    <button
-                      onClick={() => removeCableType(cableType)}
-                      className="cursor-pointer text-zinc-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ListSection
+              title="Type"
+              items={types}
+              onAdd={addType}
+              onRemove={removeType}
+              placeholder="Add type"
+              autoFocus={true}
+            />
+            <ListSection
+              title="Location"
+              items={locations}
+              onAdd={addLocation}
+              onRemove={removeLocation}
+              placeholder="Add location"
+            />
+            <ListSection
+              title="Cable Type"
+              items={cableTypes}
+              onAdd={addCableType}
+              onRemove={removeCableType}
+              placeholder="Add cable type"
+            />
           </div>
 
           {/* Properties Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-            {/* Rider List Properties */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Rider List
-              </h3>
-              <div className="flex gap-8">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hideRider"
-                    className="w-4 h-4 cursor-pointer"
-                    checked={hideRiderTitle}
-                    onChange={toggleHideRiderTitle}
-                  />
-                  <label
-                    htmlFor="hideRider"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Hide Title
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hideRiderDate"
-                    className="w-4 h-4 cursor-pointer"
-                    checked={hideRiderDate}
-                    onChange={toggleHideRiderDate}
-                  />
-                  <label
-                    htmlFor="hideRiderDate"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Hide Date
-                  </label>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <PropertyInput
-                  label="Title"
-                  value={riderListTitle}
-                  onChange={updateRiderListTitle}
-                />
-                <PropertyInput
-                  label="Subtitle"
-                  value={riderListSubtitle}
-                  onChange={updateRiderListSubtitle}
-                />
-                <PropertyInput
-                  label="Prepared By"
-                  value={riderListPreparedBy}
-                  onChange={updateRiderListPreparedBy}
-                />
-              </div>
-            </div>
-
-            {/* Diagram Canvas Properties */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Signal FLow
-              </h3>
-              <div className="flex gap-8">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hideSignal"
-                    className="w-4 h-4 cursor-pointer"
-                    checked={hideTitle}
-                    onChange={toggleHideTitle}
-                  />
-                  <label
-                    htmlFor="hideSignal"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Hide Title
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hideSignalDate"
-                    className="w-4 h-4 cursor-pointer"
-                    checked={hideDate}
-                    onChange={toggleHideDate}
-                  />
-                  <label
-                    htmlFor="hideSignalDate"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Hide Date
-                  </label>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <PropertyInput
-                  label="Title"
-                  value={canvasTitle}
-                  onChange={updateCanvasTitle}
-                />
-                <PropertyInput
-                  label="Subtitle"
-                  value={canvasSubtitle}
-                  onChange={updateCanvasSubtitle}
-                />
-                <PropertyInput
-                  label="Prepared By"
-                  value={canvasPreparedBy}
-                  onChange={updateCanvasPreparedBy}
-                />
-              </div>
-            </div>
-
-            {/* Stage Plan Canvas Properties */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-                Stage Plan
-              </h3>
-              <div className="flex gap-8">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hideStage"
-                    className="w-4 h-4 cursor-pointer"
-                    checked={hideStagePlanTitle}
-                    onChange={toggleHideStagePlanTitle}
-                  />
-                  <label
-                    htmlFor="hideStage"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Hide Title
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hideStageDate"
-                    className="w-4 h-4 cursor-pointer"
-                    checked={hideStagePlanDate}
-                    onChange={toggleHideStagePlanDate}
-                  />
-                  <label
-                    htmlFor="hideStageDate"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Hide Date
-                  </label>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <PropertyInput
-                  label="Title"
-                  value={stagePlanTitle}
-                  onChange={updateStagePlanTitle}
-                />
-                <PropertyInput
-                  label="Subtitle"
-                  value={stagePlanSubtitle}
-                  onChange={updateStagePlanSubtitle}
-                />
-                <PropertyInput
-                  label="Prepared By"
-                  value={stagePlanPreparedBy}
-                  onChange={updateStagePlanPreparedBy}
-                />
-              </div>
-            </div>
+            <PropertySection
+              title="Rider List"
+              hideTitle={hideRiderTitle}
+              onToggleHideTitle={toggleHideRiderTitle}
+              hideDate={hideRiderDate}
+              onToggleHideDate={toggleHideRiderDate}
+              properties={[
+                { label: "Title", value: riderListTitle, onChange: updateRiderListTitle },
+                { label: "Subtitle", value: riderListSubtitle, onChange: updateRiderListSubtitle },
+                { label: "Prepared By", value: riderListPreparedBy, onChange: updateRiderListPreparedBy },
+              ]}
+            />
+            <PropertySection
+              title="Signal Flow"
+              hideTitle={hideTitle}
+              onToggleHideTitle={toggleHideTitle}
+              hideDate={hideDate}
+              onToggleHideDate={toggleHideDate}
+              properties={[
+                { label: "Title", value: canvasTitle, onChange: updateCanvasTitle },
+                { label: "Subtitle", value: canvasSubtitle, onChange: updateCanvasSubtitle },
+                { label: "Prepared By", value: canvasPreparedBy, onChange: updateCanvasPreparedBy },
+              ]}
+            />
+            <PropertySection
+              title="Stage Plan"
+              hideTitle={hideStagePlanTitle}
+              onToggleHideTitle={toggleHideStagePlanTitle}
+              hideDate={hideStagePlanDate}
+              onToggleHideDate={toggleHideStagePlanDate}
+              properties={[
+                { label: "Title", value: stagePlanTitle, onChange: updateStagePlanTitle },
+                { label: "Subtitle", value: stagePlanSubtitle, onChange: updateStagePlanSubtitle },
+                { label: "Prepared By", value: stagePlanPreparedBy, onChange: updateStagePlanPreparedBy },
+              ]}
+            />
           </div>
         </div>
       </div>
