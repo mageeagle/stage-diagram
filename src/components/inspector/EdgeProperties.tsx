@@ -60,7 +60,7 @@ export const EdgeProperties = () => {
   return (
     <>
       <div className="grow">
-        <h2 className="font-bold text-lg mb-4">Edge Properties</h2>
+        <h2 className="font-bold text-lg mb-4">Connection Properties</h2>
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -70,7 +70,7 @@ export const EdgeProperties = () => {
                 "text-gray-500 dark:text-gray-400",
               )}
             >
-              Edge Type
+              Display Line Type
             </label>
           </div>
           <select
