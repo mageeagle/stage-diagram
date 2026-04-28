@@ -41,18 +41,6 @@ export default function Home() {
       <main className="relative flex-1">
         {isStagePlanEnabled ? null : <DiagramCanvas />}
         {isStagePlanEnabled ? <StagePlanCanvas /> : null}
-{/* 
-        <button
-          onClick={() => {
-            setPendingPosition({ x: 100, y: 100 });
-            setIsModalOpen(true);
-          }}
-          className="cursor-pointer absolute bottom-4 left-12 flex items-center gap-2 rounded-full bg-blue-400 px-4 py-2 text-white shadow-lg hover:bg-blue-300 transition-colors"
-        >
-          <Plus size={20} />
-          Add Node
-        </button> */}
-
         <Toolbar />
         <SettingsModal
           isOpen={isSettingsModalOpen}
