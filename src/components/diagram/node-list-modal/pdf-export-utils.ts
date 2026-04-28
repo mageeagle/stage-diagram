@@ -9,6 +9,7 @@ export function exportToPdf(
   report: Report,
   hideTitle: boolean,
   hideDate: boolean,
+  showDetails: boolean
 ): void {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -72,8 +73,8 @@ export function exportToPdf(
           drawText(`${row.node.name}`, margin + 5, currentY, 10);
 
           let details = "";
-          if (row.node.type) details += ` (${row.node.type})`;
-          if (row.node.location) details += ` @ ${row.node.location}`;
+          if (row.node.type && row.node.type !== "none" && showDetails) details += ` (${row.node.type})`;
+          if (row.node.location && row.node.location !== "none" && showDetails) details += ` @ ${row.node.location}`;
 
           if (details) {
             drawText(

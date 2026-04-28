@@ -1,4 +1,3 @@
-import React from "react";
 import { type NodeListContentProps } from "../node-list-modal-types";
 import { NodeListItem } from "./NodeListItem";
 import { generateNodeListReport } from "./node-list-report-generator";

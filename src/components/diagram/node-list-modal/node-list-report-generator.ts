@@ -3,11 +3,11 @@ import { type CustomNodeData } from "../../../types/diagram";
 import { type GroupByMode, type GroupedNode } from "../node-list-modal-types";
 import { groupByName, groupByLocation, groupByType } from "../node-list-utils";
 
-export type ReportRow = 
-  | { type: 'header'; label: string }
-  | { type: 'node'; node: GroupedNode }
-  | { type: 'summary'; label: string; value: string | number }
-  | { type: 'separator' };
+export type ReportRow =
+  | { type: "header"; label: string }
+  | { type: "node"; node: GroupedNode }
+  | { type: "summary"; label: string; value: string | number }
+  | { type: "separator" };
 
 export type Report = {
   nodesReport: ReportRow[];
@@ -17,15 +17,18 @@ export type Report = {
 export function generateNodeListReport(
   nodes: Node<CustomNodeData>[],
   groupBy: GroupByMode,
-  edges: Edge[]
+  edges: Edge[],
 ): Report {
   const nodesReport: ReportRow[] = [];
-  
+
   // Filter out nodes marked to hide from list (including edges connected to them)
   const visibleNodes = nodes.filter(
-    (node) => !(node.data?.hideFromList === true || node.data?.exportingHidden === true)
+    (node) =>
+      !(
+        node.data?.hideFromList === true || node.data?.exportingHidden === true
+      ),
   );
-  
+
   const aggregatedNodes =
     visibleNodes.length > 0
       ? groupBy === "none"
@@ -49,7 +52,7 @@ export function generateNodeListReport(
       if (isNewLocation) {
         if (index > 0 && powerSocketsInCurrentLoc > 0) {
           nodesReport.push({
-            type: 'summary',
+            type: "summary",
             label: "Power Sockets",
             value: powerSocketsInCurrentLoc,
           });
@@ -57,8 +60,8 @@ export function generateNodeListReport(
         }
 
         nodesReport.push({
-          type: 'header',
-          label: currentLoc,
+          type: "header",
+          label: currentLoc === "none" ? "Unspecified" : currentLoc,
         });
       }
 
@@ -67,14 +70,14 @@ export function generateNodeListReport(
       }
 
       nodesReport.push({
-        type: 'node',
+        type: "node",
         node: node,
       });
     });
 
-    if (aggregatedNodes.length > 0) {
+    if (aggregatedNodes.length > 0 && powerSocketsInCurrentLoc > 0) {
       nodesReport.push({
-        type: 'summary',
+        type: "summary",
         label: "Power Sockets",
         value: powerSocketsInCurrentLoc,
       });
@@ -91,7 +94,7 @@ export function generateNodeListReport(
 
         if (isNewType) {
           nodesReport.push({
-            type: 'header',
+            type: "header",
             label: currentType,
           });
         }
@@ -102,14 +105,14 @@ export function generateNodeListReport(
       }
 
       nodesReport.push({
-        type: 'node',
+        type: "node",
         node: node,
       });
     });
 
     if (locationsWithPower.size > 0) {
       nodesReport.push({
-        type: 'summary',
+        type: "summary",
         label: "Power Breakout (Min.)",
         value: locationsWithPower.size,
       });
@@ -118,29 +121,30 @@ export function generateNodeListReport(
 
   // Cables section
   const cablesReport: ReportRow[] = [];
-  
+
   // Get unique cable types from edges connected to visible nodes only
-  const visibleEdges = visibleNodes.flatMap((n) =>
-    edges.filter((e) => e.source === n.id || e.target === n.id)
+  const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
+  const visibleEdges = edges.filter(
+    (e) => visibleNodeIds.has(e.source) || visibleNodeIds.has(e.target),
   );
-  
+
   const cableTypeCounts = new Map<string, number>();
   visibleEdges.forEach((edge) => {
     const type = edge.data?.cableType as string;
-    if (type && type !== 'none') {
+    if (type && type !== "none") {
       cableTypeCounts.set(type, (cableTypeCounts.get(type) || 0) + 1);
     }
   });
 
   if (cableTypeCounts.size > 0) {
     cablesReport.push({
-      type: 'header',
-      label: 'Cables',
+      type: "header",
+      label: "Cables",
     });
 
     Array.from(cableTypeCounts.entries()).forEach(([type, count]) => {
       cablesReport.push({
-        type: 'summary',
+        type: "summary",
         label: type,
         value: count,
       });

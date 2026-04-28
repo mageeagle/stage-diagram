@@ -40,7 +40,7 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
 
   const handleExport = () => {
     const report = generateNodeListReport(nodes, groupBy, edges);
-    exportToPdf(title, subtitle, preparedBy, report, hideTitle, hideDate);
+    exportToPdf(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails);
   };
 
   if (!isOpen) return null;
