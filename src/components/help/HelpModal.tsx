@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, FolderCode, User } from "lucide-react";
+import { X, FolderCode, User, Heart } from "lucide-react";
 import { useStore } from "../../store/useStore";
 
 interface HelpModalProps {
@@ -33,7 +33,7 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
       onKeyDown={handleKeyDown}
     >
       <div
-        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900"
+        className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -54,8 +54,8 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
         <div className="mb-6">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             This application provides a simple, unified interface for creating
-            both Rider Lists and Signal Flows, helping you visualize and
-            organize technical requirements more effectively.
+            both Rider List, Signal Flow and Stage Plan, helping you visualize
+            and organize technical requirements more effectively.
           </p>
         </div>
         <div className="mb-6">
@@ -127,7 +127,7 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
         </div>
 
         <div className="border-t border-zinc-200 pt-6 dark:border-zinc-800">
-          <div className="flex items-center gap-4 h-12">
+          <div className="flex items-center gap-4 h-16">
             <a
               href="https://www.qqaqq.net"
               target="_blank"
@@ -136,20 +136,35 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
             >
               <User size={16} />
               <div className="flex flex-col items-start">
-                <span className="text-xs text-zinc-500 dark:text-zinc-500">
+                <span className="text-xs text-zinc-500">
                   Made by
                 </span>
                 <span className="font-medium">Eagle Wu</span>
               </div>
             </a>
             <a
-              href="https://github.com"
+              href="https://buymeacoffee.com/mageeagle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-full flex items-center gap-2 rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            >
+              <Heart size={16} />
+              <div className="flex flex-col items-start">
+                <span className="font-medium">Donate</span>
+              </div>
+            </a>
+            <a
+              href="https://github.com/mageeagle/stage-diagram"
               target="_blank"
               rel="noopener noreferrer"
               className="h-full flex items-center gap-2 rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             >
               <FolderCode size={16} />
-              <span>Source Code</span>
+              <div className="flex flex-col">
+                <span className="text-xs text-zinc-500">Bug Report</span>
+                <span className="text-xs text-zinc-500">Feature Request</span>
+                <span>Source Code</span>
+              </div>
             </a>
             <span className="text-sm">License: AGPL-3.0</span>
           </div>
