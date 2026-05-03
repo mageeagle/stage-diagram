@@ -1,4 +1,4 @@
-import { Handle, Position, NodeProps, useUpdateNodeInternals, Node } from "@xyflow/react";
+import { Position, NodeProps, useUpdateNodeInternals, Node } from "@xyflow/react";
 import { CustomNodeData, NodeInput, NodeOutput } from "@/types/diagram";
 import { useEffect } from "react";
 import { useThemeStore } from "@/store/useThemeStore";
