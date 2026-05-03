@@ -248,26 +248,7 @@ export const DiagramCanvas = () => {
 
       if (event.key === " " || event.key === "Enter") {
         event.preventDefault();
-        const instance = flowInstanceRef.current;
-        const container = containerRef.current;
-
-        if (instance && container) {
-          // Calculate center coordinates in flow units
-          const viewPort = instance.getViewport();
-          const containerWidth = container.clientWidth;
-          const containerHeight = container.clientHeight;
-
-          // Calculate flow coordinates for the center
-          const x = (containerWidth / 2 - viewPort.x) / viewPort.zoom;
-          const y = (containerHeight / 2 - viewPort.y) / viewPort.zoom;
-
-          setPendingPosition({ x, y });
-          setIsModalOpen(true);
-        } else {
-          // Fallback to hardcoded position if instance or container is unavailable
-          setPendingPosition({ x: 100, y: 100 });
-          setIsModalOpen(true);
-        }
+        setIsModalOpen(true);
       }
     };
 
@@ -286,6 +267,29 @@ export const DiagramCanvas = () => {
     undo,
     redo,
   ]);
+
+  useEffect(() => {
+    if (!isModalOpen || !setPendingPosition) return
+    const instance = flowInstanceRef.current;
+    const container = containerRef.current;
+
+    if (instance && container) {
+      // Calculate center coordinates in flow units
+      const viewPort = instance.getViewport();
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+
+      // Calculate flow coordinates for the center
+      const x = (containerWidth / 2 - viewPort.x) / viewPort.zoom;
+      const y = (containerHeight / 2 - viewPort.y) / viewPort.zoom;
+
+      setPendingPosition({ x, y });
+    } else {
+      // Fallback to hardcoded position if instance or container is unavailable
+      setPendingPosition({ x: 100, y: 100 });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isModalOpen]);
 
   const handleCreateNode = (
     name: string,
@@ -462,11 +466,11 @@ export const DiagramCanvas = () => {
             <div className="text-sm text-zinc-500 dark:text-zinc-500">
               {canvasPreparedBy}
             </div>
-            {!hideDate &&
+            {!hideDate && (
               <div className="text-sm text-zinc-500 dark:text-zinc-500">
                 {format(new Date(), "yyyy.MM.dd")}
               </div>
-            }
+            )}
           </div>
         )}
       </div>
