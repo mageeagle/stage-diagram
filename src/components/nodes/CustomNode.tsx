@@ -3,6 +3,7 @@ import { CustomNodeData, NodeInput, NodeOutput } from "@/types/diagram";
 import { useEffect } from "react";
 import { useThemeStore } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
+import { LabeledHandle } from "./LabeledHandle";
 
 export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData>>) => {
   const update = useUpdateNodeInternals();
@@ -21,7 +22,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
 
   return (
     <div className={cn(
-      "px-4 py-2 shadow-md rounded-md border-2 min-w-[250px]",
+      "py-2 shadow-md rounded-md border-2 min-w-[250px]",
       isDark ? "bg-stone-800 text-stone-100 border-stone-600" : "bg-white text-stone-900 border-stone-400",
       selected ? 'border-blue-500 ring-2 ring-blue-200' : "",
       data.hidden ? "opacity-30" : ""
@@ -33,18 +34,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
         <div className="flex flex-col gap-2">
           {data.inputs ? (
             data.inputs.map((input: NodeInput) => (
-              <div
-                key={input.id}
-                className="relative flex items-center w-full h-4"
-              >
-                <Handle
-                  type="target"
-                  position={Position.Left}
-                  id={input.id}
-                  className={cn("w-3 h-3 bg-blue-500!", isDark && "!hover:bg-blue-300")}
-                />
-                <span className="text-[10px] ml-4">{input.name}</span >
-              </div>
+              <LabeledHandle key={input.id} id={input.id} type={"target"} position={Position.Left} title={input.name} />
             ))
           ) : (
             <div className="w-4"></div >
@@ -55,18 +45,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
         <div className="flex flex-col gap-2">
           {data.outputs ? (
             data.outputs.map((output: NodeOutput) => (
-              <div
-                key={output.id}
-                className="relative flex items-center w-full h-4"
-              >
-                <span className="text-[10px] mr-4">{output.name}</span >
-                <Handle
-                  type="source"
-                  position={Position.Right}
-                  id={output.id}
-                  className={cn("w-3 h-3 bg-green-500!", isDark && "bg-green-400!")}
-                />
-              </div>
+              <LabeledHandle key={output.id} id={output.id} type={"source"} position={Position.Right} title={output.name} />
             ))
           ) : (
             <div className="w-4"></div >
