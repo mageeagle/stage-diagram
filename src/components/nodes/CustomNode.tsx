@@ -15,6 +15,10 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
 
   const isDark = theme === 'dark';
 
+  if (!data) {
+    return null;
+  }
+
   // Return null to hide the node from the canvas during export
   if (data.exportingHidden) {
     return null;

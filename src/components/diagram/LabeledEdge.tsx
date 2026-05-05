@@ -61,7 +61,7 @@ const labeledSmoothstepEdge = (
     data: { cableType: string; exportingHidden: boolean; hidden: boolean };
   },
 ) =>
-  props.data.exportingHidden ? null : (
+  !props.data || props.data.exportingHidden ? null : (
     <>
       <SmoothStepEdge {...props} />
       <EdgeLabel
@@ -80,7 +80,7 @@ const labeledStepEdge = (
     data: { cableType: string; exportingHidden: boolean; hidden: boolean };
   },
 ) =>
-  props.data.exportingHidden ? null : (
+  !props.data || props.data.exportingHidden ? null : (
     <>
       <StepEdge {...props} />
       <EdgeLabel
@@ -99,7 +99,7 @@ const labeledStraightEdge = (
     data: { cableType: string; exportingHidden: boolean; hidden: boolean };
   },
 ) =>
-  props.data.exportingHidden ? null : (
+  !props.data || props.data.exportingHidden ? null : (
     <>
       <StraightEdge {...props} />
       <EdgeLabel
@@ -118,7 +118,7 @@ const labeledBezierEdge = (
     data: { cableType: string; exportingHidden: boolean; hidden: boolean };
   },
 ) =>
-  props.data.exportingHidden ? null : (
+  !props.data || props.data.exportingHidden ? null : (
     <>
       <BezierEdge {...props} />
       <EdgeLabel
@@ -132,10 +132,13 @@ const labeledBezierEdge = (
     </>
   );
 
+const tempEdge = (props: BezierEdgeProps) => <BezierEdge {...props} />;
+
 export {
   labeledSmoothstepEdge,
   labeledStepEdge,
   labeledStraightEdge,
   labeledBezierEdge,
+  tempEdge,
 };
 export type { EdgeLabelProps };

@@ -139,11 +139,54 @@ interface DiagramState {
   toggleHideRiderTitle: () => void;
   toggleHideDate: () => void;
   toggleHideRiderDate: () => void;
+
+  // Temp edges for proximity preview
+  tempEdges: Edge[];
+  setTempEdges: (edges: Edge[]) => void;
+
+  // Proximity connect
+  proximityPairs: Array<{
+    source: string;
+    target: string;
+    sourceNodeId: string;
+    targetNodeId: string;
+  }>;
+  setProximityPairs: (pairs: Array<{
+    source: string;
+    target: string;
+    sourceNodeId: string;
+    targetNodeId: string;
+  }>) => void;
+  proximityEdgeIds: string[];
+  setProximityEdgeIds: (ids: string[]) => void;
+  autoConnectEdges: (pairs: Array<{
+    source: string;
+    target: string;
+    sourceNodeId: string;
+    targetNodeId: string;
+  }>, amMode?: boolean) => void;
+  disconnectEdges: (edgeIds: string[]) => void;
+  onMoveEnd: () => void;
+}
+
+function edgeKey(edge: Edge): string {
+  return `${edge.source}-${edge.sourceHandle || ""}||${edge.target}-${edge.targetHandle || ""}`;
+}
+
+function pairKey(sourceNodeId: string, targetNodeId: string, sourceHandle: string, targetHandle: string): string {
+  return `${sourceNodeId}-${sourceHandle}||${targetNodeId}-${targetHandle}`;
 }
 
 export const useStore = create<DiagramState>((set, get) => ({
   nodes: [],
   edges: [],
+  tempEdges: [],
+  setTempEdges: (tempEdges) => set({ tempEdges }),
+  proximityPairs: [],
+  setProximityPairs: (pairs) => set({ proximityPairs: pairs }),
+  proximityEdgeIds: [],
+  setProximityEdgeIds: (ids) => set({ proximityEdgeIds: ids }),
+  onMoveEnd: () => {},
   selectedNodeIds: [],
   selectedEdgeIds: [],
   cableTypes: [],
@@ -293,6 +336,94 @@ export const useStore = create<DiagramState>((set, get) => ({
         },
         get().edges,
       ),
+    });
+  },
+
+  autoConnectEdges: (pairs: { sourceNodeId: string; targetNodeId: string; source: string; target: string }[]) => {
+    get().recordHistory();
+    const { edges, proximityEdgeIds } = get();
+
+    const pairKeys = new Set<string>();
+    for (const pair of pairs) {
+      const key = pairKey(pair.sourceNodeId, pair.targetNodeId, pair.source, pair.target);
+      pairKeys.add(key);
+    }
+
+    const edgesToRemove: string[] = [];
+    const edgesToAdd: Edge[] = [];
+    const edgeIdToKey = new Map<string, string>();
+    const existingEdgeSet = new Set<string>();
+
+    for (const edge of edges) {
+      if (!edge.className?.includes("temp")) {
+        existingEdgeSet.add(edgeKey(edge));
+      }
+    }
+
+    for (const edgeId of proximityEdgeIds) {
+      const edge = edges.find((e) => e.id === edgeId);
+      if (edge) {
+        const key = pairKey(edge.source, edge.target, edge.sourceHandle || "", edge.targetHandle || "");
+        edgeIdToKey.set(edgeId, key);
+        if (!pairKeys.has(key)) {
+          edgesToRemove.push(edgeId);
+        }
+      }
+    }
+
+    const usedKeys = new Set<string>(existingEdgeSet);
+
+    for (const pair of pairs) {
+      const sourceHandle = pair.source;
+      const targetHandle = pair.target;
+      const edgeId = `${nanoid()}`;
+
+      const key = edgeKey({
+        id: edgeId,
+        source: pair.sourceNodeId,
+        target: pair.targetNodeId,
+        sourceHandle,
+        targetHandle,
+        type: "default",
+        data: { cableType: "none", hidden: false },
+      } as Edge);
+
+      if (usedKeys.has(key)) continue;
+
+      usedKeys.add(key);
+      edgesToAdd.push({
+        id: edgeId,
+        source: pair.sourceNodeId,
+        target: pair.targetNodeId,
+        sourceHandle,
+        targetHandle,
+        type: "default",
+        data: { cableType: "none", hidden: false },
+      });
+    }
+
+    if (edgesToRemove.length > 0 || edgesToAdd.length > 0) {
+      const remainingProximityIds = proximityEdgeIds.filter(
+        (id) => !edgesToRemove.includes(id),
+      );
+      const newEdgeIds = edgesToAdd.map((e) => e.id);
+
+      set({
+        edges: edges
+          .filter((e) => !edgesToRemove.includes(e.id))
+          .concat(edgesToAdd),
+        proximityEdgeIds: [...remainingProximityIds, ...newEdgeIds],
+      });
+    }
+  },
+
+  disconnectEdges: (edgeIds) => {
+    if (edgeIds.length === 0) return;
+    get().recordHistory();
+    const { edges } = get();
+    set({
+      edges: edges.filter((e) => !edgeIds.includes(e.id)),
+      proximityEdgeIds: get().proximityEdgeIds.filter((id) => !edgeIds.includes(id)),
     });
   },
 

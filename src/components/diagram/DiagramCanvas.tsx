@@ -14,9 +14,9 @@ import {
   Edge,
   NodeChange,
   ReactFlowInstance,
-  OnInit,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import "@/styles/temp-edge.css";
 import { useStore } from "@/store/useStore";
 import { CustomNodeData } from "@/types/diagram";
 import { CustomNode } from "@/components/nodes/CustomNode";
@@ -27,18 +27,19 @@ import {
   labeledStepEdge,
   labeledStraightEdge,
   labeledBezierEdge,
+  tempEdge,
 } from "@/components/diagram/LabeledEdge";
 import { ExportButton } from "@/components/diagram/ExportButton";
 import { useThemeStore } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns/format";
+import { useProximityConnect, ProximityPair } from "@/hooks/useProximityConnect";
+
 
 const nodeTypes = {
   custom: CustomNode,
   group: GroupNode,
 };
-
-const groupNodesStore = new Map<string, Node>();
 
 export const DiagramCanvas = () => {
   const nodes = useStore((state) => state.nodes);
@@ -73,18 +74,70 @@ export const DiagramCanvas = () => {
   const theme = useThemeStore((state) => state.theme);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const tempEdges = useStore((state) => state.tempEdges);
+  const setTempEdges = useStore((state) => state.setTempEdges);
+  const autoConnectEdges = useStore((state) => state.autoConnectEdges);
+  const proximityPairsRef = useRef<ProximityPair[]>([]);
+  const isDraggingRef = useRef(false);
+  const liveNodesRef = useRef<Node<CustomNodeData>[] | undefined>(undefined);
+
+  useEffect(() => {
+    if (!liveNodesRef.current) {
+      liveNodesRef.current = nodes;
+    }
+  }, [nodes]);
+  const [, setDragTick] = useState(0);
+
+  const [liveNodes, setLiveNodes] = useState<Node<CustomNodeData>[]>([]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _proximityHook = useProximityConnect(
+    nodes,
+    edges,
+    (pairs) => {
+      proximityPairsRef.current = pairs;
+      if (pairs.length > 0) {
+        const newTempEdges: Edge[] = pairs.map((pair) => ({
+          id: `temp-${pair.sourceNodeId}-${pair.source}-${pair.targetNodeId}-${pair.target}`,
+          source: pair.sourceNodeId,
+          sourceHandle: pair.source,
+          target: pair.targetNodeId,
+          targetHandle: pair.target,
+          type: 'tempEdge',
+          className: 'temp-edge',
+          animated: false,
+          style: { stroke: '#a855f7', strokeWidth: 2, strokeDasharray: '8 4' },
+          markerEnd: { type: 'arrow', color: '#a855f7' },
+          data: { cableType: 'none', hidden: false },
+        }));
+        setTempEdges(newTempEdges);
+      } else {
+        setTempEdges([]);
+      }
+    },
+    liveNodes,
+  );
+
+  const onNodeDrag = useCallback(() => {
+    if (flowInstanceRef.current) {
+      const nodes = flowInstanceRef.current.getNodes() as Node<CustomNodeData>[];
+      setLiveNodes(nodes);
+      setDragTick((t) => t + 1);
+    }
+  }, []);
 
   const onReactFlowApi = useCallback((instance: ReactFlowInstance) => {
     flowInstanceRef.current = instance;
   }, []);
-  const groupNodesMap = useMemo(() => groupNodesStore, []);
+
+  const groupNodesMap = useRef<Map<string, Node>>(new Map());
   const [groupNodesTick, setGroupNodesTick] = useState(0);
 
   useEffect(() => {
     if (!locationGroupsEnabled) {
-      groupNodesMap.clear();
+      groupNodesMap.current.clear();
     }
-  }, [locationGroupsEnabled, groupNodesMap]);
+  }, [locationGroupsEnabled]);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
@@ -115,9 +168,21 @@ export const DiagramCanvas = () => {
     (event: React.MouseEvent, node: Node) => {
       setSelectedNodeIds([node.id]);
       setSelectedEdgeIds([]);
+      isDraggingRef.current = true;
+      proximityPairsRef.current = [];
     },
     [setSelectedNodeIds, setSelectedEdgeIds],
   );
+
+  const onMoveEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    const pairs = proximityPairsRef.current;
+    if (pairs.length > 0) {
+      autoConnectEdges(pairs);
+      proximityPairsRef.current = [];
+      setTempEdges([])
+    }
+  }, [autoConnectEdges, setTempEdges]);
 
   const onEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
@@ -170,7 +235,7 @@ export const DiagramCanvas = () => {
       if (groupChanges.length > 0) {
         groupChanges.forEach((change) => {
           const { id, position } = change;
-          const existingNode = groupNodesMap.get(id);
+          const existingNode = groupNodesMap.current.get(id);
           if (existingNode) {
             const delta = {
               x: position.x - existingNode.position.x,
@@ -189,7 +254,7 @@ export const DiagramCanvas = () => {
                 );
               }
             }
-            groupNodesMap.set(id, { ...existingNode, position });
+            groupNodesMap.current.set(id, { ...existingNode, position });
           }
         });
         setGroupNodesTick((t) => t + 1);
@@ -199,7 +264,7 @@ export const DiagramCanvas = () => {
         onNodesChangeOrig(otherChanges);
       }
     },
-    [onNodesChangeOrig, groupNodesMap, nodes, moveNodes],
+    [onNodesChangeOrig, nodes, moveNodes],
   );
 
   useEffect(() => {
@@ -340,6 +405,7 @@ export const DiagramCanvas = () => {
     const groupEntries = Array.from(groupedNodes.entries()).filter(
       ([, nodeGroup]) => nodeGroup.length > 1,
     );
+    // eslint-disable-next-line react-hooks/refs
     const groupNodesList = groupEntries.map(([location, groupNodes]) => {
       const groupId = `group-${location}`;
       const props = {
@@ -371,16 +437,17 @@ export const DiagramCanvas = () => {
           70,
       };
 
-      const existingNode = groupNodesMap.get(groupId);
+      // eslint-disable-next-line react-hooks/refs
+      const existingNode = groupNodesMap.current.get(groupId);
       if (existingNode) {
         const updatedNode = { ...existingNode, ...props };
-        groupNodesMap.set(groupId, updatedNode);
+        groupNodesMap.current.set(groupId, updatedNode);
         return updatedNode;
       }
 
       const newNode = props as Node;
 
-      groupNodesMap.set(groupId, newNode);
+      groupNodesMap.current.set(groupId, newNode);
       return newNode;
     });
 
@@ -423,20 +490,22 @@ export const DiagramCanvas = () => {
         style: hiddenEdgeIds.has(edge.id) ? { display: "none" } : edge.style,
       })),
     };
-  }, [nodes, edges, locationGroupsEnabled, groupNodesMap, groupNodesTick]);
+  }, [nodes, edges, locationGroupsEnabled, groupNodesTick]);
 
   return (
     <div className={cn("w-full h-full relative bg-background")}>
       <div ref={containerRef} className="w-full h-full">
         <ReactFlow
           nodes={displayNodes}
-          edges={displayEdges}
+          edges={[...displayEdges, ...tempEdges]}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onSelectionChange={onSelectionChange}
           onNodeClick={onNodeClick}
           onNodeDragStart={onNodeDragStart}
+          onNodeDrag={onNodeDrag}
+          onNodeDragStop={onMoveEnd}
           onEdgeClick={onEdgeClick}
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
@@ -445,13 +514,14 @@ export const DiagramCanvas = () => {
           snapToGrid
           snapGrid={[20, 20]}
           edgeTypes={{
-            default: labeledBezierEdge,
-            labeledSmoothstep: labeledSmoothstepEdge,
-            labeledStep: labeledStepEdge,
-            labeledStraight: labeledStraightEdge,
-            labeledBezier: labeledBezierEdge,
-          }}
-          onInit={onReactFlowApi as OnInit}
+             default: labeledBezierEdge,
+             labeledSmoothstep: labeledSmoothstepEdge,
+             labeledStep: labeledStepEdge,
+             labeledStraight: labeledStraightEdge,
+             labeledBezier: labeledBezierEdge,
+             tempEdge,
+           }}
+          onInit={onReactFlowApi}
         >
           <Controls position="bottom-right" />
         </ReactFlow>
