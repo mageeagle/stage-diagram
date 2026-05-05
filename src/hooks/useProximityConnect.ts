@@ -62,7 +62,8 @@ export function useProximityConnect(
   edges: Edge[],
   onProximityChange: (pairs: ProximityPair[]) => void,
   liveNodes?: Node<CustomNodeData>[],
-): { getPairs: () => ProximityPair[]; isAMode: () => boolean } {
+): { getPairs: () => ProximityPair[]; isQMode: () => boolean } {
+  const qKeyPressed = useRef(false);
   const aKeyPressed = useRef(false);
   const prevPairsRef = useRef<ProximityPair[]>([]);
   const currentPairsRef = useRef<ProximityPair[]>([]);
@@ -70,12 +71,18 @@ export function useProximityConnect(
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "q" || e.key === "Q") {
+        qKeyPressed.current = true;
+      }
       if (e.key === "a" || e.key === "A") {
         aKeyPressed.current = true;
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "q" || e.key === "Q") {
+        qKeyPressed.current = false;
+      }
       if (e.key === "a" || e.key === "A") {
         aKeyPressed.current = false;
       }
@@ -92,6 +99,10 @@ export function useProximityConnect(
 
   useEffect(() => {
     const findProximityPairs = (nodesList: Node<CustomNodeData>[]): ProximityPair[] => {
+      if (!qKeyPressed.current) {
+        return [];
+      }
+
       const outputs: { nodeId: string; handleId: string; x: number; y: number }[] = [];
       const inputs: { nodeId: string; handleId: string; x: number; y: number }[] = [];
 
@@ -137,7 +148,6 @@ export function useProximityConnect(
       const pairs: ProximityPair[] = [];
 
       if (aKeyPressed.current) {
-        // Full mesh mode: connect all proximate output-input pairs
         for (const output of outputs) {
           for (const input of inputs) {
             if (output.nodeId === input.nodeId) continue;
@@ -154,7 +164,6 @@ export function useProximityConnect(
           }
         }
       } else {
-        // Default mode: closest-first greedy matching
         const candidates: {
           output: typeof outputs[0];
           input: typeof inputs[0];
@@ -202,7 +211,6 @@ export function useProximityConnect(
     const pairs = findProximityPairs(effectiveNodes);
     currentPairsRef.current = pairs;
 
-    // Only trigger callback if pairs changed
     const prev = prevPairsRef.current;
     const changed =
       pairs.length !== prev.length ||
@@ -222,6 +230,6 @@ export function useProximityConnect(
 
   return {
     getPairs: () => currentPairsRef.current,
-    isAMode: () => aKeyPressed.current,
+    isQMode: () => qKeyPressed.current,
   };
 }
