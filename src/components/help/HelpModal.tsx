@@ -118,6 +118,18 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
               </li>
               <li className="flex items-center gap-2">
                 <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Hold Q + Move Node
+                </kbd>
+                <span>Auto Connect Closest Node in Proximity</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Hold Q and A + Move Node
+                </kbd>
+                <span>Auto Connect Multiple Nodes in Proximity</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
                   Esc
                 </kbd>
                 <span>Close Dialog</span>
@@ -136,9 +148,7 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
             >
               <User size={16} />
               <div className="flex flex-col items-start">
-                <span className="text-xs text-zinc-500">
-                  Made by
-                </span>
+                <span className="text-xs text-zinc-500">Made by</span>
                 <span className="font-medium">Eagle Wu</span>
               </div>
             </a>

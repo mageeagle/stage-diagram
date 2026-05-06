@@ -33,6 +33,8 @@ You can export your work to PDF or images.
 | `Ctrl + Click` | Multiselect |
 | `Shift + Drag` | Multiselect Area |
 | `Esc` | Close Dialog |
+| `Hold Q + Move Node` | Auto Connect Closest Node in Proximity |
+| `Hold Q and A + Move Node` | Auto Connect Multiple Nodes in Proximity |
 
 ## ❤️ Support
 
