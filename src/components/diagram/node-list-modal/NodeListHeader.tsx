@@ -1,4 +1,4 @@
-import { X, List, FileDown } from "lucide-react";
+import { X, List, FileDown, FileSpreadsheet, FileJson, ChevronDown, ChevronUp } from "lucide-react";
 import { type NodeListHeaderProps } from "../node-list-modal-types";
 import { useStore } from "@/store/useStore";
 
@@ -8,7 +8,12 @@ export const NodeListHeader = ({
   title,
   subtitle,
   preparedBy,
-}: NodeListHeaderProps) => {
+  exportMenuOpen,
+  setExportMenuOpen,
+}: NodeListHeaderProps & {
+  exportMenuOpen: boolean;
+  setExportMenuOpen: (open: boolean) => void;
+}) => {
    const updateTitle = useStore((s) => s.updateRiderListTitle);
    const updateSubtitle = useStore((s) => s.updateRiderListSubtitle);
    const updatePreparedBy = useStore((s) => s.updateRiderListPreparedBy);
@@ -23,13 +28,53 @@ export const NodeListHeader = ({
         </div>
         <div className="flex items-center gap-2">
           {onExport && (
-            <button
-              onClick={onExport}
-              className="cursor-pointer rounded-md flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            >
-              <FileDown size={18} />
-              Export PDF
-            </button>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExportMenuOpen(!exportMenuOpen);
+                }}
+                className="cursor-pointer rounded-md flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                <FileDown size={18} />
+                Export
+                {exportMenuOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+              {exportMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-40 rounded-md bg-white dark:bg-zinc-800 shadow-lg border border-zinc-200 dark:border-zinc-700 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExport?.("pdf");
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-t-md"
+                  >
+                    <FileDown size={16} />
+                    Export PDF
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExport?.("csv");
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                  >
+                    <FileSpreadsheet size={16} />
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExport?.("json");
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-b-md"
+                  >
+                    <FileJson size={16} />
+                    Export JSON
+                  </button>
+                </div>
+              )}
+            </div>
           )}
           <button
             onClick={onClose}

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useStore } from "../../store/useStore";
 
 import {
+  type ExportFormat,
   type GroupByMode,
   type NodeListModalProps,
 } from "./node-list-modal-types";
@@ -13,10 +14,12 @@ import { NodeListTabs } from "./node-list-modal/NodeListTabs";
 import { NodeListContent } from "./node-list-modal/NodeListContent";
 import { generateNodeListReport } from "./node-list-modal/node-list-report-generator";
 import { exportToPdf } from "./node-list-modal/pdf-export-utils";
+import { exportToCsv, exportToJson } from "./node-list-modal/export-utils";
 
 export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [showDetails, setShowDetails] = useState(true);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
 
    const title = useStore(s => s.riderListTitle);
    const subtitle = useStore(s => s.riderListSubtitle);
@@ -38,9 +41,28 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
     };
   }, [isOpen, onClose]);
 
-  const handleExport = () => {
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (exportMenuOpen) setExportMenuOpen(false);
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [exportMenuOpen]);
+
+  const handleExport = (format: ExportFormat) => {
+    setExportMenuOpen(false);
     const report = generateNodeListReport(nodes, groupBy, edges);
-    exportToPdf(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails);
+    switch (format) {
+      case "pdf":
+        exportToPdf(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails);
+        break;
+      case "csv":
+        exportToCsv(title, subtitle, report);
+        break;
+      case "json":
+        exportToJson(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails);
+        break;
+    }
   };
 
   if (!isOpen) return null;
@@ -60,6 +82,8 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
           title={title}
           subtitle={subtitle}
           preparedBy={preparedBy}
+          exportMenuOpen={exportMenuOpen}
+          setExportMenuOpen={setExportMenuOpen}
         />
 
         <div className="px-6 pb-6">

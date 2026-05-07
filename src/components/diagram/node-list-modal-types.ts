@@ -2,6 +2,7 @@ import { type Edge, type Node } from "@xyflow/react";
 import { type CustomNodeData } from "../../types/diagram";
 
 export type GroupByMode = "none" | "location" | "type";
+export type ExportFormat = "pdf" | "csv" | "json";
 
 export interface GroupedNode {
   name: string;
@@ -18,7 +19,7 @@ export interface NodeListModalProps {
 
 export interface NodeListHeaderProps {
   onClose: () => void;
-  onExport?: () => void;
+  onExport?: (format: ExportFormat) => void;
   title: string;
   subtitle: string;
   preparedBy: string;
