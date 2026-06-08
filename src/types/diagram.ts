@@ -22,6 +22,7 @@ export interface CustomNodeData {
   rotation?: number;
   width?: number;
   height?: number;
+  zIndex?: number; // Added for stacking order control
   [key: string]: unknown;
 }
 
