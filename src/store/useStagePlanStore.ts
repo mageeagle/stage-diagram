@@ -48,6 +48,7 @@ interface DiagramState {
     width: number,
     height: number,
   ) => void;
+  updateNodeStackingOrder: (nodeIds: string[], zIndex: number) => void;
   matchNode: (nodes: Node<CustomNodeData>[]) => void;
   moveNodes: (
     nodeIds: string[],
@@ -247,6 +248,24 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  updateNodeStackingOrder: (nodeIds, zIndex) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (nodeIds.includes(node.id)) {
+        return {
+          ...node,
+          data: { ...node.data, zIndex },
+          style: { ...node.style, zIndex },
+        };
+      }
+      return node;
+    });
+
+    set({
+      nodes: updatedNodes,
+    });
+  },
+
   moveNodes: (
     nodeIds: string[],
     delta: {
@@ -277,7 +296,16 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
     const existingNodesIds = existingNodes.map((node) => node.id);
     const outputNodes = nodes.map((node) => {
       const searchIndex = existingNodesIds.indexOf(node.id);
-      if (searchIndex !== -1) return existingNodes[searchIndex];
+      if (searchIndex !== -1) {
+        const existingNode = existingNodes[searchIndex];
+        return {
+          ...existingNode,
+          style: {
+            ...existingNode.style,
+            zIndex: existingNode.data.zIndex,
+          },
+        };
+      }
       const newNode: Node<CustomNodeData> = {
         id: node.id,
         type: node.type,
@@ -293,6 +321,10 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
           outputs: node.data.outputs,
           power: node.data.power,
           hidden: false,
+          zIndex: node.data.zIndex,
+        },
+        style: {
+          zIndex: node.data.zIndex,
         },
       };
       return newNode;
