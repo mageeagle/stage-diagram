@@ -296,16 +296,18 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
     const existingNodesIds = existingNodes.map((node) => node.id);
     const outputNodes = nodes.map((node) => {
       const searchIndex = existingNodesIds.indexOf(node.id);
-      if (searchIndex !== -1) {
-        const existingNode = existingNodes[searchIndex];
-        return {
-          ...existingNode,
-          style: {
-            ...existingNode.style,
-            zIndex: existingNode.data.zIndex,
-          },
-        };
-      }
+       if (searchIndex !== -1) {
+         const existingNode = existingNodes[searchIndex];
+         return {
+           ...existingNode,
+           data: { ...existingNode.data, ...node.data },
+           position: node.position,
+           style: {
+             ...existingNode.style,
+             zIndex: node.data.zIndex ?? existingNode.data.zIndex,
+           },
+         };
+       }
       const newNode: Node<CustomNodeData> = {
         id: node.id,
         type: node.type,
