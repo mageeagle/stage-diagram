@@ -14,6 +14,8 @@ export const StagePlanPropertiesPanel = () => {
     (state) => state.updateNodeDimensions,
   );
   const updateNodeHidden = useStagePlanStore((state) => state.updateNodeHidden);
+  const updateNodeStackingOrder = useStagePlanStore((state) => state.updateNodeStackingOrder);
+
 
   const primaryNode = nodes.find((n) => n.id === selectedNodeIds[0]);
 
@@ -119,22 +121,40 @@ export const StagePlanPropertiesPanel = () => {
             </p>
           )}
         </div>
-              <div className="mb-6 flex items-center gap-3">
-        <input
-          type="checkbox"
-          id="node-hidden"
-          className="w-4 h-4 cursor-pointer"
-          checked={isMultiSelect ? anyHidden : primaryNode.data.hidden}
-          onChange={(e) => updateNodeHidden(selectedNodeIds, e.target.checked)}
-        />
-        <label
-          htmlFor="node-hidden"
-          className="text-sm font-medium cursor-pointer"
-        >
-          Hidden
-        </label>
-      </div>
+        <div className="mb-6 flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="node-hidden"
+            className="w-4 h-4 cursor-pointer"
+            checked={isMultiSelect ? anyHidden : primaryNode.data.hidden}
+            onChange={(e) => updateNodeHidden(selectedNodeIds, e.target.checked)}
+          />
+          <label
+            htmlFor="node-hidden"
+            className="text-sm font-medium cursor-pointer"
+          >
+            Hidden
+          </label>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-xs font-medium uppercase mb-1 text-gray-500 dark:text-gray-400">
+            Stacking Order
+          </label>
+          <input
+            type="number"
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+            value={primaryNode.data.zIndex || 0}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              if (!isNaN(val)) {
+                updateNodeStackingOrder(selectedNodeIds, val);
+              }
+            }}
+          />
+        </div>
       </div>
     </div>
   );
+
 };
