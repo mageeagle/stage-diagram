@@ -9,6 +9,7 @@ import { SettingsModal } from "@/components/settings/SettingsModal";
 import { NodeListModal } from "@/components/diagram/NodeListModal";
 import { Toolbar } from "@/components/toolbar/Toolbar";
 import { HelpModal } from "@/components/help/HelpModal";
+import { SaveAsDialog } from "@/components/settings/SaveAsDialog";
 import { useShallow } from "zustand/shallow";
 
 export default function Home() {
@@ -19,6 +20,12 @@ export default function Home() {
     setIsNodeListModalOpen,
     isHelpModalOpen,
     setIsHelpModalOpen,
+    isSaveAsDialogOpen,
+    saveAsSuggestedName,
+    saveAsExtension,
+    saveAsOnConfirm,
+    saveAsOnClose,
+    closeSaveAsDialog,
   } = useStore(
     useShallow((state) => ({
       setPendingPosition: state.setPendingPosition,
@@ -29,6 +36,12 @@ export default function Home() {
       setIsNodeListModalOpen: state.setIsNodeListModalOpen,
       isHelpModalOpen: state.isHelpModalOpen,
       setIsHelpModalOpen: state.setIsHelpModalOpen,
+      isSaveAsDialogOpen: state.isSaveAsDialogOpen,
+      saveAsSuggestedName: state.saveAsSuggestedName,
+      saveAsExtension: state.saveAsExtension,
+      saveAsOnConfirm: state.saveAsOnConfirm,
+      saveAsOnClose: state.saveAsOnClose,
+      closeSaveAsDialog: state.closeSaveAsDialog,
     })),
   );
 
@@ -55,6 +68,14 @@ export default function Home() {
         <HelpModal
           isOpen={isHelpModalOpen}
           onClose={() => setIsHelpModalOpen(false)}
+        />
+
+        <SaveAsDialog
+          isOpen={isSaveAsDialogOpen}
+          suggestedName={saveAsSuggestedName}
+          extension={saveAsExtension}
+          onConfirm={saveAsOnConfirm ?? (() => {})}
+          onClose={closeSaveAsDialog}
         />
       </main>
 

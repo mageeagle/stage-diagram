@@ -140,6 +140,16 @@ interface DiagramState {
   toggleHideDate: () => void;
   toggleHideRiderDate: () => void;
 
+  // Save-as dialog
+  isSaveAsDialogOpen: boolean;
+  saveAsSuggestedName: string;
+  saveAsExtension: string;
+  saveAsOnConfirm: ((filename: string) => void) | null;
+  saveAsOnClose: (() => void) | null;
+  saveAsNativeHandle: any | null;
+  setSaveAsDialog: (suggestedName: string, extension: string, onConfirm: (filename: string) => void, onClose?: () => void) => void;
+  closeSaveAsDialog: () => void;
+
   // Temp edges for proximity preview
   tempEdges: Edge[];
   setTempEdges: (edges: Edge[]) => void;
@@ -217,6 +227,27 @@ export const useStore = create<DiagramState>((set, get) => ({
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
   locationGroupsEnabled: false,
+  isSaveAsDialogOpen: false,
+  saveAsSuggestedName: "",
+  saveAsExtension: "",
+  saveAsOnConfirm: null,
+  saveAsOnClose: null,
+  saveAsNativeHandle: null,
+  setSaveAsDialog: (suggestedName, extension, onConfirm, onClose) => set({
+    isSaveAsDialogOpen: true,
+    saveAsSuggestedName: suggestedName,
+    saveAsExtension: extension,
+    saveAsOnConfirm: onConfirm,
+    saveAsOnClose: onClose ?? null,
+  }),
+  closeSaveAsDialog: () => set({
+    isSaveAsDialogOpen: false,
+    saveAsSuggestedName: "",
+    saveAsExtension: "",
+    saveAsOnConfirm: null,
+    saveAsOnClose: null,
+    saveAsNativeHandle: null,
+  }),
   undo: () => {
     const { undoStack, redoStack, nodes, edges } = get();
     if (undoStack.length === 0) return;

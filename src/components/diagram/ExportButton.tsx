@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Download,
   FileImage,
@@ -12,6 +12,7 @@ import {
 import { toPng, toJpeg, toSvg } from "html-to-image";
 import { useStore } from "@/store/useStore";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
+import { useSaveAs } from "@/hooks/useSaveAs";
 import * as XYFlow from "@xyflow/react";
 import { Tooltip } from "@/components/tooltip/Tooltip";
 import { CustomNodeData, EdgeData } from "@/types/diagram";
@@ -30,6 +31,15 @@ export const ExportButton = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const nodes = useStore((state) => state.nodes);
   const stageNodes = useStagePlanStore((state) => state.nodes);
+
+  const canvasTitle = useStore((state) => state.canvasTitle);
+  const stagePlanTitle = useStagePlanStore((state) => state.title);
+  const isStagePlanEnabled = useStagePlanStore((state) => state.isStagePlanEnabled);
+
+  const getExportTitle = () =>
+    isStagePlanEnabled ? stagePlanTitle : canvasTitle;
+
+  const saveAs = useSaveAs(getExportTitle());
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -127,11 +137,15 @@ export const ExportButton = ({
 
   const runExport = async (
     exportFn: (el: HTMLElement) => Promise<string>,
-    filename: string,
+    customFilename?: string,
     isJpeg: boolean = false,
   ) => {
     const el = targetRef.current;
     if (!el) return;
+
+    const defaultName = isStagePlanEnabled ? stagePlanTitle : canvasTitle;
+    const ext = isJpeg ? "jpg" : "png";
+    const filename = customFilename || `${defaultName}.${ext}`;
 
     // Collect nodes to be hidden for export
     const nodesToHide = getNodesToHideForExport(nodes);
@@ -190,26 +204,38 @@ export const ExportButton = ({
   };
 
   const exportAsPng = async () => {
-    await runExport((el: HTMLElement) => toPng(el), "diagram.png");
+    saveAs("png", async (filename: string) => {
+      await runExport((el: HTMLElement) => toPng(el), filename);
+    });
   };
 
   const exportAsJpeg = async () => {
-    await runExport((el: HTMLElement) => toJpeg(el), "diagram.jpg", true);
+    saveAs("jpg", async (filename: string) => {
+      await runExport((el: HTMLElement) => toJpeg(el, { backgroundColor: "white" }), filename, true);
+    });
   };
 
   const exportAsSvg = async () => {
-    await runExport((el: HTMLElement) => toSvg(el), "diagram.svg");
+    saveAs("svg", async (filename: string) => {
+      await runExport((el: HTMLElement) => toSvg(el), filename);
+    });
   };
 
   const exportAsPdf = async () => {
-    await runExportPdf((el: HTMLElement) => toSvg(el));
+    saveAs("svg", async (filename: string) => {
+      await runExportPdf((el: HTMLElement) => toSvg(el), filename);
+    });
   };
 
   const runExportPdf = async (
     exportFn: (el: HTMLElement) => Promise<string>,
+    customFilename?: string,
   ) => {
     const el = targetRef.current;
     if (!el) return;
+
+    const defaultName = isStagePlanEnabled ? stagePlanTitle : canvasTitle;
+    const filename = customFilename || `${defaultName}.svg`;
 
     // Collect nodes and edges to be hidden for export
     const nodesToHide = getNodesToHideForExport(nodes);
@@ -352,7 +378,7 @@ export const ExportButton = ({
             </button>
             <button
               onClick={exportAsSvg}
-              className="flex items-center w-full px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-st-stone-700"
+              className="flex items-center w-full px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700"
             >
               <FileCode size={16} className="mr-2" />
               SVG

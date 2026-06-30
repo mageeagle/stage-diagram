@@ -13,7 +13,7 @@ function downloadFile(content: string, filename: string, mimeType: string): void
   URL.revokeObjectURL(url);
 }
 
-export function exportToCsv(title: string, subtitle: string, report: Report): void {
+export function exportToCsv(title: string, subtitle: string, report: Report, customFilename?: string): void {
   const exportDate = format(new Date(), "yyyy-MM-dd");
 
   const lines: string[] = [];
@@ -51,7 +51,7 @@ export function exportToCsv(title: string, subtitle: string, report: Report): vo
   }
 
   const csvContent = lines.join("\n");
-  const filename = `${title || "node-list"}.csv`;
+  const filename = customFilename || `${title || "node-list"}.csv`;
   downloadFile(csvContent, filename, "text/csv;charset=utf-8;");
 }
 
@@ -63,6 +63,7 @@ export function exportToJson(
   hideTitle: boolean,
   hideDate: boolean,
   showDetails: boolean,
+  customFilename?: string,
 ): void {
   const exportDate = format(new Date(), "yyyy-MM-dd");
 
@@ -113,7 +114,7 @@ export function exportToJson(
   };
 
   const jsonContent = JSON.stringify(exportData, null, 2);
-  const filename = `${title || "node-list"}.json`;
+  const filename = customFilename || `${title || "node-list"}.json`;
   downloadFile(jsonContent, filename, "application/json");
 }
 

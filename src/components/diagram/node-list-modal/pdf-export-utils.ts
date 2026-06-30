@@ -9,7 +9,8 @@ export function exportToPdf(
   report: Report,
   hideTitle: boolean,
   hideDate: boolean,
-  showDetails: boolean
+  showDetails: boolean,
+  customFilename?: string
 ): void {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -121,5 +122,5 @@ export function exportToPdf(
     renderRows(report.cablesReport);
   }
 
-  doc.save("node-list-report.pdf");
+  doc.save(customFilename || "node-list-report.pdf");
 }

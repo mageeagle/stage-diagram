@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useStore } from "../../store/useStore";
+import { useSaveAs } from "../../hooks/useSaveAs";
 
 import {
   type ExportFormat,
@@ -24,10 +25,12 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
    const title = useStore(s => s.riderListTitle);
    const subtitle = useStore(s => s.riderListSubtitle);
    const preparedBy = useStore(s => s.riderListPreparedBy);
-  const nodes = useStore(s => s.nodes);
-  const edges = useStore(s => s.edges);
-  const hideTitle = useStore(s => s.hideRiderTitle);
-  const hideDate = useStore(s => s.hideRiderDate);
+   const nodes = useStore(s => s.nodes);
+   const edges = useStore(s => s.edges);
+   const hideTitle = useStore(s => s.hideRiderTitle);
+   const hideDate = useStore(s => s.hideRiderDate);
+
+   const doSaveAsExport = useSaveAs(title || "node-list");
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,18 +54,21 @@ export const NodeListModal = ({ isOpen, onClose }: NodeListModalProps) => {
 
   const handleExport = (format: ExportFormat) => {
     setExportMenuOpen(false);
-    const report = generateNodeListReport(nodes, groupBy, edges);
-    switch (format) {
-      case "pdf":
-        exportToPdf(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails);
-        break;
-      case "csv":
-        exportToCsv(title, subtitle, report);
-        break;
-      case "json":
-        exportToJson(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails);
-        break;
-    }
+    const extension = format === "pdf" ? "pdf" : format === "csv" ? "csv" : "json";
+    doSaveAsExport(extension, (filename: string) => {
+      const report = generateNodeListReport(nodes, groupBy, edges);
+      switch (format) {
+        case "pdf":
+          exportToPdf(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails, filename);
+          break;
+        case "csv":
+          exportToCsv(title, subtitle, report, filename);
+          break;
+        case "json":
+          exportToJson(title, subtitle, preparedBy, report, hideTitle, hideDate, showDetails, filename);
+          break;
+      }
+    });
   };
 
   if (!isOpen) return null;

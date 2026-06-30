@@ -16,6 +16,7 @@ import { useStore } from "@/store/useStore";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
 import { exportProject, importProject } from "@/utils/projectIO";
 import { Tooltip } from "@/components/tooltip/Tooltip";
+import { useSaveAs } from "@/hooks/useSaveAs";
 
 interface ToolbarButton {
   key: string;
@@ -84,46 +85,58 @@ export const Toolbar = () => {
   const handleUndo = () => (isStagePlanEnabled ? spUndo() : undo());
   const handleRedo = () => (isStagePlanEnabled ? spRedo() : redo());
 
+  const canvasTitle = useStore((state) => state.canvasTitle);
+  const stagePlanTitle = useStagePlanStore((state) => state.title);
+
+  const doSaveAsExport = useSaveAs(
+    isStagePlanEnabled ? stagePlanTitle : canvasTitle
+  );
+
   const handleExport = () => {
-    const {
-      templates,
-      nodes,
-      edges,
-      types,
-      locations,
-      cableTypes,
-      riderListTitle,
-      riderListSubtitle,
-      riderListPreparedBy,
-      canvasTitle,
-      canvasSubtitle,
-      canvasPreparedBy,
-    } = useStore.getState();
+    doSaveAsExport("json", (filename: string) => {
+      const {
+        templates,
+        nodes,
+        edges,
+        types,
+        locations,
+        cableTypes,
+        riderListTitle,
+        riderListSubtitle,
+        riderListPreparedBy,
+        canvasTitle,
+        canvasSubtitle,
+        canvasPreparedBy,
+      } = useStore.getState();
 
-    const {
-      title: stagePlanTitle,
-      subtitle: stagePlanSubtitle,
-      preparedBy: stagePlanPreparedBy,
-      nodes: stagePlanNodes,
-    } = useStagePlanStore.getState();
+      const {
+        title: stagePlanTitle,
+        subtitle: stagePlanSubtitle,
+        preparedBy: stagePlanPreparedBy,
+        nodes: stagePlanNodes,
+      } = useStagePlanStore.getState();
 
-    exportProject({
-      templates,
-      nodes,
-      edges,
-      types,
-      locations,
-      cableTypes,
-      riderListTitle,
-      riderListSubtitle,
-      riderListPreparedBy,
-      canvasTitle,
-      canvasSubtitle,
-      canvasPreparedBy,
-      stagePlanTitle,
-      stagePlanSubtitle,
-      stagePlanPreparedBy,
-      stagePlanNodes,
+      exportProject(
+        {
+          templates,
+          nodes,
+          edges,
+          types,
+          locations,
+          cableTypes,
+          riderListTitle,
+          riderListSubtitle,
+          riderListPreparedBy,
+          canvasTitle,
+          canvasSubtitle,
+          canvasPreparedBy,
+          stagePlanTitle,
+          stagePlanSubtitle,
+          stagePlanPreparedBy,
+          stagePlanNodes,
+        },
+        filename
+      );
     });
   };
 

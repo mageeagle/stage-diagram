@@ -27,22 +27,25 @@ D:\Github\stage-diagram\
 │   ├── store/
 │   │   ├── useStore.ts           # Main diagram state (nodes, edges, templates)
 │   │   ├── useStagePlanStore.ts  # Stage Plan-specific state
-│   │   └── useThemeStore.ts      # Theme (light/dark) state
+│   │   ├── useThemeStore.ts      # Theme (light/dark) state
+│   │   └── useSaveAs.ts          # Save-as dialog state (in useStore)
 │   ├── components/
 │   │   ├── diagram/              # Canvas components
 │   │   ├── nodes/                # Custom node types
 │   │   ├── inspector/            # Property inspector panels
 │   │   ├── toolbar/              # Toolbar with actions
-│   │   ├── settings/             # Settings modal
+│   │   ├── settings/             # Settings modal + SaveAsDialog
 │   │   ├── help/                 # Help modal
 │   │   ├── theme/                # Theme switcher
 │   │   ├── tooltip/              # Tooltip component
 │   │   ├── providers/            # React Flow provider wrapper
 │   │   └── ...
 │   ├── hooks/
-│   │   └── useProximityConnect.ts # Auto-connect proximity detection
+│   │   ├── useProximityConnect.ts # Auto-connect proximity detection
+│   │   └── useSaveAs.ts          # Save-as dialog hook for export points
 │   ├── utils/
-│   │   └── projectIO.ts          # Export/Import project JSON
+│   │   ├── projectIO.ts          # Export/Import project JSON
+│   │   └── saveAs.ts             # Hybrid save utility (native picker + fallback)
 │   └── lib/
 │       └── utils.ts              # cn() utility (clsx + tailwind-merge)
 │
@@ -98,6 +101,12 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `isSettingsModalOpen` | `boolean` | Settings modal visibility |
 | `isNodeListModalOpen` | `boolean` | Node list modal visibility |
 | `isHelpModalOpen` | `boolean` | Help modal visibility |
+| `isSaveAsDialogOpen` | `boolean` | Save-as dialog visibility |
+| `saveAsSuggestedName` | `string` | Default filename suggestion |
+| `saveAsExtension` | `string` | File extension (e.g., "png", "json") |
+| `saveAsOnConfirm` | `(filename: string) => void \| null` | Callback when user confirms filename |
+| `saveAsOnClose` | `() => void \| null` | Callback when dialog closes |
+| `saveAsNativeHandle` | `any \| null` | Native file handle (Chrome/Edge) |
 | `pendingPosition` | `{x, y} \| null` | Canvas position for new node placement |
 | `riderListTitle/Subtitle/PreparedBy` | `string` | Rider list header info |
 | `canvasTitle/Subtitle/PreparedBy` | `string` | Canvas header info |
@@ -117,6 +126,8 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 - `undo()` / `redo()` / `recordHistory()` — History management
 - `restoreProjectState(state)` — Import project data
 - `autoConnectEdges(pairs)` — Auto-connect proximity pairs
+- `setSaveAsDialog(suggestedName, extension, onConfirm, onClose?)` — Open save-as dialog
+- `closeSaveAsDialog()` — Close save-as dialog
 
 ### 2. `useStagePlanStore` (`src/store/useStagePlanStore.ts`) — Stage Plan State
 
@@ -150,6 +161,103 @@ Simple store managing light/dark theme.
 | `toggleTheme()` | `void` | Toggle theme |
 
 **Implementation:** Toggles `.dark` class on `document.documentElement`.
+
+---
+
+## Save-As Dialog Architecture
+
+### Overview
+
+All export points now support **custom filenames** via a hybrid approach:
+- **Chrome/Edge:** Uses native `showSaveFilePicker()` Web API
+- **Firefox/Safari:** Falls back to a custom modal dialog (`SaveAsDialog`)
+
+### Components
+
+#### `SaveAsDialog` (`src/components/settings/SaveAsDialog.tsx`)
+
+Reusable modal component for browsers without native picker support.
+
+**Props:**
+```typescript
+interface SaveAsDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  suggestedName: string;
+  extension: string;
+  onConfirm: (filename: string) => void;
+}
+```
+
+**Features:**
+- Filename input with invalid character stripping (`< > : " / \ | ? *`)
+- Disabled extension input shown as visual suffix
+- Escape key and Cancel button close the dialog
+- Renders via `createPortal()` to `document.body`
+
+#### `useSaveAs` Hook (`src/hooks/useSaveAs.ts`)
+
+Custom hook providing a simplified API for all export points:
+
+```typescript
+// Call ONCE at component level (NOT inside event handlers)
+const saveAs = useSaveAs(suggestedName);
+
+// Pass extension as parameter to each export handler
+saveAs(extension, (filename: string) => {
+  // Export logic using the chosen filename
+});
+```
+
+**Usage pattern:**
+1. Hook called at component level with suggested filename
+2. Each export handler calls `saveAs(extension, callback)` passing the extension as a parameter
+3. Store opens `SaveAsDialog` with state
+4. User confirms or cancels
+5. If confirmed: `onConfirm(filename)` is called, then dialog closes
+6. Callback receives the full filename (with extension) and proceeds with export
+
+**Important:** The hook must be called at the top level of a React component — never inside event handlers or regular functions, as this would cause an "Invalid hook call" error.
+
+#### `saveAs` Utility (`src/utils/saveAs.ts`)
+
+Hybrid save utility with two exported functions:
+
+```typescript
+// Shows native picker (Chrome/Edge) or returns null for fallback
+showSaveAsDialog(suggestedName: string, extension: string): Promise<string | null>
+
+// Writes file via native handle or fallback download
+saveFile(blob: Blob, filename: string): Promise<void>
+
+// Clears internal state (for cleanup)
+resetSaveState(): void
+```
+
+**Native picker flow:**
+1. `showSaveAsDialog()` calls `window.showSaveFilePicker()`
+2. User selects location → returns filename
+3. `saveFile()` writes via `handle.createWritable()`
+4. State cleared after write
+
+**Fallback flow:**
+1. `showSaveAsDialog()` returns `null`
+2. `SaveAsDialog` component shows modal
+3. User enters filename → `onConfirm(filename)` called
+4. Export logic creates blob and uses `<a>` download
+
+### Export Points
+
+| Component | Export Type | Title Source | Extension |
+|-----------|-------------|--------------|-----------|
+| `Toolbar` | Project JSON | `canvasTitle` / `stagePlanTitle` | `.json` |
+| `ExportButton` | PNG | `canvasTitle` / `stagePlanTitle` | `.png` |
+| `ExportButton` | JPG | `canvasTitle` / `stagePlanTitle` | `.jpg` |
+| `ExportButton` | SVG | `canvasTitle` / `stagePlanTitle` | `.svg` |
+| `ExportButton` | PDF | `canvasTitle` / `stagePlanTitle` | `.svg` (printed as PDF) |
+| `NodeListModal` | PDF | `riderListTitle` | `.pdf` |
+| `NodeListModal` | CSV | `riderListTitle` | `.csv` |
+| `NodeListModal` | JSON | `riderListTitle` | `.json` |
 
 ---
 
@@ -249,7 +357,7 @@ interface ProjectState {
 │  │                                 │                      │ │
 │  │   [Title overlay - bottom-left] │                      │ │
 │  └─────────────────────────────────┴──────────────────────┘ │
-│  [Modals: Settings, NodeList, Help, NodeCreation]            │
+│  [Modals: Settings, NodeList, Help, SaveAsDialog]            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -384,6 +492,14 @@ Manages:
 - **Signal Flow settings:** Title, Subtitle, Prepared By, hide title/date
 - **Stage Plan settings:** Title, Subtitle, Prepared By, hide title/date
 
+#### `SaveAsDialog`
+
+Save-as dialog for custom filenames:
+- Filename input with invalid character stripping
+- Disabled extension suffix display
+- Escape key support
+- Used when native picker is unavailable
+
 #### `ExportButton`
 
 Dropdown with export formats:
@@ -392,12 +508,13 @@ Dropdown with export formats:
 - **SVG** — `toSvg()`
 - **PDF** — SVG → print window with A4 landscape
 
-Export process:
-1. Identify hidden nodes/edges
-2. Mark them with `exportingHidden: true`
-3. Hide React Flow controls/minimap
-4. Capture the canvas
-5. Restore visibility
+**Export process:**
+1. `useSaveAs` is called ONCE at component level with the project title as suggested name
+2. Each export handler (`exportAsPng`, `exportAsJpeg`, etc.) calls `saveAs(extension, callback)` passing the extension as a parameter
+3. `saveAs` opens save-as dialog (native picker or modal)
+4. User confirms filename
+5. Callback receives the filename and calls `runExport()` which captures the canvas and downloads with the chosen filename
+6. Restore visibility of hidden nodes/edges
 
 ---
 
@@ -429,7 +546,7 @@ Enables automatic edge creation when handles are near each other.
 
 1. Reads all state from both stores
 2. Serializes to JSON
-3. Creates blob and triggers download as `project.json`
+3. Creates blob and triggers download as `project.json` or `customFilename`
 
 ### Import (`importProject`)
 
@@ -551,8 +668,15 @@ User Action
     │   └── → useProximityConnect → autoConnectEdges() → Store update
     │
     ├── Export
-    │   ├── Project JSON → exportProject() → Download
-    │   └── Canvas → html-to-image → Download
+    │   ├── Project JSON → exportProject(filename) → Download
+    │   ├── Canvas → html-to-image → downloadFile(filename) → Download
+    │   ├── Node List PDF → exportToPdf(..., filename) → jsPDF.save(filename)
+    │   ├── Node List CSV → exportToCsv(..., filename) → Download
+    │   └── Node List JSON → exportToJson(..., filename) → Download
+    │
+    ├── Save-As Dialog
+    │   ├── Native Picker (Chrome/Edge) → showSaveFilePicker() → handle.createWritable()
+    │   └── Fallback Modal (Firefox/Safari) → SaveAsDialog → onConfirm(filename)
     │
     └── Import
         └── → importProject() → restoreProjectState() → Store update
@@ -572,3 +696,28 @@ User Action
 8. **Dynamic node types** — `nodeTypes` object maps React Flow type names to components
 9. **Group nodes** — Computed from `data.location` when `locationGroupsEnabled` is true
 10. **Proximity thresholds** — 150px minimum distance for auto-connect
+11. **Hybrid save strategy** — Native picker when available, modal fallback for compatibility
+12. **Filename sanitization** — Strips `< > : " / \ | ? *` from user input
+13. **Extension as suffix** — Extension shown as disabled input after filename textbox
+14. **Title-based defaults** — Uses `canvasTitle`/`stagePlanTitle`/`riderListTitle` for default filenames
+15. **Hook placement** — `useSaveAs` hook must be called at the component level, never inside event handlers or regular functions (prevents "Invalid hook call" error)
+
+---
+
+## Browser Compatibility Notes
+
+### `showSaveFilePicker()` API
+
+| Browser | Support | Fallback |
+|---------|---------|----------|
+| Chrome/Edge | ✅ Native picker | — |
+| Firefox | ❌ | SaveAsDialog modal |
+| Safari | ❌ | SaveAsDialog modal |
+
+**Requirements:**
+- HTTPS or `localhost` (won't work with `file://` protocol)
+- User gesture (click/tap) to trigger
+
+### Static Export Considerations
+
+Since the app uses `output: "export"`, it's typically opened via `file://` protocol or a local server. The native picker won't work with `file://`, so Firefox/Safari users will always see the modal dialog.

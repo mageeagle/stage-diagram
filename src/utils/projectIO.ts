@@ -23,15 +23,17 @@ export interface ProjectState {
 /**
  * Exports the current project state to a downloadable JSON file.
  * @param state The current project state.
+ * @param customFilename Optional custom filename (defaults to "project.json").
  */
-export function exportProject(state: ProjectState): void {
+export function exportProject(state: ProjectState, customFilename?: string): void {
+  const filename = customFilename || "project.json";
   const jsonString = JSON.stringify(state, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = "project.json";
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
