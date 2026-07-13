@@ -17,9 +17,11 @@
     "jspdf": "^4.2.1",
     "lucide-react": "^1.8.0",
     "nanoid": "^5.1.9",
-    "next": "16.2.4",
+    "next": "^16.2.10",
+    "obstacle-router": "^0.1.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "reactflow-edge-routing": "^0.1.13",
     "tailwind-merge": "^3.5.0",
     "zustand": "^5.0.12"
   },
