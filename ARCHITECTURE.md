@@ -106,7 +106,6 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `saveAsExtension` | `string` | File extension (e.g., "png", "json") |
 | `saveAsOnConfirm` | `(filename: string) => void \| null` | Callback when user confirms filename |
 | `saveAsOnClose` | `() => void \| null` | Callback when dialog closes |
-| `saveAsNativeHandle` | `any \| null` | Native file handle (Chrome/Edge) |
 | `pendingPosition` | `{x, y} \| null` | Canvas position for new node placement |
 | `riderListTitle/Subtitle/PreparedBy` | `string` | Rider list header info |
 | `canvasTitle/Subtitle/PreparedBy` | `string` | Canvas header info |

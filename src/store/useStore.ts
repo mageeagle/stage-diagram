@@ -150,7 +150,6 @@ interface DiagramState {
   saveAsExtension: string;
   saveAsOnConfirm: ((filename: string) => void) | null;
   saveAsOnClose: (() => void) | null;
-  saveAsNativeHandle: any | null;
   setSaveAsDialog: (suggestedName: string, extension: string, onConfirm: (filename: string) => void, onClose?: () => void) => void;
   closeSaveAsDialog: () => void;
 
@@ -272,7 +271,6 @@ export const useStore = create<DiagramState>((set, get) => ({
   saveAsExtension: "",
   saveAsOnConfirm: null,
   saveAsOnClose: null,
-  saveAsNativeHandle: null,
   setSaveAsDialog: (suggestedName, extension, onConfirm, onClose) => set({
     isSaveAsDialogOpen: true,
     saveAsSuggestedName: suggestedName,
@@ -286,7 +284,6 @@ export const useStore = create<DiagramState>((set, get) => ({
     saveAsExtension: "",
     saveAsOnConfirm: null,
     saveAsOnClose: null,
-    saveAsNativeHandle: null,
   }),
   undo: () => {
     const { undoStack, redoStack, nodes, edges } = get();
