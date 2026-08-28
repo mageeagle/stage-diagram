@@ -119,8 +119,8 @@ export const EdgeProperties = () => {
           >
             <option value="none">None</option>
             {cableTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
+              <option key={type.name} value={type.name}>
+                {type.name}
               </option>
             ))}
           </select>

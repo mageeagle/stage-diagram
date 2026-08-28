@@ -41,3 +41,12 @@ export interface NodeTemplate {
   nodeType: string; // The 'type' property of the Node itself (React Flow type)
   power: boolean;
 }
+
+export type DashPattern = "solid" | "dashed" | "dotted" | "dashdot";
+
+export interface CableTypeDef {
+  name: string;
+  color: string; // hex, e.g. "#3b82f6"
+  strokeWidth: number; // 1-6
+  dash: DashPattern;
+}

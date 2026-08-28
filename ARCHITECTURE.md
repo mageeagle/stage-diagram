@@ -95,7 +95,8 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `templates` | `NodeTemplate[]` | Reusable node templates |
 | `types` | `string[]` | Available node types (e.g., "Amplifier") |
 | `locations` | `string[]` | Available locations (e.g., "Stage Left") |
-| `cableTypes` | `string[]` | Available cable types (e.g., "XLR") |
+| `cableTypes` | `CableTypeDef[]` | Cable types with per-type styling (e.g., "XLR") |
+| `hideLegend` | `boolean` | Hide cable type legend |
 | `undoStack` / `redoStack` | `HistoryState[]` | Undo/redo history (max 50 entries) |
 | `isModalOpen` | `boolean` | Node creation modal visibility |
 | `isSettingsModalOpen` | `boolean` | Settings modal visibility |
@@ -299,6 +300,15 @@ interface EdgeData {
   exportingHidden?: boolean;        // Hidden during export
 }
 
+export type DashPattern = "solid" | "dashed" | "dotted" | "dashdot";
+
+interface CableTypeDef {
+  name: string;
+  color: string;      // Hex stroke color
+  strokeWidth: number; // 1-6
+  dash: DashPattern;
+}
+
 interface NodeTemplate {
   id: string;
   name: string;
@@ -319,7 +329,8 @@ interface ProjectState {
   edges: Edge[];
   types: string[];
   locations: string[];
-  cableTypes: string[];
+  cableTypes: CableTypeDef[];
+  hideLegend?: boolean;
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
@@ -381,6 +392,7 @@ Main Signal Flow canvas. Key features:
   - `Space` / `Enter` — Open node creation modal
 - **Live node tracking:** Uses `onNodeDrag` callback to track live positions for proximity detection
 - **Title overlay:** Shows `canvasTitle`, `canvasSubtitle`, `canvasPreparedBy`, and date
+- **Cable legend:** Bottom-right overlay listing cable types in use (color/width/dash sample per type); hidden below 2 used types or via Hide Legend setting; included in image exports
 
 #### `StagePlanCanvas` (`src/components/diagram/StagePlanCanvas.tsx`)
 
@@ -487,6 +499,7 @@ Creates nodes with:
 
 Manages:
 - **Lists:** Types, Locations, Cable Types (add/remove)
+- **Cable Types:** Style editor — color/width/dash per type
 - **Rider List settings:** Title, Subtitle, Prepared By, hide title/date
 - **Signal Flow settings:** Title, Subtitle, Prepared By, hide title/date
 - **Stage Plan settings:** Title, Subtitle, Prepared By, hide title/date

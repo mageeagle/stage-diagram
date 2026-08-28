@@ -31,7 +31,9 @@ import {
   tempEdge,
 } from "@/components/diagram/LabeledEdge";
 import { ExportButton } from "@/components/diagram/ExportButton";
+import { CableLegend } from "@/components/diagram/CableLegend";
 import { useThemeStore } from "@/store/useThemeStore";
+import { cableTypeStyle } from "@/utils/cableStyles";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns/format";
 import { useProximityConnect, ProximityPair } from "@/hooks/useProximityConnect";
@@ -74,6 +76,7 @@ export const DiagramCanvas = () => {
   );
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
   const edgeRoutingEnabled = useStore((state) => state.edgeRoutingEnabled);
+  const cableTypes = useStore((state) => state.cableTypes);
   const edgeRounding = useStore((state) => state.edgeRounding);
   const toggleEdgeRouting = useStore((state) => state.toggleEdgeRouting);
   const theme = useThemeStore((state) => state.theme);
@@ -427,11 +430,18 @@ export const DiagramCanvas = () => {
     if (!locationGroupsEnabled) {
       return {
         displayNodes: nodes,
-        displayEdges: edges.map((edge) => ({
-          ...edge,
-          type: edgeRoutingEnabled ? "routed" : edge.type,
-          style: hiddenEdgeIds.has(edge.id) ? { display: "none" } : edge.style,
-        })),
+        displayEdges: edges.map((edge) => {
+          const def = cableTypes.find(
+            (c) => c.name === edge.data?.cableType,
+          );
+          return {
+            ...edge,
+            type: edgeRoutingEnabled ? "routed" : edge.type,
+            style: hiddenEdgeIds.has(edge.id)
+              ? { display: "none" }
+              : { ...edge.style, ...cableTypeStyle(def) },
+          };
+        }),
       };
     }
 
@@ -528,13 +538,20 @@ export const DiagramCanvas = () => {
 
     return {
       displayNodes,
-      displayEdges: edges.map((edge) => ({
-        ...edge,
-        type: edgeRoutingEnabled ? "routed" : edge.type,
-        style: hiddenEdgeIds.has(edge.id) ? { display: "none" } : edge.style,
-      })),
+      displayEdges: edges.map((edge) => {
+        const def = cableTypes.find(
+          (c) => c.name === edge.data?.cableType,
+        );
+        return {
+          ...edge,
+          type: edgeRoutingEnabled ? "routed" : edge.type,
+          style: hiddenEdgeIds.has(edge.id)
+            ? { display: "none" }
+            : { ...edge.style, ...cableTypeStyle(def) },
+        };
+      }),
     };
-  }, [nodes, edges, locationGroupsEnabled, groupNodesTick, edgeRoutingEnabled]);
+  }, [nodes, edges, locationGroupsEnabled, groupNodesTick, edgeRoutingEnabled, cableTypes]);
 
   return (
     <div className={cn("w-full h-full relative bg-background")}>
@@ -570,6 +587,7 @@ export const DiagramCanvas = () => {
         >
           <Controls position="bottom-right" />
         </ReactFlow>
+        <CableLegend />
         {!hideTitle && (
           <div className="absolute bottom-6 left-6 z-10">
             <div className="text-2xl font-bold text-zinc-900 dark:text-white">

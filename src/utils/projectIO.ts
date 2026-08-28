@@ -1,4 +1,4 @@
-import { CustomNodeData, NodeTemplate } from "@/types/diagram";
+import { CustomNodeData, NodeTemplate, CableTypeDef } from "@/types/diagram";
 import { Edge, Node } from "@xyflow/react";
 
 export interface ProjectState {
@@ -7,7 +7,8 @@ export interface ProjectState {
   edges: Edge[];
   types: string[];
   locations: string[];
-  cableTypes: string[];
+  cableTypes: CableTypeDef[];
+  hideLegend?: boolean; // optional: absent in pre-styling project files
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;

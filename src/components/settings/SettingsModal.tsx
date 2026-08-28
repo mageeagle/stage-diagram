@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, Plus, Trash2 } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useStagePlanStore } from "../../store/useStagePlanStore";
+import { CableTypeList } from "./CableTypeList";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -110,6 +111,7 @@ const PropertySection = ({
   hideDate,
   onToggleHideDate,
   properties,
+  extraToggle,
 }: {
   title: string;
   hideTitle: boolean;
@@ -121,6 +123,12 @@ const PropertySection = ({
     value: string;
     onChange: (val: string) => void;
   }[];
+  extraToggle?: {
+    id: string;
+    label: string;
+    checked: boolean;
+    onToggle: () => void;
+  };
 }) => {
   const safeId = (id: string) => id.replace(/\s+/g, "-").toLowerCase();
   const titleId = safeId(title);
@@ -155,6 +163,23 @@ const PropertySection = ({
             Hide Date
           </label>
         </div>
+        {extraToggle && (
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id={`${titleId}-${extraToggle.id}`}
+              className="w-4 h-4 cursor-pointer"
+              checked={extraToggle.checked}
+              onChange={extraToggle.onToggle}
+            />
+            <label
+              htmlFor={`${titleId}-${extraToggle.id}`}
+              className="text-sm font-medium cursor-pointer"
+            >
+              {extraToggle.label}
+            </label>
+          </div>
+        )}
       </div>
       <div className="space-y-3">
         {properties.map((prop) => (
@@ -168,13 +193,10 @@ const PropertySection = ({
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const types = useStore((s) => s.types);
   const locations = useStore((s) => s.locations);
-  const cableTypes = useStore((s) => s.cableTypes);
   const addType = useStore((s) => s.addType);
   const removeType = useStore((s) => s.removeType);
   const addLocation = useStore((s) => s.addLocation);
   const removeLocation = useStore((s) => s.removeLocation);
-  const addCableType = useStore((s) => s.addCableType);
-  const removeCableType = useStore((s) => s.removeCableType);
   const riderListTitle = useStore((s) => s.riderListTitle);
   const riderListSubtitle = useStore((s) => s.riderListSubtitle);
   const riderListPreparedBy = useStore((s) => s.riderListPreparedBy);
@@ -195,6 +217,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const hideRiderDate = useStore((s) => s.hideRiderDate);
   const toggleHideDate = useStore((s) => s.toggleHideDate);
   const toggleHideRiderDate = useStore((s) => s.toggleHideRiderDate);
+  const hideLegend = useStore((s) => s.hideLegend);
+  const toggleHideLegend = useStore((s) => s.toggleHideLegend);
   const edgeRounding = useStore((s) => s.edgeRounding);
   const setEdgeRounding = useStore((s) => s.setEdgeRounding);
 
@@ -256,13 +280,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               onRemove={removeLocation}
               placeholder="Add location"
             />
-            <ListSection
-              title="Cable Type"
-              items={cableTypes}
-              onAdd={addCableType}
-              onRemove={removeCableType}
-              placeholder="Add cable type"
-            />
+            <CableTypeList />
           </div>
 
           {/* Properties Section */}
@@ -290,6 +308,12 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 { label: "Subtitle", value: canvasSubtitle, onChange: updateCanvasSubtitle },
                 { label: "Prepared By", value: canvasPreparedBy, onChange: updateCanvasPreparedBy },
               ]}
+              extraToggle={{
+                id: "hide-legend",
+                label: "Hide Legend",
+                checked: hideLegend,
+                onToggle: toggleHideLegend,
+              }}
             />
             <PropertySection
               title="Stage Plan"

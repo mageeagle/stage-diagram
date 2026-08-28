@@ -11,11 +11,13 @@ import {
 } from "@xyflow/react";
 import { nanoid } from "nanoid";
 import {
+  CableTypeDef,
   CustomNodeData,
   NodeInput,
   NodeOutput,
   NodeTemplate,
 } from "../types/diagram";
+import { migrateCableTypes, CABLE_TYPE_PALETTE } from "@/utils/cableStyles";
 import { ProjectState } from "@/utils/projectIO";
 
 interface HistoryState {
@@ -28,7 +30,8 @@ interface DiagramState {
   edges: Edge[];
   selectedNodeIds: string[];
   selectedEdgeIds: string[];
-  cableTypes: string[];
+  cableTypes: CableTypeDef[];
+  hideLegend: boolean;
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   isNodeListModalOpen: boolean;
@@ -123,8 +126,13 @@ interface DiagramState {
   copyNodes: (nodeIds: string[]) => void;
   deleteNodes: (nodeIds: string[]) => void;
   deleteEdge: (edgeIds: string[]) => void;
-  addCableType: (type: string) => void;
-  removeCableType: (type: string) => void;
+  addCableType: (name: string) => void;
+  removeCableType: (name: string) => void;
+  updateCableTypeStyle: (
+    name: string,
+    patch: Partial<Omit<CableTypeDef, "name">>,
+  ) => void;
+  toggleHideLegend: () => void;
   updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
   setIsModalOpen: (isOpen: boolean) => void;
   setIsSettingsModalOpen: (isOpen: boolean) => void;
@@ -246,6 +254,8 @@ export const useStore = create<DiagramState>((set, get) => ({
   undoStack: [],
   redoStack: [],
   hideTitle: false,
+  hideLegend: false,
+  toggleHideLegend: () => set((state) => ({ hideLegend: !state.hideLegend })),
   hideRiderTitle: false,
   toggleHideTitle: () => set((state) => ({ hideTitle: !state.hideTitle })),
   toggleHideRiderTitle: () => set((state) => ({ hideRiderTitle: !state.hideRiderTitle })),
@@ -854,7 +864,8 @@ export const useStore = create<DiagramState>((set, get) => ({
       templates: projectState.templates,
       types: projectState.types,
       locations: projectState.locations,
-      cableTypes: projectState.cableTypes,
+      cableTypes: migrateCableTypes(projectState.cableTypes),
+      hideLegend: projectState.hideLegend ?? false,
       riderListTitle: projectState.riderListTitle,
       riderListSubtitle: projectState.riderListSubtitle,
       riderListPreparedBy: projectState.riderListPreparedBy,
@@ -1030,13 +1041,25 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  addCableType: (type) => {
-    if (!get().cableTypes.includes(type)) {
-      set({ cableTypes: [...get().cableTypes, type] });
-    }
+  addCableType: (name) => {
+    if (get().cableTypes.some((c) => c.name === name)) return;
+    const def: CableTypeDef = {
+      name,
+      color:
+        CABLE_TYPE_PALETTE[get().cableTypes.length % CABLE_TYPE_PALETTE.length],
+      strokeWidth: 2,
+      dash: "solid",
+    };
+    set({ cableTypes: [...get().cableTypes, def] });
   },
-  removeCableType: (type) =>
-    set({ cableTypes: get().cableTypes.filter((t) => t !== type) }),
+  removeCableType: (name) =>
+    set({ cableTypes: get().cableTypes.filter((c) => c.name !== name) }),
+  updateCableTypeStyle: (name, patch) =>
+    set({
+      cableTypes: get().cableTypes.map((c) =>
+        c.name === name ? { ...c, ...patch } : c,
+      ),
+    }),
   updateEdgeCableType: (edgeIds, cableType) => {
     get().recordHistory();
     set({

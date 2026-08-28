@@ -174,7 +174,10 @@ const routedLabeledEdge = (
       <BaseEdge
         id={props.id}
         path={path}
-        style={{ strokeDasharray: wasRouted ? undefined : "4 2" }}
+        style={{
+          ...props.style,
+          strokeDasharray: wasRouted ? props.style?.strokeDasharray : "4 2",
+        }}
       />
       <EdgeLabel
         className={cn("", { "opacity-50": props.data.hidden })}
