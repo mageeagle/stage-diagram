@@ -195,6 +195,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const hideRiderDate = useStore((s) => s.hideRiderDate);
   const toggleHideDate = useStore((s) => s.toggleHideDate);
   const toggleHideRiderDate = useStore((s) => s.toggleHideRiderDate);
+  const edgeRounding = useStore((s) => s.edgeRounding);
+  const setEdgeRounding = useStore((s) => s.setEdgeRounding);
 
   const stagePlanTitle = useStagePlanStore((s) => s.title);
   const stagePlanSubtitle = useStagePlanStore((s) => s.subtitle);
@@ -301,6 +303,27 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 { label: "Prepared By", value: stagePlanPreparedBy, onChange: updateStagePlanPreparedBy },
               ]}
             />
+          </div>
+
+          {/* Edge Routing Section */}
+          <div className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
+            <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
+              Edge Routing
+            </h3>
+            <div className="flex items-center gap-2">
+              <label htmlFor="edge-rounding" className="text-sm font-medium cursor-pointer">
+                Corner radius
+              </label>
+              <input
+                id="edge-rounding"
+                type="number"
+                min={0}
+                max={24}
+                value={edgeRounding}
+                onChange={(e) => setEdgeRounding(Number(e.target.value))}
+                className="w-16 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              />
+            </div>
           </div>
         </div>
       </div>

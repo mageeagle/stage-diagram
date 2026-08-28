@@ -38,6 +38,8 @@ interface DiagramState {
   types: string[];
   locations: string[];
   locationGroupsEnabled: boolean;
+  edgeRoutingEnabled: boolean;
+  edgeRounding: number;
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
@@ -135,6 +137,8 @@ interface DiagramState {
   removeLocation: (location: string) => void;
   restoreProjectState: (state: ProjectState) => void;
   toggleLocationGroups: () => void;
+  toggleEdgeRouting: () => void;
+  setEdgeRounding: (value: number) => void;
   toggleHideTitle: () => void;
   toggleHideRiderTitle: () => void;
   toggleHideDate: () => void;
@@ -187,6 +191,32 @@ function pairKey(sourceNodeId: string, targetNodeId: string, sourceHandle: strin
   return `${sourceNodeId}-${sourceHandle}||${targetNodeId}-${targetHandle}`;
 }
 
+// Drops edges whose endpoint node or handle no longer exists (unrenderable + console spam).
+function purgeOrphanedEdges(
+  nodes: Node<CustomNodeData>[],
+  edges: Edge[],
+): Edge[] {
+  const nodeById = new Map(nodes.map((n) => [n.id, n]));
+  return edges.filter((edge) => {
+    const sourceNode = nodeById.get(edge.source);
+    const targetNode = nodeById.get(edge.target);
+    if (!sourceNode || !targetNode) return false;
+    if (
+      edge.sourceHandle &&
+      !(sourceNode.data?.outputs ?? []).some((o) => o.id === edge.sourceHandle)
+    ) {
+      return false;
+    }
+    if (
+      edge.targetHandle &&
+      !(targetNode.data?.inputs ?? []).some((i) => i.id === edge.targetHandle)
+    ) {
+      return false;
+    }
+    return true;
+  });
+}
+
 export const useStore = create<DiagramState>((set, get) => ({
   nodes: [],
   edges: [],
@@ -227,6 +257,16 @@ export const useStore = create<DiagramState>((set, get) => ({
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
   locationGroupsEnabled: false,
+  toggleEdgeRouting: () =>
+    set((state) => ({ edgeRoutingEnabled: !state.edgeRoutingEnabled })),
+  setEdgeRounding: (value: number) =>
+    set((state) => ({
+      edgeRounding: Number.isFinite(value)
+        ? Math.max(0, Math.min(24, Math.round(value)))
+        : state.edgeRounding,
+    })),
+  edgeRoutingEnabled: false,
+  edgeRounding: 8,
   isSaveAsDialogOpen: false,
   saveAsSuggestedName: "",
   saveAsExtension: "",
@@ -641,6 +681,13 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   removeInput: (nodeId, inputId) => {
+    const removedEdgeIds = new Set(
+      get()
+        .edges.filter(
+          (edge) => edge.target === nodeId && edge.targetHandle === inputId,
+        )
+        .map((edge) => edge.id),
+    );
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId) {
@@ -656,6 +703,10 @@ export const useStore = create<DiagramState>((set, get) => ({
         }
         return node;
       }),
+      edges: get().edges.filter((edge) => !removedEdgeIds.has(edge.id)),
+      proximityEdgeIds: get().proximityEdgeIds.filter(
+        (id) => !removedEdgeIds.has(id),
+      ),
     });
   },
 
@@ -697,6 +748,13 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
 
   removeOutput: (nodeId, outputId) => {
+    const removedEdgeIds = new Set(
+      get()
+        .edges.filter(
+          (edge) => edge.source === nodeId && edge.sourceHandle === outputId,
+        )
+        .map((edge) => edge.id),
+    );
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId) {
@@ -712,6 +770,10 @@ export const useStore = create<DiagramState>((set, get) => ({
         }
         return node;
       }),
+      edges: get().edges.filter((edge) => !removedEdgeIds.has(edge.id)),
+      proximityEdgeIds: get().proximityEdgeIds.filter(
+        (id) => !removedEdgeIds.has(id),
+      ),
     });
   },
 
@@ -773,10 +835,17 @@ export const useStore = create<DiagramState>((set, get) => ({
   restoreProjectState: (projectState: ProjectState) => {
     get().recordHistory();
 
+    const validEdges = purgeOrphanedEdges(projectState.nodes, projectState.edges);
+    if (validEdges.length !== projectState.edges.length) {
+      console.warn(
+        `[stage-diagram] Dropped ${projectState.edges.length - validEdges.length} edge(s) referencing missing nodes/handles on load.`,
+      );
+    }
+
     // 1. Nodes/Edges: Restore the main canvas data
     set({
       nodes: projectState.nodes,
-      edges: projectState.edges,
+      edges: validEdges,
       selectedNodeIds: [],
       selectedEdgeIds: [],
       // Clear temporary/local state indicators when reloading

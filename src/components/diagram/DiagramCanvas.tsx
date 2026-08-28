@@ -27,6 +27,7 @@ import {
   labeledStepEdge,
   labeledStraightEdge,
   labeledBezierEdge,
+  routedLabeledEdge,
   tempEdge,
 } from "@/components/diagram/LabeledEdge";
 import { ExportButton } from "@/components/diagram/ExportButton";
@@ -34,6 +35,7 @@ import { useThemeStore } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns/format";
 import { useProximityConnect, ProximityPair } from "@/hooks/useProximityConnect";
+import { useAvoidNodesRouting } from "@/hooks/useAvoidNodesRouting";
 
 
 const nodeTypes = {
@@ -71,8 +73,12 @@ export const DiagramCanvas = () => {
     (state) => state.locationGroupsEnabled,
   );
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
+  const edgeRoutingEnabled = useStore((state) => state.edgeRoutingEnabled);
+  const edgeRounding = useStore((state) => state.edgeRounding);
+  const toggleEdgeRouting = useStore((state) => state.toggleEdgeRouting);
   const theme = useThemeStore((state) => state.theme);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
+  const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const tempEdges = useStore((state) => state.tempEdges);
   const setTempEdges = useStore((state) => state.setTempEdges);
@@ -118,6 +124,14 @@ export const DiagramCanvas = () => {
     liveNodes,
   );
 
+  const { beginDrag, endDrag } = useAvoidNodesRouting({
+    enabled: edgeRoutingEnabled,
+    nodes,
+    edges,
+    edgeRounding,
+    instance: rfInstance,
+  });
+
   const onNodeDrag = useCallback(() => {
     if (flowInstanceRef.current) {
       const nodes = flowInstanceRef.current.getNodes() as Node<CustomNodeData>[];
@@ -126,9 +140,13 @@ export const DiagramCanvas = () => {
     }
   }, []);
 
-  const onReactFlowApi = useCallback((instance: ReactFlowInstance) => {
-    flowInstanceRef.current = instance;
-  }, []);
+  const onReactFlowApi = useCallback(
+    (instance: ReactFlowInstance) => {
+      flowInstanceRef.current = instance;
+      setRfInstance(instance);
+    },
+    [],
+  );
 
   const groupNodesMap = useRef<Map<string, Node>>(new Map());
   const [groupNodesTick, setGroupNodesTick] = useState(0);
@@ -170,8 +188,29 @@ export const DiagramCanvas = () => {
       setSelectedEdgeIds([]);
       isDraggingRef.current = true;
       proximityPairsRef.current = [];
+      if (edgeRoutingEnabled) {
+        const draggedIds = node.id.startsWith("group-")
+          ? nodes
+              .filter(
+                (n) =>
+                  !n.id.startsWith("group-") &&
+                  n.data.location === node.data.label,
+              )
+              .map((n) => n.id)
+          : selectedNodeIds.length > 1 && selectedNodeIds.includes(node.id)
+            ? [...selectedNodeIds]
+            : [node.id];
+        beginDrag(draggedIds);
+      }
     },
-    [setSelectedNodeIds, setSelectedEdgeIds],
+    [
+      nodes,
+      selectedNodeIds,
+      beginDrag,
+      edgeRoutingEnabled,
+      setSelectedNodeIds,
+      setSelectedEdgeIds,
+    ],
   );
 
   const onMoveEnd = useCallback(() => {
@@ -182,7 +221,10 @@ export const DiagramCanvas = () => {
       proximityPairsRef.current = [];
       setTempEdges([])
     }
-  }, [autoConnectEdges, setTempEdges]);
+    if (edgeRoutingEnabled) {
+      endDrag();
+    }
+  }, [autoConnectEdges, setTempEdges, endDrag, edgeRoutingEnabled]);
 
   const onEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
@@ -387,6 +429,7 @@ export const DiagramCanvas = () => {
         displayNodes: nodes,
         displayEdges: edges.map((edge) => ({
           ...edge,
+          type: edgeRoutingEnabled ? "routed" : edge.type,
           style: hiddenEdgeIds.has(edge.id) ? { display: "none" } : edge.style,
         })),
       };
@@ -487,10 +530,11 @@ export const DiagramCanvas = () => {
       displayNodes,
       displayEdges: edges.map((edge) => ({
         ...edge,
+        type: edgeRoutingEnabled ? "routed" : edge.type,
         style: hiddenEdgeIds.has(edge.id) ? { display: "none" } : edge.style,
       })),
     };
-  }, [nodes, edges, locationGroupsEnabled, groupNodesTick]);
+  }, [nodes, edges, locationGroupsEnabled, groupNodesTick, edgeRoutingEnabled]);
 
   return (
     <div className={cn("w-full h-full relative bg-background")}>
@@ -519,6 +563,7 @@ export const DiagramCanvas = () => {
              labeledStep: labeledStepEdge,
              labeledStraight: labeledStraightEdge,
              labeledBezier: labeledBezierEdge,
+             routed: routedLabeledEdge,
              tempEdge,
            }}
           onInit={onReactFlowApi}
@@ -555,6 +600,17 @@ export const DiagramCanvas = () => {
           />
           <span className="text-sm text-stone-700 dark:text-stone-300">
             Group by Location
+          </span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer bg-stone-200 dark:bg-stone-700 px-3 py-1 rounded border border-stone-400">
+          <input
+            type="checkbox"
+            checked={edgeRoutingEnabled}
+            onChange={toggleEdgeRouting}
+            className="accent-stone-600"
+          />
+          <span className="text-sm text-stone-700 dark:text-stone-300">
+            Avoid Nodes
           </span>
         </label>
       </div>

@@ -540,6 +540,19 @@ Enables automatic edge creation when handles are near each other.
 
 ---
 
+## Avoid Nodes Edge Routing (`src/hooks/useAvoidNodesRouting.ts`)
+
+The **Avoid Nodes** toggle on the Signal Flow canvas routes edges orthogonally around nodes.
+
+- **Router:** Runs on the main thread — each routing pass creates a fresh `obstacle-router` `Router` session (orthogonal), wires the late-bound libavoid helpers, adds one `ShapeRef` per measured node, routes all edges, then deletes connectors/shapes and discards the router. No Web Worker (the app is statically exported and commonly opened via `file://`)
+- **Handle anchors:** Exact handle centers come from React Flow internal handle bounds (`getInternalNode(id).internals.handleBounds`), converted to absolute canvas coordinates. Edges whose handle id can't be resolved (or that have no handle set) fall back to the midpoint of the node side facing the other node
+- **Per-handle separation:** Each edge's connection end sits a short stub outside its exact handle (`ConnEnd.fromPoint`): distinct handles on the same node side get distinct stub lengths (20px base + 4px per lane, ordered along the side), so their exit/approach lanes are separate instead of overlapping. The final polyline prepends/appends the exact handle point, making the first/last segment a short axis-aligned stub
+- **Routing parameters:** `shapeBufferDistance 8`, `idealNudgingDistance 4`, `segmentPenalty 10`; options: `nudgeOrthogonalSegmentsConnectedToShapes false`, `nudgeSharedPathsWithCommonEndPoint true`, `performUnifyingNudgingPreprocessingStep true`, `nudgeOrthogonalTouchingColinearSegments false`, `improveHyperedgeRoutesMovingJunctions true`
+- **Settings:** `edgeRoutingEnabled` and `edgeRounding` (corner radius) are session-only and NOT persisted with the project
+- **Rendering:** Edges render through the `routed` edge type backed by `useRoutedEdgePath`; while a connected node is being dragged, affected edges show a dashed live preview and re-route on drop
+
+---
+
 ## Project I/O (`src/utils/projectIO.ts`)
 
 ### Export (`exportProject`)
