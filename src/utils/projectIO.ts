@@ -9,6 +9,7 @@ export interface ProjectState {
   locations: string[];
   cableTypes: CableTypeDef[];
   hideLegend?: boolean; // optional: absent in pre-styling project files
+  hideCableLabels?: boolean; // optional: absent in pre-existing project files
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;

@@ -97,6 +97,7 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `locations` | `string[]` | Available locations (e.g., "Stage Left") |
 | `cableTypes` | `CableTypeDef[]` | Cable types with per-type styling (e.g., "XLR") |
 | `hideLegend` | `boolean` | Hide cable type legend |
+| `hideCableLabels` | `boolean` | Hide cable type labels (midpoint chips) |
 | `undoStack` / `redoStack` | `HistoryState[]` | Undo/redo history (max 50 entries) |
 | `isModalOpen` | `boolean` | Node creation modal visibility |
 | `isSettingsModalOpen` | `boolean` | Settings modal visibility |
@@ -331,6 +332,7 @@ interface ProjectState {
   locations: string[];
   cableTypes: CableTypeDef[];
   hideLegend?: boolean;
+  hideCableLabels?: boolean;
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
@@ -448,7 +450,7 @@ Custom edge renderers that combine React Flow edges with labels:
 | `labeledStraightEdge` | `StraightEdge` | Straight line |
 | `tempEdge` | `BezierEdge` | Dashed preview for proximity connect |
 
-All edges show `data.cableType` as a label at the midpoint. Edges with `exportingHidden: true` return `null`.
+All edges show `data.cableType` as a label at the midpoint. Edges with `exportingHidden: true` return `null`. `EdgeLabel` is suppressed globally by the `hideCableLabels` setting (labels hidden everywhere, including exports).
 
 ### Inspector Components (`src/components/inspector/`)
 

@@ -38,7 +38,9 @@ function EdgeLabel({
   x,
   y,
 }: EdgeLabelProps) {
-  if (!cableType || cableType === "none") {
+  const hideCableLabels = useStore((s) => s.hideCableLabels);
+
+  if (hideCableLabels || !cableType || cableType === "none") {
     return null;
   }
 

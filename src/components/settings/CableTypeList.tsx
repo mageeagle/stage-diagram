@@ -76,7 +76,7 @@ export const CableTypeList = () => {
           <Plus size={18} />
         </button>
       </form>
-      <ul className="space-y-2 max-h-40 overflow-y-auto">
+      <ul className="space-y-2">
         {cableTypes.map((def) => (
           <li
             key={def.name}

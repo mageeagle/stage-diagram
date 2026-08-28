@@ -84,7 +84,7 @@ const ListSection = ({
           <Plus size={18} />
         </button>
       </form>
-      <ul className="space-y-2 max-h-40 overflow-y-auto">
+      <ul className="space-y-2">
         {items.map((item) => (
           <li
             key={item}
@@ -111,7 +111,7 @@ const PropertySection = ({
   hideDate,
   onToggleHideDate,
   properties,
-  extraToggle,
+  extraToggles,
 }: {
   title: string;
   hideTitle: boolean;
@@ -123,12 +123,12 @@ const PropertySection = ({
     value: string;
     onChange: (val: string) => void;
   }[];
-  extraToggle?: {
+  extraToggles?: {
     id: string;
     label: string;
     checked: boolean;
     onToggle: () => void;
-  };
+  }[];
 }) => {
   const safeId = (id: string) => id.replace(/\s+/g, "-").toLowerCase();
   const titleId = safeId(title);
@@ -138,7 +138,7 @@ const PropertySection = ({
       <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
         {title}
       </h3>
-      <div className="flex gap-8">
+      <div className="grid min-h-12 grid-cols-2 gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -163,23 +163,23 @@ const PropertySection = ({
             Hide Date
           </label>
         </div>
-        {extraToggle && (
-          <div className="flex items-center gap-2">
+        {extraToggles?.map((t) => (
+          <div key={t.id} className="flex items-center gap-2">
             <input
               type="checkbox"
-              id={`${titleId}-${extraToggle.id}`}
+              id={`${titleId}-${t.id}`}
               className="w-4 h-4 cursor-pointer"
-              checked={extraToggle.checked}
-              onChange={extraToggle.onToggle}
+              checked={t.checked}
+              onChange={t.onToggle}
             />
             <label
-              htmlFor={`${titleId}-${extraToggle.id}`}
+              htmlFor={`${titleId}-${t.id}`}
               className="text-sm font-medium cursor-pointer"
             >
-              {extraToggle.label}
+              {t.label}
             </label>
           </div>
-        )}
+        ))}
       </div>
       <div className="space-y-3">
         {properties.map((prop) => (
@@ -219,8 +219,11 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const toggleHideRiderDate = useStore((s) => s.toggleHideRiderDate);
   const hideLegend = useStore((s) => s.hideLegend);
   const toggleHideLegend = useStore((s) => s.toggleHideLegend);
+  const hideCableLabels = useStore((s) => s.hideCableLabels);
+  const toggleHideCableLabels = useStore((s) => s.toggleHideCableLabels);
   const edgeRounding = useStore((s) => s.edgeRounding);
   const setEdgeRounding = useStore((s) => s.setEdgeRounding);
+  const [activeTab, setActiveTab] = useState<"lists" | "properties">("lists");
 
   const stagePlanTitle = useStagePlanStore((s) => s.title);
   const stagePlanSubtitle = useStagePlanStore((s) => s.subtitle);
@@ -247,7 +250,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       onKeyDown={handleKeyDown}
     >
       <div
-        className="w-full max-w-3xl rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900"
+        className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -262,8 +265,28 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           </button>
         </div>
 
-        <div className="space-y-10">
-          {/* Lists Section */}
+        <div className="mb-6 flex gap-6 border-b border-zinc-200 dark:border-zinc-800">
+          {(
+            [
+              { id: "lists", label: "Categories" },
+              { id: "properties", label: "Properties" },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`-mb-px cursor-pointer border-b-2 pb-2 text-sm font-medium ${
+                activeTab === tab.id
+                  ? "border-blue-500 text-zinc-900 dark:text-zinc-100"
+                  : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "lists" ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <ListSection
               title="Type"
@@ -282,9 +305,9 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             />
             <CableTypeList />
           </div>
-
-          {/* Properties Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+        ) : (
+          <div className="space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <PropertySection
               title="Rider List"
               hideTitle={hideRiderTitle}
@@ -308,12 +331,20 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 { label: "Subtitle", value: canvasSubtitle, onChange: updateCanvasSubtitle },
                 { label: "Prepared By", value: canvasPreparedBy, onChange: updateCanvasPreparedBy },
               ]}
-              extraToggle={{
-                id: "hide-legend",
-                label: "Hide Legend",
-                checked: hideLegend,
-                onToggle: toggleHideLegend,
-              }}
+              extraToggles={[
+                {
+                  id: "hide-legend",
+                  label: "Hide Legend",
+                  checked: hideLegend,
+                  onToggle: toggleHideLegend,
+                },
+                {
+                  id: "hide-cable-labels",
+                  label: "Hide Cable Labels",
+                  checked: hideCableLabels,
+                  onToggle: toggleHideCableLabels,
+                },
+              ]}
             />
             <PropertySection
               title="Stage Plan"
@@ -349,7 +380,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               />
             </div>
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </div>,
     document.body,

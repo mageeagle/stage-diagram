@@ -32,6 +32,7 @@ interface DiagramState {
   selectedEdgeIds: string[];
   cableTypes: CableTypeDef[];
   hideLegend: boolean;
+  hideCableLabels: boolean;
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   isNodeListModalOpen: boolean;
@@ -133,6 +134,7 @@ interface DiagramState {
     patch: Partial<Omit<CableTypeDef, "name">>,
   ) => void;
   toggleHideLegend: () => void;
+  toggleHideCableLabels: () => void;
   updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
   setIsModalOpen: (isOpen: boolean) => void;
   setIsSettingsModalOpen: (isOpen: boolean) => void;
@@ -256,6 +258,9 @@ export const useStore = create<DiagramState>((set, get) => ({
   hideTitle: false,
   hideLegend: false,
   toggleHideLegend: () => set((state) => ({ hideLegend: !state.hideLegend })),
+  hideCableLabels: false,
+  toggleHideCableLabels: () =>
+    set((state) => ({ hideCableLabels: !state.hideCableLabels })),
   hideRiderTitle: false,
   toggleHideTitle: () => set((state) => ({ hideTitle: !state.hideTitle })),
   toggleHideRiderTitle: () => set((state) => ({ hideRiderTitle: !state.hideRiderTitle })),
@@ -866,6 +871,7 @@ export const useStore = create<DiagramState>((set, get) => ({
       locations: projectState.locations,
       cableTypes: migrateCableTypes(projectState.cableTypes),
       hideLegend: projectState.hideLegend ?? false,
+      hideCableLabels: projectState.hideCableLabels ?? false,
       riderListTitle: projectState.riderListTitle,
       riderListSubtitle: projectState.riderListSubtitle,
       riderListPreparedBy: projectState.riderListPreparedBy,
