@@ -23,6 +23,7 @@ export interface CustomNodeData {
   width?: number;
   height?: number;
   zIndex?: number; // Added for stacking order control
+  details?: string;                 // Lightweight markup: **bold**, *italic*, __underline__, "- item", "1. item", \n
   [key: string]: unknown;
 }
 

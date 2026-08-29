@@ -138,7 +138,7 @@ const PropertySection = ({
       <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
         {title}
       </h3>
-      <div className="grid min-h-12 grid-cols-2 gap-x-4 gap-y-2">
+      <div className="grid min-h-[76px] grid-cols-2 gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -221,6 +221,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const toggleHideLegend = useStore((s) => s.toggleHideLegend);
   const hideCableLabels = useStore((s) => s.hideCableLabels);
   const toggleHideCableLabels = useStore((s) => s.toggleHideCableLabels);
+  const hideDetailsSignalFlow = useStore((s) => s.hideDetailsSignalFlow);
+  const toggleHideDetailsSignalFlow = useStore((s) => s.toggleHideDetailsSignalFlow);
   const edgeRounding = useStore((s) => s.edgeRounding);
   const setEdgeRounding = useStore((s) => s.setEdgeRounding);
   const [activeTab, setActiveTab] = useState<"lists" | "properties">("lists");
@@ -235,6 +237,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const toggleHideStagePlanTitle = useStagePlanStore((s) => s.toggleHideStagePlanTitle);
   const hideStagePlanDate = useStagePlanStore((s) => s.hideStagePlanDate);
   const toggleHideStagePlanDate = useStagePlanStore((s) => s.toggleHideStagePlanDate);
+  const hideDetailsStagePlan = useStagePlanStore((s) => s.hideDetailsStagePlan);
+  const toggleHideDetailsStagePlan = useStagePlanStore((s) => s.toggleHideDetailsStagePlan);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -344,6 +348,12 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                   checked: hideCableLabels,
                   onToggle: toggleHideCableLabels,
                 },
+                {
+                  id: "hide-details",
+                  label: "Hide Details",
+                  checked: hideDetailsSignalFlow,
+                  onToggle: toggleHideDetailsSignalFlow,
+                },
               ]}
             />
             <PropertySection
@@ -356,6 +366,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 { label: "Title", value: stagePlanTitle, onChange: updateStagePlanTitle },
                 { label: "Subtitle", value: stagePlanSubtitle, onChange: updateStagePlanSubtitle },
                 { label: "Prepared By", value: stagePlanPreparedBy, onChange: updateStagePlanPreparedBy },
+              ]}
+              extraToggles={[
+                {
+                  id: "hide-details",
+                  label: "Hide Details",
+                  checked: hideDetailsStagePlan,
+                  onToggle: toggleHideDetailsStagePlan,
+                },
               ]}
             />
           </div>

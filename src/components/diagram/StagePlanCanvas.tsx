@@ -102,7 +102,9 @@ export const StagePlanCanvas = () => {
     (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
       const isTyping =
-        target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
 
       if (isTyping) {
         return;

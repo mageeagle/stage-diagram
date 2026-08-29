@@ -20,6 +20,7 @@ interface DiagramState {
   redoStack: HistoryState[];
   hideStagePlanTitle: boolean;
   hideStagePlanDate: boolean;
+  hideDetailsStagePlan: boolean;
   undo: () => void;
   redo: () => void;
   recordHistory: () => void;
@@ -64,6 +65,7 @@ interface DiagramState {
   restoreProjectState: (state: ProjectState) => void;
   toggleHideStagePlanTitle: () => void;
   toggleHideStagePlanDate: () => void;
+  toggleHideDetailsStagePlan: () => void;
 }
 
 export const useStagePlanStore = create<DiagramState>((set, get) => ({
@@ -79,6 +81,8 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
   toggleHideStagePlanTitle: () => set((state) => ({ hideStagePlanTitle: !state.hideStagePlanTitle })),
   hideStagePlanDate: false,
   toggleHideStagePlanDate: () => set((state) => ({ hideStagePlanDate: !state.hideStagePlanDate })),
+  hideDetailsStagePlan: false,
+  toggleHideDetailsStagePlan: () => set((state) => ({ hideDetailsStagePlan: !state.hideDetailsStagePlan })),
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
   locationGroupsEnabled: false,
@@ -324,6 +328,7 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
           power: node.data.power,
           hidden: false,
           zIndex: node.data.zIndex,
+          details: node.data.details,
         },
         style: {
           zIndex: node.data.zIndex,
@@ -362,6 +367,7 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
       title: projectState.stagePlanTitle,
       subtitle: projectState.stagePlanSubtitle,
       preparedBy: projectState.stagePlanPreparedBy,
+      hideDetailsStagePlan: projectState.hideDetailsStagePlan ?? false,
     });
   },
 }));

@@ -2,6 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
+import { useStore } from "@/store/useStore";
+import { DetailsEditor } from "./DetailsEditor";
 
 export const StagePlanPropertiesPanel = () => {
   const selectedNodeIds = useStagePlanStore((state) => state.selectedNodeIds);
@@ -15,6 +17,8 @@ export const StagePlanPropertiesPanel = () => {
   );
   const updateNodeHidden = useStagePlanStore((state) => state.updateNodeHidden);
   const updateNodeStackingOrder = useStagePlanStore((state) => state.updateNodeStackingOrder);
+  const updateNodeDetails = useStore((state) => state.updateNodeDetails);
+
 
 
   const primaryNode = nodes.find((n) => n.id === selectedNodeIds[0]);
@@ -60,6 +64,18 @@ export const StagePlanPropertiesPanel = () => {
             </p>
           )}
         </div>
+
+        {!isMultiSelect && (
+          <div className="mb-6">
+            <label className="block text-xs font-medium uppercase mb-1 text-gray-500 dark:text-gray-400">
+              Details
+            </label>
+            <DetailsEditor
+              value={primaryNode.data.details ?? ""}
+              onChange={(v) => updateNodeDetails(primaryNode.id, v)}
+            />
+          </div>
+        )}
 
         <div className="mb-6">
           <label className="block text-xs font-medium uppercase mb-1 text-gray-500 dark:text-gray-400">

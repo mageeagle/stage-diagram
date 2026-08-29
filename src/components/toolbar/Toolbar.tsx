@@ -103,6 +103,7 @@ export const Toolbar = () => {
         cableTypes,
         hideLegend,
         hideCableLabels,
+        hideDetailsSignalFlow,
         riderListTitle,
         riderListSubtitle,
         riderListPreparedBy,
@@ -116,6 +117,7 @@ export const Toolbar = () => {
         subtitle: stagePlanSubtitle,
         preparedBy: stagePlanPreparedBy,
         nodes: stagePlanNodes,
+        hideDetailsStagePlan,
       } = useStagePlanStore.getState();
 
       exportProject(
@@ -128,6 +130,7 @@ export const Toolbar = () => {
           cableTypes,
           hideLegend,
           hideCableLabels,
+          hideDetailsSignalFlow,
           riderListTitle,
           riderListSubtitle,
           riderListPreparedBy,
@@ -138,6 +141,7 @@ export const Toolbar = () => {
           stagePlanSubtitle,
           stagePlanPreparedBy,
           stagePlanNodes,
+          hideDetailsStagePlan,
         },
         filename
       );

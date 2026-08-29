@@ -2,12 +2,15 @@ import { Position, NodeProps, useUpdateNodeInternals, Node } from "@xyflow/react
 import { CustomNodeData, NodeInput, NodeOutput } from "@/types/diagram";
 import { useEffect } from "react";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useStore } from "@/store/useStore";
 import { cn } from "@/lib/utils";
 import { LabeledHandle } from "./LabeledHandle";
+import { DetailsText } from "./DetailsText";
 
 export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData>>) => {
   const update = useUpdateNodeInternals();
   const theme = useThemeStore(s => s.theme);
+  const hideDetails = useStore((s) => s.hideDetailsSignalFlow);
 
   useEffect(() => {
     update(id);
@@ -26,12 +29,20 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
 
   return (
     <div className={cn(
-      "py-2 shadow-md rounded-md border-2 min-w-[250px]",
+      "py-2 shadow-md rounded-md border-2 min-w-[250px] max-w-[320px]",
       isDark ? "bg-stone-800 text-stone-100 border-stone-600" : "bg-white text-stone-900 border-stone-400",
       selected ? 'border-blue-500 ring-2 ring-blue-200' : "",
       data.hidden ? "opacity-30" : ""
     )}>
-      <div className="font-bold text-sm mb-2 text-center">{data.label}</div >
+      <div className="font-bold text-sm mb-2 text-center break-words">
+        {data.label}
+      </div>
+
+      {!hideDetails && data.details ? (
+        <div className="text-xs mb-2 px-2 text-left text-stone-500 dark:text-stone-300">
+          <DetailsText value={data.details} />
+        </div>
+      ) : null}
 
       <div className="flex flex-row justify-between gap-6">
         {/* Inputs */}

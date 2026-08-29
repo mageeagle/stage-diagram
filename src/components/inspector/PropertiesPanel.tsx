@@ -6,12 +6,14 @@ import { Trash2, Plus, Copy, Save } from "lucide-react";
 import { NodeTemplate } from "@/types/diagram";
 import { nanoid } from "nanoid";
 import { EdgeProperties } from "./EdgeProperties";
+import { DetailsEditor } from "./DetailsEditor";
 
 export const PropertiesPanel = () => {
   const selectedNodeIds = useStore((state) => state.selectedNodeIds);
   const selectedEdgeIds = useStore((state) => state.selectedEdgeIds);
   const nodes = useStore((state) => state.nodes);
   const updateNodeLabel = useStore((state) => state.updateNodeLabel);
+  const updateNodeDetails = useStore((state) => state.updateNodeDetails);
   const updateNodeType = useStore((state) => state.updateNodeType);
   const updateNodeLocation = useStore((state) => state.updateNodeLocation);
   const updateNodePower = useStore((state) => state.updateNodePower);
@@ -105,6 +107,23 @@ export const PropertiesPanel = () => {
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
               value={primaryNode.data.label}
               onChange={(e) => updateNodeLabel(primaryNode.id, e.target.value)}
+            />
+          </div>
+        )}
+
+        {!isMultiSelect && (
+          <div className="mb-6">
+            <label
+              className={cn(
+                "block text-xs font-medium uppercase mb-1",
+                "text-gray-500 dark:text-gray-400",
+              )}
+            >
+              Details
+            </label>
+            <DetailsEditor
+              value={primaryNode.data.details ?? ""}
+              onChange={(v) => updateNodeDetails(primaryNode.id, v)}
             />
           </div>
         )}
@@ -311,6 +330,7 @@ export const PropertiesPanel = () => {
             </label>
           </div>
         )}
+
       </div>
 
       <div className="mb-6 flex items-center gap-3">

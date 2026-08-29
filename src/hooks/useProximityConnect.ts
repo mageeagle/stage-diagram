@@ -71,6 +71,13 @@ export function useProximityConnect(
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+      if (isTyping) return;
+
       if (e.key === "q" || e.key === "Q") {
         qKeyPressed.current = true;
       }

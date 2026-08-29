@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import {
   NodeProps,
   useUpdateNodeInternals,
@@ -10,6 +10,7 @@ import { useStagePlanStore } from "@/store/useStagePlanStore";
 import { cn } from "@/lib/utils";
 import { RotateCw } from "lucide-react";
 import { useThemeStore } from "@/store/useThemeStore";
+import { DetailsText } from "./DetailsText";
 
 export type StagePlanNodeData = CustomNodeData & {
   shape?: "rectangle" | "circle" | "triangle";
@@ -27,18 +28,70 @@ export const StagePlanNode = ({
 }: NodeProps<Node<StagePlanNodeData>>) => {
   const update = useUpdateNodeInternals();
   const { updateNodeRotation } = useStagePlanStore();
+  const hideDetails = useStagePlanStore((s) => s.hideDetailsStagePlan);
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
   const nodeRef = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
 
   const shape = data.shape || "rectangle";
   const rotation = data.rotation || 0;
   const width = nodeWidth || data.width || 200;
   const height = nodeHeight || data.height || 150;
 
+  const boxStyle = useMemo(() => {
+    if (shape === "circle") {
+      const s = Math.min(width, height) * 0.7;
+      return {
+        position: "absolute" as const,
+        width: s,
+        height: s,
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+      };
+    }
+    if (shape === "triangle") {
+      // Apex is at the top: only the lower-middle area is usable.
+      return {
+        position: "absolute" as const,
+        width: width * 0.5,
+        height: height * 0.35,
+        left: "50%",
+        top: "70%",
+        transform: "translate(-50%, -50%)",
+      };
+    }
+    return {
+      position: "absolute" as const,
+      left: "8%",
+      top: "8%",
+      width: "84%",
+      height: "84%",
+    };
+  }, [shape, width, height]);
+
   useEffect(() => {
     update(id);
   }, [data, id, update]);
+
+  useLayoutEffect(() => {
+    const box = boxRef.current;
+    const title = titleRef.current;
+    const details = detailsRef.current;
+    if (!box || !title) return;
+    let size = 18;
+    while (size > 10) {
+      title.style.fontSize = `${size}px`;
+      if (details) {
+        details.style.fontSize = `${Math.max(9, Math.round(size * 0.62))}px`;
+      }
+      if (box.scrollHeight <= box.clientHeight + 1) break;
+      size -= 1;
+    }
+  }, [data.label, data.details, hideDetails, width, height, shape]);
 
   // --- Rotation Logic ---
   const rotationRef = useRef<{
@@ -157,8 +210,29 @@ export const StagePlanNode = ({
             />
           )}
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-center text-lg font-bold pointer-events-none truncate px-2 text-stone-800">
-          {data.label}
+        <div
+          ref={boxRef}
+          style={boxStyle}
+          className="overflow-hidden flex items-center justify-center text-center pointer-events-none"
+        >
+          <div className="w-full">
+            <div
+              ref={titleRef}
+              className="font-bold break-words leading-tight text-stone-800"
+              style={{ fontSize: 18 }}
+            >
+              {data.label}
+            </div>
+            {!hideDetails && data.details ? (
+              <div
+                ref={detailsRef}
+                className="break-words leading-tight mt-1 px-2 text-left text-stone-600"
+                style={{ fontSize: 11 }}
+              >
+                <DetailsText value={data.details} />
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

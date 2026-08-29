@@ -33,6 +33,7 @@ interface DiagramState {
   cableTypes: CableTypeDef[];
   hideLegend: boolean;
   hideCableLabels: boolean;
+  hideDetailsSignalFlow: boolean;
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   isNodeListModalOpen: boolean;
@@ -80,6 +81,7 @@ interface DiagramState {
 
   // Node property updates
   updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeDetails: (nodeId: string, details: string) => void;
   updateNodeType: (nodeIds: string[], type: string) => void;
   updateNodeLocation: (nodeIds: string[], location: string) => void;
   updateNodePower: (nodeIds: string[], power: boolean) => void;
@@ -135,6 +137,7 @@ interface DiagramState {
   ) => void;
   toggleHideLegend: () => void;
   toggleHideCableLabels: () => void;
+  toggleHideDetailsSignalFlow: () => void;
   updateEdgeCableType: (edgeIds: string[], cableType: string) => void;
   setIsModalOpen: (isOpen: boolean) => void;
   setIsSettingsModalOpen: (isOpen: boolean) => void;
@@ -261,6 +264,9 @@ export const useStore = create<DiagramState>((set, get) => ({
   hideCableLabels: false,
   toggleHideCableLabels: () =>
     set((state) => ({ hideCableLabels: !state.hideCableLabels })),
+  hideDetailsSignalFlow: false,
+  toggleHideDetailsSignalFlow: () =>
+    set((state) => ({ hideDetailsSignalFlow: !state.hideDetailsSignalFlow })),
   hideRiderTitle: false,
   toggleHideTitle: () => set((state) => ({ hideTitle: !state.hideTitle })),
   toggleHideRiderTitle: () => set((state) => ({ hideRiderTitle: !state.hideRiderTitle })),
@@ -522,6 +528,20 @@ export const useStore = create<DiagramState>((set, get) => ({
           return {
             ...node,
             data: { ...node.data, label },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+
+  updateNodeDetails: (nodeId, details) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: { ...node.data, details },
           };
         }
         return node;
@@ -872,6 +892,7 @@ export const useStore = create<DiagramState>((set, get) => ({
       cableTypes: migrateCableTypes(projectState.cableTypes),
       hideLegend: projectState.hideLegend ?? false,
       hideCableLabels: projectState.hideCableLabels ?? false,
+      hideDetailsSignalFlow: projectState.hideDetailsSignalFlow ?? false,
       riderListTitle: projectState.riderListTitle,
       riderListSubtitle: projectState.riderListSubtitle,
       riderListPreparedBy: projectState.riderListPreparedBy,
