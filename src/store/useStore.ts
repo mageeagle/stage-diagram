@@ -125,6 +125,7 @@ interface DiagramState {
     typeProperty?: string,
     locationProperty?: string,
     power?: boolean,
+    details?: string,
   ) => void;
   copyNodes: (nodeIds: string[]) => void;
   deleteNodes: (nodeIds: string[]) => void;
@@ -916,6 +917,7 @@ export const useStore = create<DiagramState>((set, get) => ({
     typeProperty,
     locationProperty,
     power = false,
+    details = "",
   ) => {
     get().recordHistory();
     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
@@ -941,6 +943,7 @@ export const useStore = create<DiagramState>((set, get) => ({
         power,
         hidden: false,
         hideFromList: false,
+        details,
       },
     };
     set({

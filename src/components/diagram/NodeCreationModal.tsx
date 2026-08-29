@@ -4,11 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { DetailsEditor } from '../inspector/DetailsEditor';
 
 interface NodeCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string, inputsCount: number, outputsCount: number, type: string, location: string) => void;
+  onCreate: (name: string, inputsCount: number, outputsCount: number, type: string, location: string, details: string, power: boolean) => void;
 }
 
 export const NodeCreationModal = ({
@@ -19,6 +20,8 @@ export const NodeCreationModal = ({
   const [name, setName] = useState('');
   const [inputsCount, setInputsCount] = useState(1);
   const [outputsCount, setOutputsCount] = useState(1);
+  const [details, setDetails] = useState('');
+  const [power, setPower] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   
@@ -59,7 +62,7 @@ export const NodeCreationModal = ({
 
   const handleCreate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    onCreate(name || 'New Node', inputsCount, outputsCount, effectiveType, effectiveLocation);
+    onCreate(name || 'New Node', inputsCount, outputsCount, effectiveType, effectiveLocation, details, power);
   };
 
   const handleCancel = () => {
@@ -93,7 +96,7 @@ export const NodeCreationModal = ({
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              Node Name
+              Label
             </label>
             <input
               ref={nameRef}
@@ -103,6 +106,13 @@ export const NodeCreationModal = ({
               placeholder="e.g. My Node"
               className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              Details
+            </label>
+            <DetailsEditor value={details} onChange={setDetails} />
           </div>
 
           <div>
@@ -153,6 +163,22 @@ export const NodeCreationModal = ({
                 +
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="node-power"
+              checked={power}
+              onChange={(e) => setPower(e.target.checked)}
+              className="w-4 h-4 cursor-pointer"
+            />
+            <label
+              htmlFor="node-power"
+              className="text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer"
+            >
+              Require Power Plug?
+            </label>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

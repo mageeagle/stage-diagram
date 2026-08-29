@@ -100,7 +100,7 @@ export const PropertiesPanel = () => {
                 "text-gray-500 dark:text-gray-400",
               )}
             >
-              Node Label
+              Label
             </label>
             <input
               type="text"
