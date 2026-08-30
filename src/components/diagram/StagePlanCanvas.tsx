@@ -65,9 +65,14 @@ export const StagePlanCanvas = () => {
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const registerFlowCanvas = useStore((state) => state.registerFlowCanvas);
+
   const onReactFlowApi = useCallback((instance: ReactFlowInstance) => {
     flowInstanceRef.current = instance;
-  }, []);
+    if (containerRef.current) {
+      registerFlowCanvas(instance, containerRef.current);
+    }
+  }, [registerFlowCanvas]);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {

@@ -143,12 +143,17 @@ export const DiagramCanvas = () => {
     }
   }, []);
 
+  const registerFlowCanvas = useStore((state) => state.registerFlowCanvas);
+
   const onReactFlowApi = useCallback(
     (instance: ReactFlowInstance) => {
       flowInstanceRef.current = instance;
       setRfInstance(instance);
+      if (containerRef.current) {
+        registerFlowCanvas(instance, containerRef.current);
+      }
     },
-    [],
+    [registerFlowCanvas],
   );
 
   const groupNodesMap = useRef<Map<string, Node>>(new Map());

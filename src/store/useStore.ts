@@ -9,6 +9,7 @@ import {
   applyEdgeChanges,
   addEdge,
 } from "@xyflow/react";
+import type { ReactFlowInstance } from "@xyflow/react";
 import { nanoid } from "nanoid";
 import {
   CableTypeDef,
@@ -106,11 +107,19 @@ interface DiagramState {
   prepareEdgeForExport: (edgeId: string) => void;
   restoreEdgeFromExport: (edgeId: string) => void;
 
+  // Registered canvas (for viewport-aware placement)
+  flowInstance: ReactFlowInstance | null;
+  flowContainer: HTMLDivElement | null;
+
   // Template actions
   addTemplate: (template: NodeTemplate) => void;
   applyTemplate: (
     template: NodeTemplate,
-    position: { x: number; y: number },
+    position?: { x: number; y: number },
+  ) => void;
+  registerFlowCanvas: (
+    instance: ReactFlowInstance,
+    container: HTMLDivElement,
   ) => void;
   updateTemplate: (template: NodeTemplate) => void;
   deleteTemplate: (templateId: string) => void;
@@ -248,6 +257,8 @@ export const useStore = create<DiagramState>((set, get) => ({
   isNodeListModalOpen: false,
   isHelpModalOpen: false,
   pendingPosition: null,
+  flowInstance: null,
+  flowContainer: null,
   templates: [],
   types: [],
   locations: [],
@@ -835,12 +846,29 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  registerFlowCanvas: (instance, container) => {
+    set({ flowInstance: instance, flowContainer: container });
+  },
+
   applyTemplate: (template, position) => {
     get().recordHistory();
+    let pos = position;
+    if (!pos) {
+      const { flowInstance, flowContainer } = get();
+      if (flowInstance && flowContainer) {
+        const viewport = flowInstance.getViewport();
+        pos = {
+          x: (flowContainer.clientWidth / 2 - viewport.x) / viewport.zoom,
+          y: (flowContainer.clientHeight / 2 - viewport.y) / viewport.zoom,
+        };
+      } else {
+        pos = { x: 0, y: 0 };
+      }
+    }
     const newNode: Node<CustomNodeData> = {
       id: nanoid(),
       type: template.nodeType,
-      position,
+      position: pos,
       data: {
         label: template.name,
         inputs: template.inputs,

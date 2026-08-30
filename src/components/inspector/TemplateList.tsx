@@ -48,8 +48,8 @@ export const TemplateList = () => {
                         className="flex items-center gap-1 w-full text-sm rounded border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       >
                         <button
-                          onClick={() => applyTemplate(template, { x: 0, y: 0 })}
-                          className="flex-1 text-left px-3 py-2"
+                          onClick={() => applyTemplate(template)}
+                          className="flex-1 text-left px-3 py-2 cursor-pointer"
                         >
                           {template.name}
                         </button>
