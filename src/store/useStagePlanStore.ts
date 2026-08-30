@@ -302,10 +302,10 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
       const searchIndex = existingNodesIds.indexOf(node.id);
        if (searchIndex !== -1) {
          const existingNode = existingNodes[searchIndex];
-         return {
-           ...existingNode,
-           data: { ...existingNode.data, ...node.data },
-           position: node.position,
+          return {
+            ...existingNode,
+            data: { ...existingNode.data, ...node.data },
+            position: existingNode.position,
            style: {
              ...existingNode.style,
              zIndex: node.data.zIndex ?? existingNode.data.zIndex,
