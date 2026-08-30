@@ -116,6 +116,8 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `tempEdges` | `Edge[]` | Temporary proximity connection preview edges |
 | `proximityPairs` | `ProximityPair[]` | Auto-connect proximity pairs |
 | `proximityEdgeIds` | `string[]` | Edge IDs for auto-connected edges |
+| `defaultLabelFontSize` | `number` | Signal Flow label default font size (px) |
+| `defaultDetailsFontSize` | `number` | Signal Flow details default font size (px) |
 
 **Key Actions:**
 
@@ -126,6 +128,8 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 - `addTemplate(template)` / `applyTemplate(template, position)` — Template management
 - `undo()` / `redo()` / `recordHistory()` — History management
 - `restoreProjectState(state)` — Import project data
+- `updateNodeLabelFontSize(nodeIds, size)` / `updateNodeDetailsFontSize(nodeIds, size)` — Per-node font size override (`null` resets to default)
+- `setDefaultLabelFontSize(size)` / `setDefaultDetailsFontSize(size)` — Global default font sizes (px, clamped 8-48)
 - `autoConnectEdges(pairs)` — Auto-connect proximity pairs
 - `setSaveAsDialog(suggestedName, extension, onConfirm, onClose?)` — Open save-as dialog
 - `closeSaveAsDialog()` — Close save-as dialog
@@ -142,6 +146,8 @@ Separate store for Stage Plan diagrams with additional shape/rotation capabiliti
 | `title` / `subtitle` / `preparedBy` | `string` | Stage Plan header info |
 | `stagePlanNodes` | `Node<CustomNodeData>[]` | Stored stage plan nodes |
 | `hideStagePlanTitle` / `hideStagePlanDate` | `boolean` | Stage Plan header visibility |
+| `defaultLabelFontSize` | `number` | Stage Plan label default font size (px) |
+| `defaultDetailsFontSize` | `number` | Stage Plan details default font size (px) |
 
 **Key Actions:**
 
@@ -150,6 +156,8 @@ Separate store for Stage Plan diagrams with additional shape/rotation capabiliti
 - `updateNodeRotation(nodeIds, rotation)` — Rotate nodes
 - `updateNodeDimensions(nodeIds, width, height)` — Resize nodes
 - `updateNodeStackingOrder(nodeIds, zIndex)` — Z-ordering
+- `updateNodeLabelFontSize(nodeIds, size)` / `updateNodeDetailsFontSize(nodeIds, size)` — Per-node font size override (`null` resets to default)
+- `setDefaultLabelFontSize(size)` / `setDefaultDetailsFontSize(size)` — Global default font sizes (px, clamped 8-48)
 
 ### 3. `useThemeStore` (`src/store/useThemeStore.ts`) — Theme State
 
@@ -292,6 +300,8 @@ interface CustomNodeData {
   width?: number;                   // Node width
   height?: number;                  // Node height
   zIndex?: number;                  // Stacking order
+  labelFontSize?: number;           // Label font size px (8-48); absent = global default
+  detailsFontSize?: number;         // Details font size px (8-48); absent = global default
   [key: string]: unknown;           // Extensible
 }
 

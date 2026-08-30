@@ -35,6 +35,8 @@ interface DiagramState {
   hideLegend: boolean;
   hideCableLabels: boolean;
   hideDetailsSignalFlow: boolean;
+  defaultLabelFontSize: number;
+  defaultDetailsFontSize: number;
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   isNodeListModalOpen: boolean;
@@ -84,6 +86,10 @@ interface DiagramState {
   // Node property updates
   updateNodeLabel: (nodeId: string, label: string) => void;
   updateNodeDetails: (nodeId: string, details: string) => void;
+  updateNodeLabelFontSize: (nodeIds: string[], size: number | null) => void;
+  updateNodeDetailsFontSize: (nodeIds: string[], size: number | null) => void;
+  setDefaultLabelFontSize: (size: number) => void;
+  setDefaultDetailsFontSize: (size: number) => void;
   updateNodeType: (nodeIds: string[], type: string) => void;
   updateNodeLocation: (nodeIds: string[], location: string) => void;
   updateNodePower: (nodeIds: string[], power: boolean) => void;
@@ -240,6 +246,10 @@ function purgeOrphanedEdges(
   });
 }
 
+function clampFontSize(size: number): number {
+  return Math.max(8, Math.min(48, Math.round(size)));
+}
+
 export const useStore = create<DiagramState>((set, get) => ({
   nodes: [],
   edges: [],
@@ -278,6 +288,8 @@ export const useStore = create<DiagramState>((set, get) => ({
   toggleHideCableLabels: () =>
     set((state) => ({ hideCableLabels: !state.hideCableLabels })),
   hideDetailsSignalFlow: false,
+  defaultLabelFontSize: 14,
+  defaultDetailsFontSize: 12,
   toggleHideDetailsSignalFlow: () =>
     set((state) => ({ hideDetailsSignalFlow: !state.hideDetailsSignalFlow })),
   hideRiderTitle: false,
@@ -570,6 +582,37 @@ export const useStore = create<DiagramState>((set, get) => ({
       }),
     });
   },
+
+  updateNodeLabelFontSize: (nodeIds, size) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        const data = { ...node.data };
+        if (size === null) delete data.labelFontSize;
+        else data.labelFontSize = clampFontSize(size);
+        return { ...node, data };
+      }),
+    });
+  },
+
+  updateNodeDetailsFontSize: (nodeIds, size) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        const data = { ...node.data };
+        if (size === null) delete data.detailsFontSize;
+        else data.detailsFontSize = clampFontSize(size);
+        return { ...node, data };
+      }),
+    });
+  },
+
+  setDefaultLabelFontSize: (size) =>
+    set({ defaultLabelFontSize: clampFontSize(size) }),
+  setDefaultDetailsFontSize: (size) =>
+    set({ defaultDetailsFontSize: clampFontSize(size) }),
 
   updateNodeType: (nodeIds, type) => {
     get().recordHistory();
@@ -932,6 +975,8 @@ export const useStore = create<DiagramState>((set, get) => ({
       hideLegend: projectState.hideLegend ?? false,
       hideCableLabels: projectState.hideCableLabels ?? false,
       hideDetailsSignalFlow: projectState.hideDetailsSignalFlow ?? false,
+      defaultLabelFontSize: projectState.signalFlowLabelFontSize ?? 14,
+      defaultDetailsFontSize: projectState.signalFlowDetailsFontSize ?? 12,
       riderListTitle: projectState.riderListTitle,
       riderListSubtitle: projectState.riderListSubtitle,
       riderListPreparedBy: projectState.riderListPreparedBy,

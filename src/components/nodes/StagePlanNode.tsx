@@ -29,6 +29,8 @@ export const StagePlanNode = ({
   const update = useUpdateNodeInternals();
   const { updateNodeRotation } = useStagePlanStore();
   const hideDetails = useStagePlanStore((s) => s.hideDetailsStagePlan);
+  const defaultLabelFontSize = useStagePlanStore((s) => s.defaultLabelFontSize);
+  const defaultDetailsFontSize = useStagePlanStore((s) => s.defaultDetailsFontSize);
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -40,6 +42,9 @@ export const StagePlanNode = ({
   const rotation = data.rotation || 0;
   const width = nodeWidth || data.width || 200;
   const height = nodeHeight || data.height || 150;
+
+  const labelSize = data.labelFontSize ?? defaultLabelFontSize;
+  const detailsSize = data.detailsFontSize ?? defaultDetailsFontSize;
 
   const boxStyle = useMemo(() => {
     if (shape === "circle") {
@@ -82,16 +87,17 @@ export const StagePlanNode = ({
     const title = titleRef.current;
     const details = detailsRef.current;
     if (!box || !title) return;
-    let size = 18;
+    const ratio = labelSize > 0 ? detailsSize / labelSize : 0.62;
+    let size = labelSize;
     while (size > 10) {
       title.style.fontSize = `${size}px`;
       if (details) {
-        details.style.fontSize = `${Math.max(9, Math.round(size * 0.62))}px`;
+        details.style.fontSize = `${Math.max(9, Math.round(size * ratio))}px`;
       }
       if (box.scrollHeight <= box.clientHeight + 1) break;
       size -= 1;
     }
-  }, [data.label, data.details, hideDetails, width, height, shape]);
+  }, [data.label, data.details, hideDetails, width, height, shape, labelSize, detailsSize]);
 
   // --- Rotation Logic ---
   const rotationRef = useRef<{
@@ -219,7 +225,7 @@ export const StagePlanNode = ({
             <div
               ref={titleRef}
               className="font-bold break-words leading-tight text-stone-800"
-              style={{ fontSize: 18 }}
+              style={{ fontSize: labelSize }}
             >
               {data.label}
             </div>
@@ -227,7 +233,7 @@ export const StagePlanNode = ({
               <div
                 ref={detailsRef}
                 className="break-words leading-tight mt-1 px-2 text-left text-stone-600"
-                style={{ fontSize: 11 }}
+                style={{ fontSize: detailsSize }}
               >
                 <DetailsText value={data.details} />
               </div>

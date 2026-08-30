@@ -110,6 +110,8 @@ export const Toolbar = () => {
         canvasTitle,
         canvasSubtitle,
         canvasPreparedBy,
+        defaultLabelFontSize,
+        defaultDetailsFontSize,
       } = useStore.getState();
 
       const {
@@ -118,6 +120,8 @@ export const Toolbar = () => {
         preparedBy: stagePlanPreparedBy,
         nodes: stagePlanNodes,
         hideDetailsStagePlan,
+        defaultLabelFontSize: stagePlanDefaultLabelFontSize,
+        defaultDetailsFontSize: stagePlanDefaultDetailsFontSize,
       } = useStagePlanStore.getState();
 
       exportProject(
@@ -131,6 +135,8 @@ export const Toolbar = () => {
           hideLegend,
           hideCableLabels,
           hideDetailsSignalFlow,
+          signalFlowLabelFontSize: defaultLabelFontSize,
+          signalFlowDetailsFontSize: defaultDetailsFontSize,
           riderListTitle,
           riderListSubtitle,
           riderListPreparedBy,
@@ -142,6 +148,8 @@ export const Toolbar = () => {
           stagePlanPreparedBy,
           stagePlanNodes,
           hideDetailsStagePlan,
+          stagePlanLabelFontSize: stagePlanDefaultLabelFontSize,
+          stagePlanDetailsFontSize: stagePlanDefaultDetailsFontSize,
         },
         filename
       );

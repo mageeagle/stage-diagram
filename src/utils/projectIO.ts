@@ -12,6 +12,10 @@ export interface ProjectState {
   hideCableLabels?: boolean; // optional: absent in pre-existing project files
   hideDetailsSignalFlow?: boolean; // optional: absent in pre-existing project files
   hideDetailsStagePlan?: boolean; // optional: absent in pre-existing project files
+  signalFlowLabelFontSize?: number; // optional: absent in pre-existing project files
+  signalFlowDetailsFontSize?: number;
+  stagePlanLabelFontSize?: number;
+  stagePlanDetailsFontSize?: number;
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;

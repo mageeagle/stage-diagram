@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
-import { useStore } from "@/store/useStore";
 import { DetailsEditor } from "./DetailsEditor";
 
 export const StagePlanPropertiesPanel = () => {
@@ -17,7 +16,15 @@ export const StagePlanPropertiesPanel = () => {
   );
   const updateNodeHidden = useStagePlanStore((state) => state.updateNodeHidden);
   const updateNodeStackingOrder = useStagePlanStore((state) => state.updateNodeStackingOrder);
-  const updateNodeDetails = useStore((state) => state.updateNodeDetails);
+  const updateNodeLabelFontSize = useStagePlanStore(
+    (state) => state.updateNodeLabelFontSize,
+  );
+  const updateNodeDetailsFontSize = useStagePlanStore(
+    (state) => state.updateNodeDetailsFontSize,
+  );
+  const updateNodeDetails = useStagePlanStore(
+    (state) => state.updateNodeDetails,
+  );
 
 
 
@@ -74,6 +81,52 @@ export const StagePlanPropertiesPanel = () => {
               value={primaryNode.data.details ?? ""}
               onChange={(v) => updateNodeDetails(primaryNode.id, v)}
             />
+          </div>
+        )}
+
+        {!isMultiSelect && (
+          <div className="mb-6">
+            <h3 className="text-sm font-bold mb-2">Font Sizes</h3>
+            <label className="block">
+              <span className="block text-xs font-medium uppercase mb-1 text-gray-500 dark:text-gray-400">
+                Label (px)
+              </span>
+              <input
+                type="number"
+                min={8}
+                max={48}
+                value={primaryNode.data.labelFontSize ?? ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  updateNodeLabelFontSize(
+                    [primaryNode.id],
+                    v === "" ? null : Math.max(8, Math.min(48, Number(v))),
+                  );
+                }}
+                placeholder="Default"
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+              />
+            </label>
+            <label className="block mt-3">
+              <span className="block text-xs font-medium uppercase mb-1 text-gray-500 dark:text-gray-400">
+                Details (px)
+              </span>
+              <input
+                type="number"
+                min={8}
+                max={48}
+                value={primaryNode.data.detailsFontSize ?? ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  updateNodeDetailsFontSize(
+                    [primaryNode.id],
+                    v === "" ? null : Math.max(8, Math.min(48, Number(v))),
+                  );
+                }}
+                placeholder="Default"
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+              />
+            </label>
           </div>
         )}
 

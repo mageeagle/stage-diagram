@@ -17,6 +17,12 @@ export const PropertiesPanel = () => {
   const updateNodeType = useStore((state) => state.updateNodeType);
   const updateNodeLocation = useStore((state) => state.updateNodeLocation);
   const updateNodePower = useStore((state) => state.updateNodePower);
+  const updateNodeLabelFontSize = useStore(
+    (state) => state.updateNodeLabelFontSize,
+  );
+  const updateNodeDetailsFontSize = useStore(
+    (state) => state.updateNodeDetailsFontSize,
+  );
   const updateNodeHidden = useStore((state) => state.updateNodeHidden);
   const updateNodeHideFromList = useStore(
     (state) => state.updateNodeHideFromList,
@@ -108,6 +114,29 @@ export const PropertiesPanel = () => {
               value={primaryNode.data.label}
               onChange={(e) => updateNodeLabel(primaryNode.id, e.target.value)}
             />
+            <label
+              className={cn(
+                "block text-xs font-medium uppercase mt-3 mb-1",
+                "text-gray-500 dark:text-gray-400",
+              )}
+            >
+              Font size (px)
+            </label>
+            <input
+              type="number"
+              min={8}
+              max={48}
+              value={primaryNode.data.labelFontSize ?? ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                updateNodeLabelFontSize(
+                  [primaryNode.id],
+                  v === "" ? null : Math.max(8, Math.min(48, Number(v))),
+                );
+              }}
+              placeholder="Default"
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+            />
           </div>
         )}
 
@@ -124,6 +153,29 @@ export const PropertiesPanel = () => {
             <DetailsEditor
               value={primaryNode.data.details ?? ""}
               onChange={(v) => updateNodeDetails(primaryNode.id, v)}
+            />
+            <label
+              className={cn(
+                "block text-xs font-medium uppercase mt-3 mb-1",
+                "text-gray-500 dark:text-gray-400",
+              )}
+            >
+              Font size (px)
+            </label>
+            <input
+              type="number"
+              min={8}
+              max={48}
+              value={primaryNode.data.detailsFontSize ?? ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                updateNodeDetailsFontSize(
+                  [primaryNode.id],
+                  v === "" ? null : Math.max(8, Math.min(48, Number(v))),
+                );
+              }}
+              placeholder="Default"
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
             />
           </div>
         )}

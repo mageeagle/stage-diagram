@@ -11,6 +11,8 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
   const update = useUpdateNodeInternals();
   const theme = useThemeStore(s => s.theme);
   const hideDetails = useStore((s) => s.hideDetailsSignalFlow);
+  const defaultLabelFontSize = useStore((s) => s.defaultLabelFontSize);
+  const defaultDetailsFontSize = useStore((s) => s.defaultDetailsFontSize);
 
   useEffect(() => {
     update(id);
@@ -34,12 +36,18 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
       selected ? 'border-blue-500 ring-2 ring-blue-200' : "",
       data.hidden ? "opacity-30" : ""
     )}>
-      <div className="font-bold text-sm mb-2 text-center break-words">
+      <div
+        className="font-bold mb-2 text-center break-words"
+        style={{ fontSize: data.labelFontSize ?? defaultLabelFontSize }}
+      >
         {data.label}
       </div>
 
       {!hideDetails && data.details ? (
-        <div className="text-xs mb-2 px-2 text-left text-stone-500 dark:text-stone-300">
+        <div
+          className="mb-2 px-2 text-left text-stone-500 dark:text-stone-300"
+          style={{ fontSize: data.detailsFontSize ?? defaultDetailsFontSize }}
+        >
           <DetailsText value={data.details} />
         </div>
       ) : null}

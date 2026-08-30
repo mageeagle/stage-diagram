@@ -24,6 +24,8 @@ export interface CustomNodeData {
   height?: number;
   zIndex?: number; // Added for stacking order control
   details?: string;                 // Lightweight markup: **bold**, *italic*, __underline__, "- item", "1. item", \n
+  labelFontSize?: number;         // Label font size in px (8-48); absent = global default
+  detailsFontSize?: number;       // Details font size in px (8-48); absent = global default
   [key: string]: unknown;
 }
 

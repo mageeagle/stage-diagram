@@ -225,6 +225,10 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const toggleHideDetailsSignalFlow = useStore((s) => s.toggleHideDetailsSignalFlow);
   const edgeRounding = useStore((s) => s.edgeRounding);
   const setEdgeRounding = useStore((s) => s.setEdgeRounding);
+  const defaultLabelFontSize = useStore((s) => s.defaultLabelFontSize);
+  const defaultDetailsFontSize = useStore((s) => s.defaultDetailsFontSize);
+  const setDefaultLabelFontSize = useStore((s) => s.setDefaultLabelFontSize);
+  const setDefaultDetailsFontSize = useStore((s) => s.setDefaultDetailsFontSize);
   const [activeTab, setActiveTab] = useState<"lists" | "properties">("lists");
 
   const stagePlanTitle = useStagePlanStore((s) => s.title);
@@ -239,6 +243,10 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const toggleHideStagePlanDate = useStagePlanStore((s) => s.toggleHideStagePlanDate);
   const hideDetailsStagePlan = useStagePlanStore((s) => s.hideDetailsStagePlan);
   const toggleHideDetailsStagePlan = useStagePlanStore((s) => s.toggleHideDetailsStagePlan);
+  const stagePlanDefaultLabelFontSize = useStagePlanStore((s) => s.defaultLabelFontSize);
+  const stagePlanDefaultDetailsFontSize = useStagePlanStore((s) => s.defaultDetailsFontSize);
+  const stagePlanSetDefaultLabelFontSize = useStagePlanStore((s) => s.setDefaultLabelFontSize);
+  const stagePlanSetDefaultDetailsFontSize = useStagePlanStore((s) => s.setDefaultDetailsFontSize);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -378,6 +386,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             />
           </div>
 
+          <div className="grid grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-8">
           {/* Edge Routing Section */}
           <div className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
@@ -397,6 +406,72 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 className="w-16 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
               />
             </div>
+          </div>
+
+          {/* Default Font Sizes Section */}
+          <div className="border-t border-zinc-200 pt-8 dark:border-zinc-800 md:col-span-2">
+            <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
+              Default Font Sizes
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+              <div className="space-y-1">
+                <label htmlFor="sf-default-label-font-size" className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  Signal Flow Label (px)
+                </label>
+                <input
+                  id="sf-default-label-font-size"
+                  type="number"
+                  min={8}
+                  max={48}
+                  value={defaultLabelFontSize}
+                  onChange={(e) => setDefaultLabelFontSize(Math.max(8, Math.min(48, Number(e.target.value))))}
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="sf-default-details-font-size" className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  Signal Flow Details (px)
+                </label>
+                <input
+                  id="sf-default-details-font-size"
+                  type="number"
+                  min={8}
+                  max={48}
+                  value={defaultDetailsFontSize}
+                  onChange={(e) => setDefaultDetailsFontSize(Math.max(8, Math.min(48, Number(e.target.value))))}
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="sp-default-label-font-size" className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  Stage Plan Label (px)
+                </label>
+                <input
+                  id="sp-default-label-font-size"
+                  type="number"
+                  min={8}
+                  max={48}
+                  value={stagePlanDefaultLabelFontSize}
+                  onChange={(e) => stagePlanSetDefaultLabelFontSize(Math.max(8, Math.min(48, Number(e.target.value))))}
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="sp-default-details-font-size" className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  Stage Plan Details (px)
+                </label>
+                <input
+                  id="sp-default-details-font-size"
+                  type="number"
+                  min={8}
+                  max={48}
+                  value={stagePlanDefaultDetailsFontSize}
+                  onChange={(e) => stagePlanSetDefaultDetailsFontSize(Math.max(8, Math.min(48, Number(e.target.value))))}
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              </div>
+            </div>
+          </div>
           </div>
           </div>
         )}

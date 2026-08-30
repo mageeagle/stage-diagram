@@ -21,6 +21,8 @@ interface DiagramState {
   hideStagePlanTitle: boolean;
   hideStagePlanDate: boolean;
   hideDetailsStagePlan: boolean;
+  defaultLabelFontSize: number;
+  defaultDetailsFontSize: number;
   undo: () => void;
   redo: () => void;
   recordHistory: () => void;
@@ -39,7 +41,12 @@ interface DiagramState {
   updatePreparedBy: (preparedBy: string) => void;
 
   // Node property updates
+  updateNodeDetails: (nodeId: string, details: string) => void;
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
+  updateNodeLabelFontSize: (nodeIds: string[], size: number | null) => void;
+  updateNodeDetailsFontSize: (nodeIds: string[], size: number | null) => void;
+  setDefaultLabelFontSize: (size: number) => void;
+  setDefaultDetailsFontSize: (size: number) => void;
   updateNodeShape: (
     nodeIds: string[],
     shape: "rectangle" | "circle" | "triangle",
@@ -69,6 +76,10 @@ interface DiagramState {
   toggleHideDetailsStagePlan: () => void;
 }
 
+function clampFontSize(size: number): number {
+  return Math.max(8, Math.min(48, Math.round(size)));
+}
+
 export const useStagePlanStore = create<DiagramState>((set, get) => ({
   nodes: [],
   selectedNodeIds: [],
@@ -83,6 +94,8 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
   hideStagePlanDate: false,
   toggleHideStagePlanDate: () => set((state) => ({ hideStagePlanDate: !state.hideStagePlanDate })),
   hideDetailsStagePlan: false,
+  defaultLabelFontSize: 18,
+  defaultDetailsFontSize: 11,
   toggleHideDetailsStagePlan: () => set((state) => ({ hideDetailsStagePlan: !state.hideDetailsStagePlan })),
   toggleLocationGroups: () =>
     set((state) => ({ locationGroupsEnabled: !state.locationGroupsEnabled })),
@@ -193,6 +206,20 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  updateNodeDetails: (nodeId, details) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (node.id === nodeId) {
+        return {
+          ...node,
+          data: { ...node.data, details },
+        };
+      }
+      return node;
+    });
+    set({ nodes: updatedNodes });
+  },
+
   updateNodeHidden: (nodeIds, hidden) => {
     const updatedNodes = get().nodes.map((node) => {
       if (nodeIds.includes(node.id)) {
@@ -208,6 +235,35 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
       nodes: updatedNodes,
     });
   },
+
+  updateNodeLabelFontSize: (nodeIds, size) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (!nodeIds.includes(node.id)) return node;
+      const data = { ...node.data };
+      if (size === null) delete data.labelFontSize;
+      else data.labelFontSize = clampFontSize(size);
+      return { ...node, data };
+    });
+    set({ nodes: updatedNodes });
+  },
+
+  updateNodeDetailsFontSize: (nodeIds, size) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (!nodeIds.includes(node.id)) return node;
+      const data = { ...node.data };
+      if (size === null) delete data.detailsFontSize;
+      else data.detailsFontSize = clampFontSize(size);
+      return { ...node, data };
+    });
+    set({ nodes: updatedNodes });
+  },
+
+  setDefaultLabelFontSize: (size) =>
+    set({ defaultLabelFontSize: clampFontSize(size) }),
+  setDefaultDetailsFontSize: (size) =>
+    set({ defaultDetailsFontSize: clampFontSize(size) }),
 
   updateNodeShape: (nodeIds, shape) => {
     get().recordHistory();
@@ -376,6 +432,8 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
       subtitle: projectState.stagePlanSubtitle,
       preparedBy: projectState.stagePlanPreparedBy,
       hideDetailsStagePlan: projectState.hideDetailsStagePlan ?? false,
+      defaultLabelFontSize: projectState.stagePlanLabelFontSize ?? 18,
+      defaultDetailsFontSize: projectState.stagePlanDetailsFontSize ?? 11,
     });
   },
 }));
