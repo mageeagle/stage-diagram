@@ -87,6 +87,14 @@ export const PropertiesPanel = () => {
     isMultiSelect && selectedNodes.some((n) => n.data.hidden === true);
   const anyHideFromList =
     isMultiSelect && selectedNodes.some((n) => n.data.hideFromList === true);
+  const labelSizes = selectedNodes.map((n) => n.data.labelFontSize);
+  const sharedLabelSize = labelSizes.every((v) => v === labelSizes[0])
+    ? labelSizes[0]
+    : undefined;
+  const detailsSizes = selectedNodes.map((n) => n.data.detailsFontSize);
+  const sharedDetailsSize = detailsSizes.every((v) => v === detailsSizes[0])
+    ? detailsSizes[0]
+    : undefined;
 
   return (
     <div
@@ -98,87 +106,103 @@ export const PropertiesPanel = () => {
       <div className="grow">
         <h2 className="font-bold text-lg mb-4">Properties</h2>
 
-        {!isMultiSelect && (
-          <div className="mb-6">
-            <label
-              className={cn(
-                "block text-xs font-medium uppercase mb-1",
-                "text-gray-500 dark:text-gray-400",
-              )}
-            >
-              Label
-            </label>
-            <input
-              type="text"
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
-              value={primaryNode.data.label}
-              onChange={(e) => updateNodeLabel(primaryNode.id, e.target.value)}
-            />
-            <label
-              className={cn(
-                "block text-xs font-medium uppercase mt-3 mb-1",
-                "text-gray-500 dark:text-gray-400",
-              )}
-            >
-              Font size (px)
-            </label>
-            <input
-              type="number"
-              min={8}
-              max={48}
-              value={primaryNode.data.labelFontSize ?? ""}
-              onChange={(e) => {
-                const v = e.target.value;
-                updateNodeLabelFontSize(
-                  [primaryNode.id],
-                  v === "" ? null : Math.max(8, Math.min(48, Number(v))),
-                );
-              }}
-              placeholder="Default"
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
-            />
-          </div>
-        )}
+        <div className="mb-6">
+          {!isMultiSelect && (
+            <>
+              <label
+                className={cn(
+                  "block text-xs font-medium uppercase mb-1",
+                  "text-gray-500 dark:text-gray-400",
+                )}
+              >
+                Label
+              </label>
+              <input
+                type="text"
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+                value={primaryNode.data.label}
+                onChange={(e) =>
+                  updateNodeLabel(primaryNode.id, e.target.value)
+                }
+              />
+            </>
+          )}
+          <label
+            className={cn(
+              "block text-xs font-medium uppercase mb-1",
+              !isMultiSelect && "mt-3",
+              "text-gray-500 dark:text-gray-400",
+            )}
+          >
+            {isMultiSelect ? "Label font size (px)" : "Font size (px)"}
+          </label>
+          <input
+            type="number"
+            min={8}
+            max={48}
+            value={
+              isMultiSelect
+                ? sharedLabelSize ?? ""
+                : primaryNode.data.labelFontSize ?? ""
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              updateNodeLabelFontSize(
+                selectedNodeIds,
+                v === "" ? null : Math.max(8, Math.min(48, Number(v))),
+              );
+            }}
+            placeholder="Default"
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+          />
+        </div>
 
-        {!isMultiSelect && (
-          <div className="mb-6">
-            <label
-              className={cn(
-                "block text-xs font-medium uppercase mb-1",
-                "text-gray-500 dark:text-gray-400",
-              )}
-            >
-              Details
-            </label>
-            <DetailsEditor
-              value={primaryNode.data.details ?? ""}
-              onChange={(v) => updateNodeDetails(primaryNode.id, v)}
-            />
-            <label
-              className={cn(
-                "block text-xs font-medium uppercase mt-3 mb-1",
-                "text-gray-500 dark:text-gray-400",
-              )}
-            >
-              Font size (px)
-            </label>
-            <input
-              type="number"
-              min={8}
-              max={48}
-              value={primaryNode.data.detailsFontSize ?? ""}
-              onChange={(e) => {
-                const v = e.target.value;
-                updateNodeDetailsFontSize(
-                  [primaryNode.id],
-                  v === "" ? null : Math.max(8, Math.min(48, Number(v))),
-                );
-              }}
-              placeholder="Default"
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
-            />
-          </div>
-        )}
+        <div className="mb-6">
+          {!isMultiSelect && (
+            <>
+              <label
+                className={cn(
+                  "block text-xs font-medium uppercase mb-1",
+                  "text-gray-500 dark:text-gray-400",
+                )}
+              >
+                Details
+              </label>
+              <DetailsEditor
+                value={primaryNode.data.details ?? ""}
+                onChange={(v) => updateNodeDetails(primaryNode.id, v)}
+              />
+            </>
+          )}
+          <label
+            className={cn(
+              "block text-xs font-medium uppercase mb-1",
+              !isMultiSelect && "mt-3",
+              "text-gray-500 dark:text-gray-400",
+            )}
+          >
+            {isMultiSelect ? "Details font size (px)" : "Font size (px)"}
+          </label>
+          <input
+            type="number"
+            min={8}
+            max={48}
+            value={
+              isMultiSelect
+                ? sharedDetailsSize ?? ""
+                : primaryNode.data.detailsFontSize ?? ""
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              updateNodeDetailsFontSize(
+                selectedNodeIds,
+                v === "" ? null : Math.max(8, Math.min(48, Number(v))),
+              );
+            }}
+            placeholder="Default"
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+          />
+        </div>
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
