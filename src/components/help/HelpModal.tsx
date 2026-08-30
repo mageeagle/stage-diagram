@@ -38,7 +38,7 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Help
+            Info
           </h2>
           <button
             onClick={() => {
@@ -88,9 +88,15 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
               </li>
               <li className="flex items-center gap-2">
                 <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
-                  C
+                  C / D
                 </kbd>
                 <span>Duplicate Selected</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Ctrl+A
+                </kbd>
+                <span>Select All Nodes and Edges</span>
               </li>
               <li className="flex items-center gap-2">
                 <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">

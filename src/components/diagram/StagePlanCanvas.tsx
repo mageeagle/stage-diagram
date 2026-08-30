@@ -44,6 +44,7 @@ export const StagePlanCanvas = () => {
   const setSelectedNodeIds = useStagePlanStore(
     (state) => state.setSelectedNodeIds,
   );
+  const selectAll = useStagePlanStore((state) => state.selectAll);
   const locationGroupsEnabled = useStagePlanStore(
     (state) => state.locationGroupsEnabled,
   );
@@ -132,8 +133,17 @@ export const StagePlanCanvas = () => {
         redo();
         return;
       }
+
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === "a" || event.key === "A")
+      ) {
+        event.preventDefault();
+        selectAll();
+        return;
+      }
     },
-    [undo, redo],
+    [undo, redo, selectAll],
   );
 
   useEffect(() => {

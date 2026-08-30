@@ -71,6 +71,7 @@ interface DiagramState {
   // Node selection
   setSelectedNodeIds: (nodeIds: string[]) => void;
   setSelectedEdgeIds: (edgeIds: string[]) => void;
+  selectAll: () => void;
 
   // Export settings
   updateRiderListTitle: (title: string) => void;
@@ -531,6 +532,15 @@ export const useStore = create<DiagramState>((set, get) => ({
   // Node selection
   setSelectedNodeIds: (nodeIds) => set({ selectedNodeIds: nodeIds }),
   setSelectedEdgeIds: (edgeIds) => set({ selectedEdgeIds: edgeIds }),
+  selectAll: () => {
+    const { nodes, edges } = get();
+    set({
+      nodes: nodes.map((n) => ({ ...n, selected: true })),
+      edges: edges.map((e) => ({ ...e, selected: true })),
+      selectedNodeIds: nodes.map((n) => n.id),
+      selectedEdgeIds: edges.map((e) => e.id),
+    });
+  },
 
   // Node property updates
   updateNodeLabel: (nodeId, label) => {

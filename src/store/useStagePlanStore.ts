@@ -31,6 +31,7 @@ interface DiagramState {
   // Modal controls
   setIsStagePlanEnabled: (isOpen: boolean) => void;
   setSelectedNodeIds: (nodeIds: string[]) => void;
+  selectAll: () => void;
 
   // Export settings
   updateTitle: (title: string) => void;
@@ -184,6 +185,13 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
 
   // Node selection
   setSelectedNodeIds: (nodeIds) => set({ selectedNodeIds: nodeIds }),
+  selectAll: () => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map((n) => ({ ...n, selected: true })),
+      selectedNodeIds: nodes.map((n) => n.id),
+    });
+  },
 
   updateNodeHidden: (nodeIds, hidden) => {
     const updatedNodes = get().nodes.map((node) => {

@@ -60,6 +60,7 @@ export const DiagramCanvas = () => {
   const deleteEdge = useStore((state) => state.deleteEdge);
   const addNode = useStore((state) => state.addNode);
   const copyNodes = useStore((state) => state.copyNodes);
+  const selectAll = useStore((state) => state.selectAll);
   const isModalOpen = useStore((state) => state.isModalOpen);
   const pendingPosition = useStore((state) => state.pendingPosition);
   const canvasTitle = useStore((state) => state.canvasTitle);
@@ -343,7 +344,10 @@ export const DiagramCanvas = () => {
         deleteEdge(selectedEdgeIds);
       }
 
-      if (event.key.toLowerCase() === "c" && selectedNodeIds.length > 0) {
+      if (
+        (event.key.toLowerCase() === "c" || event.key.toLowerCase() === "d") &&
+        selectedNodeIds.length > 0
+      ) {
         copyNodes(selectedNodeIds);
       }
 
@@ -367,6 +371,14 @@ export const DiagramCanvas = () => {
         event.preventDefault();
         setIsModalOpen(true);
       }
+
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === "a" || event.key === "A")
+      ) {
+        event.preventDefault();
+        selectAll();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -383,6 +395,7 @@ export const DiagramCanvas = () => {
     setIsModalOpen,
     undo,
     redo,
+    selectAll,
   ]);
 
   useEffect(() => {
