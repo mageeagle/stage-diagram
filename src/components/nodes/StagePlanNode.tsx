@@ -10,6 +10,8 @@ import { useStagePlanStore } from "@/store/useStagePlanStore";
 import { cn } from "@/lib/utils";
 import { RotateCw } from "lucide-react";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useStore } from "@/store/useStore";
+import { resolveBackgroundColor, textColorFor, isValidHexColor } from "@/utils/color";
 import { DetailsText } from "./DetailsText";
 
 export type StagePlanNodeData = CustomNodeData & {
@@ -33,6 +35,13 @@ export const StagePlanNode = ({
   const defaultDetailsFontSize = useStagePlanStore((s) => s.defaultDetailsFontSize);
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
+  const typeBackgrounds = useStore((s) => s.typeBackgrounds);
+  const namedColors = useStore((s) => s.namedColors);
+  const nodeBg = resolveBackgroundColor(data.backgroundColor, namedColors);
+  const typeBgRaw = typeBackgrounds[data.type ?? ""];
+  const bg = nodeBg ?? (isValidHexColor(typeBgRaw) ? typeBgRaw : undefined);
+  const fg = bg ? textColorFor(bg) : undefined;
+  const shapeFill = bg ?? (isDark ? "grey" : "white");
   const nodeRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -189,7 +198,7 @@ export const StagePlanNode = ({
               y="1"
               width="98"
               height="98"
-              fill={isDark ? "grey" : "white"}
+              fill={shapeFill}
               stroke="#a8a29e"
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
@@ -200,7 +209,7 @@ export const StagePlanNode = ({
               cx="50"
               cy="50"
               r="48"
-              fill={isDark ? "grey" : "white"}
+              fill={shapeFill}
               stroke="#a8a29e"
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
@@ -209,7 +218,7 @@ export const StagePlanNode = ({
           {shape === "triangle" && (
             <polygon
               points="50,1 1,99 99,99"
-              fill={isDark ? "grey" : "white"}
+              fill={shapeFill}
               stroke="#a8a29e"
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
@@ -225,7 +234,7 @@ export const StagePlanNode = ({
             <div
               ref={titleRef}
               className="font-bold break-words leading-tight text-stone-800"
-              style={{ fontSize: labelSize }}
+              style={{ fontSize: labelSize, ...(fg ? { color: fg } : {}) }}
             >
               {data.label}
             </div>
@@ -233,7 +242,7 @@ export const StagePlanNode = ({
               <div
                 ref={detailsRef}
                 className="break-words leading-tight mt-1 px-2 text-left text-stone-600"
-                style={{ fontSize: detailsSize }}
+                style={{ fontSize: detailsSize, ...(fg ? { color: fg } : {}) }}
               >
                 <DetailsText value={data.details} />
               </div>

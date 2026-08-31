@@ -27,6 +27,10 @@ export const PropertiesPanel = () => {
   const updateNodeHideFromList = useStore(
     (state) => state.updateNodeHideFromList,
   );
+  const updateNodeBackground = useStore(
+    (state) => state.updateNodeBackground,
+  );
+  const namedColors = useStore((state) => state.namedColors);
   const types = useStore((state) => state.types);
   const locations = useStore((state) => state.locations);
   const addType = useStore((state) => state.addType);
@@ -95,6 +99,10 @@ export const PropertiesPanel = () => {
   const sharedDetailsSize = detailsSizes.every((v) => v === detailsSizes[0])
     ? detailsSizes[0]
     : undefined;
+  const bgValues = selectedNodes.map((n) => n.data.backgroundColor ?? "");
+  const sharedBg = bgValues.every((v) => v === bgValues[0])
+    ? bgValues[0]
+    : "";
 
   return (
     <div
@@ -274,6 +282,36 @@ export const PropertiesPanel = () => {
           {isMultiSelect && hasMixedLocations && (
             <p className="text-[10px] text-gray-500 italic mt-1">
               Multiple locations selected
+            </p>
+          )}
+        </div>
+
+        <div className="mb-6">
+          <label
+            className={cn(
+              "block text-xs font-medium uppercase mb-1",
+              "text-gray-500 dark:text-gray-400",
+            )}
+          >
+            Background
+          </label>
+          <select
+            value={sharedBg}
+            onChange={(e) =>
+              updateNodeBackground(selectedNodeIds, e.target.value || null)
+            }
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+          >
+            <option value="">None</option>
+            {namedColors.map((c) => (
+              <option key={c.name} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          {isMultiSelect && sharedBg === "" && selectedNodes.length > 1 && (
+            <p className="text-[10px] text-gray-500 italic mt-1">
+              Mixed or unset backgrounds
             </p>
           )}
         </div>

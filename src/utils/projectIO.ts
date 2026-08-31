@@ -1,4 +1,4 @@
-import { CustomNodeData, NodeTemplate, CableTypeDef } from "@/types/diagram";
+import { CustomNodeData, NodeTemplate, CableTypeDef, NamedColorDef } from "@/types/diagram";
 import { Edge, Node } from "@xyflow/react";
 
 export interface ProjectState {
@@ -27,6 +27,9 @@ export interface ProjectState {
   stagePlanSubtitle: string;
   stagePlanPreparedBy: string;
   stagePlanNodes: Node<CustomNodeData>[];
+  namedColors?: NamedColorDef[]; // optional: absent in pre-existing project files
+  locationBackgrounds?: Record<string, string>;
+  typeBackgrounds?: Record<string, string>;
 }
 
 /**

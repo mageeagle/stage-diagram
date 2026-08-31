@@ -14,12 +14,14 @@ import { nanoid } from "nanoid";
 import {
   CableTypeDef,
   CustomNodeData,
+  NamedColorDef,
   NodeInput,
   NodeOutput,
   NodeTemplate,
 } from "../types/diagram";
 import { migrateCableTypes, CABLE_TYPE_PALETTE } from "@/utils/cableStyles";
 import { ProjectState } from "@/utils/projectIO";
+import { useStagePlanStore } from "./useStagePlanStore";
 
 interface HistoryState {
   nodes: Node<CustomNodeData>[];
@@ -49,6 +51,9 @@ interface DiagramState {
   edgeRoutingEnabled: boolean;
   edgeRounding: number;
   defaultLineType: string;
+  namedColors: NamedColorDef[];
+  locationBackgrounds: Record<string, string>;
+  typeBackgrounds: Record<string, string>;
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
@@ -96,6 +101,13 @@ interface DiagramState {
   updateNodePower: (nodeIds: string[], power: boolean) => void;
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
+  updateNodeBackground: (nodeIds: string[], name: string | null) => void;
+  setLocationBackground: (location: string, name: string | null) => void;
+  setTypeBackground: (type: string, hex: string | null) => void;
+  addNamedColor: (name: string) => void;
+  removeNamedColor: (name: string) => void;
+  renameNamedColor: (oldName: string, newName: string) => void;
+  updateNamedColorColor: (name: string, color: string) => void;
   updateEdgeLineType: (edgeIds: string[], lineType: string | null) => void;
   setDefaultLineType: (lineType: string) => void;
   moveNodes: (
@@ -293,6 +305,9 @@ export const useStore = create<DiagramState>((set, get) => ({
   defaultLabelFontSize: 14,
   defaultDetailsFontSize: 12,
   defaultLineType: "labeledBezier",
+  namedColors: [],
+  locationBackgrounds: {},
+  typeBackgrounds: {},
   toggleHideDetailsSignalFlow: () =>
     set((state) => ({ hideDetailsSignalFlow: !state.hideDetailsSignalFlow })),
   hideRiderTitle: false,
@@ -724,6 +739,96 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  updateNodeBackground: (nodeIds, name) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        const data = { ...node.data };
+        if (name === null || name === "") delete data.backgroundColor;
+        else data.backgroundColor = name;
+        return { ...node, data };
+      }),
+    });
+  },
+
+  setLocationBackground: (location, name) => {
+    const backgrounds = { ...get().locationBackgrounds };
+    if (name === null || name === "") delete backgrounds[location];
+    else backgrounds[location] = name;
+    set({ locationBackgrounds: backgrounds });
+  },
+
+  setTypeBackground: (type, hex) => {
+    const backgrounds = { ...get().typeBackgrounds };
+    if (hex === null || hex === "") delete backgrounds[type];
+    else backgrounds[type] = hex;
+    set({ typeBackgrounds: backgrounds });
+  },
+
+  addNamedColor: (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (
+      get().namedColors.some(
+        (c) => c.name.toLowerCase() === trimmed.toLowerCase(),
+      )
+    )
+      return;
+    set({
+      namedColors: [...get().namedColors, { name: trimmed, color: "#fca5a5" }],
+    });
+  },
+
+  removeNamedColor: (name) =>
+    set({ namedColors: get().namedColors.filter((c) => c.name !== name) }),
+
+  renameNamedColor: (oldName, newName) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return;
+    if (
+      get().namedColors.some(
+        (c) =>
+          c.name !== oldName &&
+          c.name.toLowerCase() === trimmed.toLowerCase(),
+      )
+    )
+      return;
+    set({
+      namedColors: get().namedColors.map((c) =>
+        c.name === oldName ? { ...c, name: trimmed } : c,
+      ),
+      nodes: get().nodes.map((node) =>
+        node.data.backgroundColor === oldName
+          ? {
+              ...node,
+              data: { ...node.data, backgroundColor: trimmed },
+            }
+          : node,
+      ),
+    });
+    const spState = useStagePlanStore.getState();
+    if (spState.nodes.some((n) => n.data.backgroundColor === oldName)) {
+      useStagePlanStore.setState({
+        nodes: spState.nodes.map((node) =>
+          node.data.backgroundColor === oldName
+            ? {
+                ...node,
+                data: { ...node.data, backgroundColor: trimmed },
+              }
+            : node,
+        ),
+      });
+    }
+  },
+
+  updateNamedColorColor: (name, color) =>
+    set({
+      namedColors: get().namedColors.map((c) =>
+        c.name === name ? { ...c, color } : c,
+      ),
+    }),
+
   updateEdgeLineType: (edgeIds, lineType) => {
     get().recordHistory();
     set({
@@ -1001,7 +1106,10 @@ export const useStore = create<DiagramState>((set, get) => ({
         projectState.defaultEdgeLineType &&
         projectState.defaultEdgeLineType !== "default"
           ? projectState.defaultEdgeLineType
-          : "labeledBezier",
+           : "labeledBezier",
+      namedColors: projectState.namedColors ?? [],
+      locationBackgrounds: projectState.locationBackgrounds ?? {},
+      typeBackgrounds: projectState.typeBackgrounds ?? {},
       riderListTitle: projectState.riderListTitle,
       riderListSubtitle: projectState.riderListSubtitle,
       riderListPreparedBy: projectState.riderListPreparedBy,
@@ -1227,15 +1335,40 @@ export const useStore = create<DiagramState>((set, get) => ({
   updateCanvasPreparedBy: (preparedBy) => set({ canvasPreparedBy: preparedBy }),
   addType: (type) => {
     if (!get().types.includes(type)) {
-      set({ types: [...get().types, type] });
+      set({
+        types: [...get().types, type],
+        typeBackgrounds: {
+          ...get().typeBackgrounds,
+          [type]: get().typeBackgrounds[type] ?? "#e7e5e4",
+        },
+      });
     }
   },
-  removeType: (type) => set({ types: get().types.filter((t) => t !== type) }),
+  removeType: (type) => {
+    const backgrounds = { ...get().typeBackgrounds };
+    delete backgrounds[type];
+    set({
+      types: get().types.filter((t) => t !== type),
+      typeBackgrounds: backgrounds,
+    });
+  },
   addLocation: (location) => {
     if (!get().locations.includes(location)) {
-      set({ locations: [...get().locations, location] });
+      set({
+        locations: [...get().locations, location],
+        locationBackgrounds: {
+          ...get().locationBackgrounds,
+          [location]: get().locationBackgrounds[location] ?? "#e7e5e4",
+        },
+      });
     }
   },
-  removeLocation: (location) =>
-    set({ locations: get().locations.filter((l) => l !== location) }),
+  removeLocation: (location) => {
+    const backgrounds = { ...get().locationBackgrounds };
+    delete backgrounds[location];
+    set({
+      locations: get().locations.filter((l) => l !== location),
+      locationBackgrounds: backgrounds,
+    });
+  },
 }));

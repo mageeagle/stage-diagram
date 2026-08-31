@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useStore } from "@/store/useStore";
 import { cn } from "@/lib/utils";
+import { resolveBackgroundColor, textColorFor, isValidHexColor } from "@/utils/color";
 import { LabeledHandle } from "./LabeledHandle";
 import { DetailsText } from "./DetailsText";
 
@@ -19,6 +20,15 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
   }, [data.inputs, data.outputs, id, update]);
 
   const isDark = theme === 'dark';
+  const typeBackgrounds = useStore((s) => s.typeBackgrounds);
+  const namedColors = useStore((s) => s.namedColors);
+  const nodeBg = resolveBackgroundColor(
+    data?.backgroundColor as string | undefined,
+    namedColors,
+  );
+  const typeBgRaw = typeBackgrounds[data?.type ?? ""];
+  const bg = nodeBg ?? (isValidHexColor(typeBgRaw) ? typeBgRaw : undefined);
+  const fg = bg ? textColorFor(bg) : undefined;
 
   if (!data) {
     return null;
@@ -35,10 +45,12 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
       isDark ? "bg-stone-800 text-stone-100 border-stone-600" : "bg-white text-stone-900 border-stone-400",
       selected ? 'border-blue-500 ring-2 ring-blue-200' : "",
       data.hidden ? "opacity-30" : ""
-    )}>
+    )}
+      style={bg ? { backgroundColor: bg } : undefined}
+    >
       <div
         className="font-bold mb-2 text-center break-words"
-        style={{ fontSize: data.labelFontSize ?? defaultLabelFontSize }}
+        style={{ fontSize: data.labelFontSize ?? defaultLabelFontSize, ...(fg ? { color: fg } : {}) }}
       >
         {data.label}
       </div>
@@ -46,7 +58,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
       {!hideDetails && data.details ? (
         <div
           className="mb-2 px-2 text-left text-stone-500 dark:text-stone-300"
-          style={{ fontSize: data.detailsFontSize ?? defaultDetailsFontSize }}
+          style={{ fontSize: data.detailsFontSize ?? defaultDetailsFontSize, ...(fg ? { color: fg } : {}) }}
         >
           <DetailsText value={data.details} />
         </div>
@@ -57,7 +69,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
         <div className="flex flex-col gap-2">
           {data.inputs ? (
             data.inputs.map((input: NodeInput) => (
-              <LabeledHandle key={input.id} id={input.id} type={"target"} position={Position.Left} title={input.name} />
+              <LabeledHandle key={input.id} id={input.id} type={"target"} position={Position.Left} title={input.name} color={fg} />
             ))
           ) : (
             <div className="w-4"></div >
@@ -68,7 +80,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
         <div className="flex flex-col gap-2">
           {data.outputs ? (
             data.outputs.map((output: NodeOutput) => (
-              <LabeledHandle key={output.id} id={output.id} type={"source"} position={Position.Right} title={output.name} />
+              <LabeledHandle key={output.id} id={output.id} type={"source"} position={Position.Right} title={output.name} color={fg} />
             ))
           ) : (
             <div className="w-4"></div >

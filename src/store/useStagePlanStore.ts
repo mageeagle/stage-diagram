@@ -45,6 +45,7 @@ interface DiagramState {
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   updateNodeLabelFontSize: (nodeIds: string[], size: number | null) => void;
   updateNodeDetailsFontSize: (nodeIds: string[], size: number | null) => void;
+  updateNodeBackground: (nodeIds: string[], name: string | null) => void;
   setDefaultLabelFontSize: (size: number) => void;
   setDefaultDetailsFontSize: (size: number) => void;
   updateNodeShape: (
@@ -260,6 +261,18 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
     set({ nodes: updatedNodes });
   },
 
+  updateNodeBackground: (nodeIds, name) => {
+    get().recordHistory();
+    const updatedNodes = get().nodes.map((node) => {
+      if (!nodeIds.includes(node.id)) return node;
+      const data = { ...node.data };
+      if (name === null || name === "") delete data.backgroundColor;
+      else data.backgroundColor = name;
+      return { ...node, data };
+    });
+    set({ nodes: updatedNodes });
+  },
+
   setDefaultLabelFontSize: (size) =>
     set({ defaultLabelFontSize: clampFontSize(size) }),
   setDefaultDetailsFontSize: (size) =>
@@ -382,6 +395,7 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
         position: node.position,
         data: {
           label: node.data.label,
+          type: node.data.type,
           location: node.data.location,
           shape: node.data.shape,
           rotation: node.data.rotation,
@@ -393,6 +407,7 @@ export const useStagePlanStore = create<DiagramState>((set, get) => ({
           hidden: false,
           zIndex: node.data.zIndex,
           details: node.data.details,
+          backgroundColor: node.data.backgroundColor,
         },
         style: {
           zIndex: node.data.zIndex,

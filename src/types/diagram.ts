@@ -26,6 +26,7 @@ export interface CustomNodeData {
   details?: string;                 // Lightweight markup: **bold**, *italic*, __underline__, "- item", "1. item", \n
   labelFontSize?: number;         // Label font size in px (8-48); absent = global default
   detailsFontSize?: number;       // Details font size in px (8-48); absent = global default
+  backgroundColor?: string; // palette entry name; "" or absent = theme default
   [key: string]: unknown;
 }
 
@@ -53,4 +54,9 @@ export interface CableTypeDef {
   color: string; // hex, e.g. "#3b82f6"
   strokeWidth: number; // 1-6
   dash: DashPattern;
+}
+
+export interface NamedColorDef {
+  name: string;
+  color: string;
 }

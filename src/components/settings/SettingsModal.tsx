@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useStagePlanStore } from "../../store/useStagePlanStore";
 import { CableTypeList } from "./CableTypeList";
+import { NodeColorList } from "./NodeColorList";
+import { LocationList } from "./LocationList";
+import { TypeList } from "./TypeList";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -33,76 +36,6 @@ const PropertyInput = ({
     />
   </div >
 );
-
-const ListSection = ({
-  title,
-  items,
-  onAdd,
-  onRemove,
-  placeholder,
-  autoFocus = false,
-}: {
-  title: string;
-  items: string[];
-  onAdd: (item: string) => void;
-  onRemove: (item: string) => void;
-  placeholder: string;
-  autoFocus?: boolean;
-}) => {
-  const [inputValue, setInputValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = inputValue.trim();
-    if (trimmed) {
-      onAdd(trimmed);
-      setInputValue("");
-      inputRef.current?.focus();
-    }
-  };
-
-  return (
-    <div>
-      <h3 className="text-sm font-medium text-zinc-500 mb-3 uppercase tracking-wider">
-        {title}
-      </h3>
-      <form onSubmit={handleAdd} className="flex gap-2 mb-4">
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder={placeholder}
-          autoFocus={autoFocus}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-        />
-        <button
-          type="submit"
-          className="cursor-pointer rounded-md bg-blue-400 p-1.5 text-white hover:bg-blue-300"
-        >
-          <Plus size={18} />
-        </button>
-      </form>
-      <ul className="space-y-2">
-        {items.map((item) => (
-          <li
-            key={item}
-            className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-          >
-            <span>{item}</span>
-            <button
-              onClick={() => onRemove(item)}
-              className="cursor-pointer text-zinc-400 hover:text-red-500"
-            >
-              <Trash2 size={16} />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
 
 const PropertySection = ({
   title,
@@ -191,12 +124,6 @@ const PropertySection = ({
 };
 
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
-  const types = useStore((s) => s.types);
-  const locations = useStore((s) => s.locations);
-  const addType = useStore((s) => s.addType);
-  const removeType = useStore((s) => s.removeType);
-  const addLocation = useStore((s) => s.addLocation);
-  const removeLocation = useStore((s) => s.removeLocation);
   const riderListTitle = useStore((s) => s.riderListTitle);
   const riderListSubtitle = useStore((s) => s.riderListSubtitle);
   const riderListPreparedBy = useStore((s) => s.riderListPreparedBy);
@@ -301,23 +228,11 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         </div>
 
         {activeTab === "lists" ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ListSection
-              title="Type"
-              items={types}
-              onAdd={addType}
-              onRemove={removeType}
-              placeholder="Add type"
-              autoFocus={true}
-            />
-            <ListSection
-              title="Location"
-              items={locations}
-              onAdd={addLocation}
-              onRemove={removeLocation}
-              placeholder="Add location"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <TypeList />
+            <LocationList />
             <CableTypeList />
+            <NodeColorList />
           </div>
         ) : (
           <div className="space-y-10">

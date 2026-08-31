@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { DASH_PATTERN } from "@/utils/cableStyles";
+import { ColorInput } from "./ColorInput";
 import type { DashPattern } from "@/types/diagram";
 
 const DASH_OPTIONS: { value: DashPattern; label: string }[] = [
@@ -82,33 +83,22 @@ export const CableTypeList = () => {
             key={def.name}
             className="rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2 min-w-0">
-                <LineSample
-                  color={def.color}
-                  strokeWidth={def.strokeWidth}
-                  dash={def.dash}
-                />
-                <span className="truncate">{def.name}</span>
-              </span>
-              <button
-                onClick={() => removeCableType(def.name)}
-                className="cursor-pointer text-zinc-400 hover:text-red-500"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                type="color"
-                value={def.color}
-                onChange={(e) =>
-                  updateCableTypeStyle(def.name, { color: e.target.value })
-                }
-                className="h-6 w-8 cursor-pointer rounded border border-zinc-300 bg-transparent dark:border-zinc-600"
-                aria-label={`${def.name} color`}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <LineSample
+                color={def.color}
+                strokeWidth={def.strokeWidth}
+                dash={def.dash}
               />
-              <label className="flex items-center gap-1 text-xs">
+              <span className="min-w-0 flex-1 break-words">{def.name}</span>
+              <ColorInput
+                value={def.color}
+                onCommit={(hex) =>
+                  updateCableTypeStyle(def.name, { color: hex })
+                }
+                className="h-6 w-8 shrink-0 cursor-pointer rounded border border-zinc-300 bg-transparent dark:border-zinc-600"
+                ariaLabel={`${def.name} color`}
+              />
+              <label className="flex shrink-0 items-center gap-1 text-xs">
                 <span className="text-zinc-500">Width</span>
                 <input
                   type="number"
@@ -133,7 +123,7 @@ export const CableTypeList = () => {
                     dash: e.target.value as DashPattern,
                   })
                 }
-                className="rounded border border-zinc-300 bg-white px-1 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                className="shrink-0 rounded border border-zinc-300 bg-white px-1 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
               >
                 {DASH_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -141,6 +131,12 @@ export const CableTypeList = () => {
                   </option>
                 ))}
               </select>
+              <button
+                onClick={() => removeCableType(def.name)}
+                className="shrink-0 cursor-pointer text-zinc-400 hover:text-red-500"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           </li>
         ))}

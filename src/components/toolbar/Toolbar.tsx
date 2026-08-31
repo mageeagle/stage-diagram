@@ -113,6 +113,9 @@ export const Toolbar = () => {
         defaultLabelFontSize,
         defaultDetailsFontSize,
         defaultLineType,
+        namedColors,
+        locationBackgrounds,
+        typeBackgrounds,
       } = useStore.getState();
 
       const {
@@ -139,6 +142,9 @@ export const Toolbar = () => {
           signalFlowLabelFontSize: defaultLabelFontSize,
           signalFlowDetailsFontSize: defaultDetailsFontSize,
           defaultEdgeLineType: defaultLineType,
+          namedColors,
+          locationBackgrounds,
+          typeBackgrounds,
           riderListTitle,
           riderListSubtitle,
           riderListPreparedBy,
