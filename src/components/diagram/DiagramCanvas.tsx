@@ -77,6 +77,7 @@ export const DiagramCanvas = () => {
   );
   const toggleLocationGroups = useStore((state) => state.toggleLocationGroups);
   const edgeRoutingEnabled = useStore((state) => state.edgeRoutingEnabled);
+  const defaultLineType = useStore((state) => state.defaultLineType);
   const cableTypes = useStore((state) => state.cableTypes);
   const edgeRounding = useStore((state) => state.edgeRounding);
   const toggleEdgeRouting = useStore((state) => state.toggleEdgeRouting);
@@ -460,7 +461,10 @@ export const DiagramCanvas = () => {
           );
           return {
             ...edge,
-            type: edgeRoutingEnabled ? "routed" : edge.type,
+            type: edgeRoutingEnabled
+              ? "routed"
+              : ((edge.data?.lineType as string | undefined) ??
+                defaultLineType),
             style: hiddenEdgeIds.has(edge.id)
               ? { display: "none" }
               : { ...edge.style, ...cableTypeStyle(def) },
@@ -568,14 +572,17 @@ export const DiagramCanvas = () => {
         );
         return {
           ...edge,
-          type: edgeRoutingEnabled ? "routed" : edge.type,
+          type: edgeRoutingEnabled
+            ? "routed"
+            : ((edge.data?.lineType as string | undefined) ??
+              defaultLineType),
           style: hiddenEdgeIds.has(edge.id)
             ? { display: "none" }
             : { ...edge.style, ...cableTypeStyle(def) },
         };
       }),
     };
-  }, [nodes, edges, locationGroupsEnabled, groupNodesTick, edgeRoutingEnabled, cableTypes]);
+  }, [nodes, edges, locationGroupsEnabled, groupNodesTick, edgeRoutingEnabled, cableTypes, defaultLineType]);
 
   return (
     <div className={cn("w-full h-full relative bg-background")}>

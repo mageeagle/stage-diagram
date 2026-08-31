@@ -11,7 +11,7 @@ export const EdgeProperties = () => {
   const cableTypes = useStore((state) => state.cableTypes);
   const addCableType = useStore((state) => state.addCableType);
   const updateEdgeCableType = useStore((state) => state.updateEdgeCableType);
-  const updateEdgeType = useStore((state) => state.updateEdgeType);
+  const updateEdgeLineType = useStore((state) => state.updateEdgeLineType);
 
   const selectedEdges = edges.filter((edge) =>
     selectedEdgeIds.includes(edge.id),
@@ -32,9 +32,14 @@ export const EdgeProperties = () => {
   };
 
   const getCommonEdgeType = () => {
-    if (selectedEdges.length === 0) return "labeledSmoothstep";
-    const firstType = selectedEdges[0].type;
-    const allMatch = selectedEdges.every((edge) => edge.type === firstType);
+    if (selectedEdges.length === 0) return "default";
+    const firstType =
+      (selectedEdges[0].data?.lineType as string | undefined) ?? "default";
+    const allMatch = selectedEdges.every(
+      (edge) =>
+        ((edge.data?.lineType as string | undefined) ?? "default") ===
+        firstType,
+    );
     return allMatch ? firstType : "mixed";
   };
 
@@ -54,7 +59,7 @@ export const EdgeProperties = () => {
   };
 
   const handleEdgeTypeChange = (newType: string) => {
-    updateEdgeType(selectedEdgeIds, newType);
+    updateEdgeLineType(selectedEdgeIds, newType === "default" ? null : newType);
   };
 
   return (
@@ -74,11 +79,7 @@ export const EdgeProperties = () => {
             </label>
           </div>
           <select
-            value={
-              currentEdgeType === "mixed"
-                ? "labeledSmoothstep"
-                : currentEdgeType
-            }
+            value={currentEdgeType === "mixed" ? "default" : currentEdgeType}
             onChange={(e) => handleEdgeTypeChange(e.target.value)}
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
           >

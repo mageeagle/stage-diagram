@@ -112,6 +112,7 @@ export const Toolbar = () => {
         canvasPreparedBy,
         defaultLabelFontSize,
         defaultDetailsFontSize,
+        defaultLineType,
       } = useStore.getState();
 
       const {
@@ -137,6 +138,7 @@ export const Toolbar = () => {
           hideDetailsSignalFlow,
           signalFlowLabelFontSize: defaultLabelFontSize,
           signalFlowDetailsFontSize: defaultDetailsFontSize,
+          defaultEdgeLineType: defaultLineType,
           riderListTitle,
           riderListSubtitle,
           riderListPreparedBy,

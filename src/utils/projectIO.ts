@@ -16,6 +16,7 @@ export interface ProjectState {
   signalFlowDetailsFontSize?: number;
   stagePlanLabelFontSize?: number;
   stagePlanDetailsFontSize?: number;
+  defaultEdgeLineType?: string; // optional: absent in pre-existing project files
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;

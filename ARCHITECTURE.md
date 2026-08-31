@@ -118,6 +118,7 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `proximityEdgeIds` | `string[]` | Edge IDs for auto-connected edges |
 | `defaultLabelFontSize` | `number` | Signal Flow label default font size (px) |
 | `defaultDetailsFontSize` | `number` | Signal Flow details default font size (px) |
+| `defaultLineType` | `string` | Default edge line type (e.g., `"default"`, `"labeledSmoothstep"`) |
 
 **Key Actions:**
 
@@ -130,6 +131,8 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 - `restoreProjectState(state)` — Import project data
 - `updateNodeLabelFontSize(nodeIds, size)` / `updateNodeDetailsFontSize(nodeIds, size)` — Per-node font size override (`null` resets to default)
 - `setDefaultLabelFontSize(size)` / `setDefaultDetailsFontSize(size)` — Global default font sizes (px, clamped 8-48)
+- `updateEdgeLineType(edgeIds, lineType)` — Per-edge line type override (`null` resets to default)
+- `setDefaultLineType(lineType)` — Global default edge line type
 - `autoConnectEdges(pairs)` — Auto-connect proximity pairs
 - `setSaveAsDialog(suggestedName, extension, onConfirm, onClose?)` — Open save-as dialog
 - `closeSaveAsDialog()` — Close save-as dialog
@@ -309,6 +312,7 @@ interface EdgeData {
   cableType: string;                // Cable type label on edge
   hidden?: boolean;                 // Hidden state
   exportingHidden?: boolean;        // Hidden during export
+  lineType?: string;                // Per-edge line type override; absent = global default
 }
 
 export type DashPattern = "solid" | "dashed" | "dotted" | "dashdot";
@@ -353,6 +357,7 @@ interface ProjectState {
   stagePlanSubtitle: string;
   stagePlanPreparedBy: string;
   stagePlanNodes: Node<CustomNodeData>[];
+  defaultEdgeLineType?: string;
 }
 ```
 
@@ -572,7 +577,7 @@ The **Avoid Nodes** toggle on the Signal Flow canvas routes edges orthogonally a
 - **Handle anchors:** Exact handle centers come from React Flow internal handle bounds (`getInternalNode(id).internals.handleBounds`), converted to absolute canvas coordinates. Edges whose handle id can't be resolved (or that have no handle set) fall back to the midpoint of the node side facing the other node
 - **Per-handle separation:** Each edge's connection end sits a short stub outside its exact handle (`ConnEnd.fromPoint`): distinct handles on the same node side get distinct stub lengths (20px base + 4px per lane, ordered along the side), so their exit/approach lanes are separate instead of overlapping. The final polyline prepends/appends the exact handle point, making the first/last segment a short axis-aligned stub
 - **Routing parameters:** `shapeBufferDistance 8`, `idealNudgingDistance 4`, `segmentPenalty 10`; options: `nudgeOrthogonalSegmentsConnectedToShapes false`, `nudgeSharedPathsWithCommonEndPoint true`, `performUnifyingNudgingPreprocessingStep true`, `nudgeOrthogonalTouchingColinearSegments false`, `improveHyperedgeRoutesMovingJunctions true`
-- **Settings:** `edgeRoutingEnabled` and `edgeRounding` (corner radius) are session-only and NOT persisted with the project
+- **Settings:** `edgeRoutingEnabled` and `edgeRounding` (corner radius) are session-only and NOT persisted with the project. `defaultLineType` IS persisted in project files as `defaultEdgeLineType`; per-edge overrides live in each edge's `data.lineType`
 - **Rendering:** Edges render through the `routed` edge type backed by `useRoutedEdgePath`; while a connected node is being dragged, affected edges show a dashed live preview and re-route on drop
 
 ---

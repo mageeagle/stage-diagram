@@ -225,6 +225,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const toggleHideDetailsSignalFlow = useStore((s) => s.toggleHideDetailsSignalFlow);
   const edgeRounding = useStore((s) => s.edgeRounding);
   const setEdgeRounding = useStore((s) => s.setEdgeRounding);
+  const defaultLineType = useStore((s) => s.defaultLineType);
+  const setDefaultLineType = useStore((s) => s.setDefaultLineType);
   const defaultLabelFontSize = useStore((s) => s.defaultLabelFontSize);
   const defaultDetailsFontSize = useStore((s) => s.defaultDetailsFontSize);
   const setDefaultLabelFontSize = useStore((s) => s.setDefaultLabelFontSize);
@@ -405,6 +407,22 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 onChange={(e) => setEdgeRounding(Number(e.target.value))}
                 className="w-16 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
               />
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <label htmlFor="default-line-type" className="text-sm font-medium cursor-pointer">
+                Default line type
+              </label>
+              <select
+                id="default-line-type"
+                value={defaultLineType}
+                onChange={(e) => setDefaultLineType(e.target.value)}
+                className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              >
+                <option value="labeledSmoothstep">SmoothStep</option>
+                <option value="labeledStep">Step</option>
+                <option value="labeledStraight">Straight</option>
+                <option value="labeledBezier">Bezier</option>
+              </select>
             </div>
           </div>
 

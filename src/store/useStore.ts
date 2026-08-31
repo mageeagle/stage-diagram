@@ -48,6 +48,7 @@ interface DiagramState {
   locationGroupsEnabled: boolean;
   edgeRoutingEnabled: boolean;
   edgeRounding: number;
+  defaultLineType: string;
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
@@ -95,7 +96,8 @@ interface DiagramState {
   updateNodePower: (nodeIds: string[], power: boolean) => void;
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
-  updateEdgeType: (edgeIds: string[], type: string) => void;
+  updateEdgeLineType: (edgeIds: string[], lineType: string | null) => void;
+  setDefaultLineType: (lineType: string) => void;
   moveNodes: (
     nodeIds: string[],
     delta: {
@@ -290,6 +292,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   hideDetailsSignalFlow: false,
   defaultLabelFontSize: 14,
   defaultDetailsFontSize: 12,
+  defaultLineType: "labeledBezier",
   toggleHideDetailsSignalFlow: () =>
     set((state) => ({ hideDetailsSignalFlow: !state.hideDetailsSignalFlow })),
   hideRiderTitle: false,
@@ -721,19 +724,24 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  updateEdgeType: (edgeIds, type) => {
+  updateEdgeLineType: (edgeIds, lineType) => {
     get().recordHistory();
     set({
       edges: get().edges.map((edge) => {
-        if (edgeIds.includes(edge.id)) {
-          return {
-            ...edge,
-            type,
-          };
+        if (!edgeIds.includes(edge.id)) return edge;
+        const data = { ...(edge.data ?? {}) };
+        if (lineType === null) {
+          delete data.lineType;
+        } else {
+          data.lineType = lineType;
         }
-        return edge;
+        return { ...edge, data };
       }),
     });
+  },
+
+  setDefaultLineType: (lineType) => {
+    set({ defaultLineType: lineType });
   },
 
   moveNodes: (
@@ -956,10 +964,22 @@ export const useStore = create<DiagramState>((set, get) => ({
       );
     }
 
-    // 1. Nodes/Edges: Restore the main canvas data
+    // 1. Nodes/Edges: Restore the main canvas data.
+    // Migrate pre-line-type projects: a stored non-default edge.type becomes an
+    // explicit per-edge override; edge.type is normalized to "default" so the
+    // render-time derivation (data.lineType ?? defaultLineType) is the single
+    // source of truth.
+    const migratedEdges = validEdges.map((edge) => {
+      const data = { ...(edge.data ?? {}) };
+      if (!data.lineType && edge.type && edge.type !== "default") {
+        data.lineType = edge.type;
+      }
+      return { ...edge, type: "default", data };
+    });
+
     set({
       nodes: projectState.nodes,
-      edges: validEdges,
+      edges: migratedEdges,
       selectedNodeIds: [],
       selectedEdgeIds: [],
       // Clear temporary/local state indicators when reloading
@@ -977,6 +997,11 @@ export const useStore = create<DiagramState>((set, get) => ({
       hideDetailsSignalFlow: projectState.hideDetailsSignalFlow ?? false,
       defaultLabelFontSize: projectState.signalFlowLabelFontSize ?? 14,
       defaultDetailsFontSize: projectState.signalFlowDetailsFontSize ?? 12,
+      defaultLineType:
+        projectState.defaultEdgeLineType &&
+        projectState.defaultEdgeLineType !== "default"
+          ? projectState.defaultEdgeLineType
+          : "labeledBezier",
       riderListTitle: projectState.riderListTitle,
       riderListSubtitle: projectState.riderListSubtitle,
       riderListPreparedBy: projectState.riderListPreparedBy,

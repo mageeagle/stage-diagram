@@ -33,6 +33,7 @@ export interface EdgeData {
   cableType: string;
   hidden?: boolean; // New property for hidden edges
   exportingHidden?: boolean; // Temporary flag for export-time hiding
+  lineType?: string; // optional per-edge override; absent = follow global default line type
 }
 
 export interface NodeTemplate {
