@@ -14,6 +14,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
   const hideDetails = useStore((s) => s.hideDetailsSignalFlow);
   const defaultLabelFontSize = useStore((s) => s.defaultLabelFontSize);
   const defaultDetailsFontSize = useStore((s) => s.defaultDetailsFontSize);
+  const openHandleMenu = useStore((s) => s.openHandleMenu);
 
   useEffect(() => {
     update(id);
@@ -47,6 +48,10 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
       data.hidden ? "opacity-30" : ""
     )}
       style={bg ? { backgroundColor: bg } : undefined}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        openHandleMenu(event.clientX, event.clientY, id);
+      }}
     >
       <div
         className="font-bold mb-2 text-center break-words"
@@ -69,7 +74,25 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
         <div className="flex flex-col gap-2">
           {data.inputs ? (
             data.inputs.map((input: NodeInput) => (
-              <LabeledHandle key={input.id} id={input.id} type={"target"} position={Position.Left} title={input.name} color={fg} />
+              <LabeledHandle
+                key={input.id}
+                id={input.id}
+                type={"target"}
+                position={Position.Left}
+                title={input.name}
+                color={fg}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  openHandleMenu(
+                    event.clientX,
+                    event.clientY,
+                    id,
+                    input.id,
+                    true,
+                  );
+                }}
+              />
             ))
           ) : (
             <div className="w-4"></div >
@@ -80,7 +103,25 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
         <div className="flex flex-col gap-2">
           {data.outputs ? (
             data.outputs.map((output: NodeOutput) => (
-              <LabeledHandle key={output.id} id={output.id} type={"source"} position={Position.Right} title={output.name} color={fg} />
+              <LabeledHandle
+                key={output.id}
+                id={output.id}
+                type={"source"}
+                position={Position.Right}
+                title={output.name}
+                color={fg}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  openHandleMenu(
+                    event.clientX,
+                    event.clientY,
+                    id,
+                    output.id,
+                    false,
+                  );
+                }}
+              />
             ))
           ) : (
             <div className="w-4"></div >

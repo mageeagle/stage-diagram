@@ -28,6 +28,14 @@ interface HistoryState {
   edges: Edge[];
 }
 
+export interface HandleMenuState {
+  x: number;
+  y: number;
+  nodeId: string;
+  handleId?: string;
+  isInput?: boolean;
+}
+
 interface DiagramState {
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
@@ -80,6 +88,28 @@ interface DiagramState {
   setSelectedNodeIds: (nodeIds: string[]) => void;
   setSelectedEdgeIds: (edgeIds: string[]) => void;
   selectAll: () => void;
+
+  // Handle context menu (right-click node/handle → select connected edges)
+  handleMenu: HandleMenuState | null;
+  openHandleMenu: (
+    x: number,
+    y: number,
+    nodeId: string,
+    handleId?: string,
+    isInput?: boolean,
+  ) => void;
+  closeHandleMenu: () => void;
+  selectEdgesForHandle: (
+    nodeId: string,
+    handleId: string,
+    isInput: boolean,
+    additive: boolean,
+  ) => void;
+  selectEdgesForSide: (
+    nodeId: string,
+    side: "input" | "output",
+    additive: boolean,
+  ) => void;
 
   // Export settings
   updateRiderListTitle: (title: string) => void;
@@ -276,6 +306,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   onMoveEnd: () => {},
   selectedNodeIds: [],
   selectedEdgeIds: [],
+  handleMenu: null,
   cableTypes: [],
   isModalOpen: false,
   isSettingsModalOpen: false,
@@ -569,6 +600,61 @@ export const useStore = create<DiagramState>((set, get) => ({
       edges: edges.map((e) => ({ ...e, selected: true })),
       selectedNodeIds: nodes.map((n) => n.id),
       selectedEdgeIds: edges.map((e) => e.id),
+    });
+  },
+
+  // Handle context menu (right-click node/handle → select connected edges)
+  openHandleMenu: (x, y, nodeId, handleId, isInput) =>
+    set({ handleMenu: { x, y, nodeId, handleId, isInput } }),
+  closeHandleMenu: () => set({ handleMenu: null }),
+   selectEdgesForHandle: (nodeId, handleId, isInput, additive) => {
+    const { nodes, edges, selectedEdgeIds, selectedNodeIds } = get();
+    const matching = edges
+      .filter((edge) =>
+        isInput
+          ? edge.target === nodeId && edge.targetHandle === handleId
+          : edge.source === nodeId && edge.sourceHandle === handleId,
+      )
+      .map((edge) => edge.id);
+    const targetIds = Array.from(
+      new Set(additive ? [...selectedEdgeIds, ...matching] : matching),
+    );
+    const selectedSet = new Set(targetIds);
+    // Edge `selected` flags must match selectedEdgeIds: onSelectionChange
+    // derives ids from React Flow's selection, which tracks these flags.
+    set({
+      edges: edges.map((edge) => ({
+        ...edge,
+        selected: selectedSet.has(edge.id),
+      })),
+      nodes: additive
+        ? nodes
+        : nodes.map((node) => ({ ...node, selected: false })),
+      selectedEdgeIds: targetIds,
+      selectedNodeIds: additive ? selectedNodeIds : [],
+    });
+  },
+  selectEdgesForSide: (nodeId, side, additive) => {
+    const { nodes, edges, selectedEdgeIds, selectedNodeIds } = get();
+    const matching = edges
+      .filter((edge) =>
+        side === "input" ? edge.target === nodeId : edge.source === nodeId,
+      )
+      .map((edge) => edge.id);
+    const targetIds = Array.from(
+      new Set(additive ? [...selectedEdgeIds, ...matching] : matching),
+    );
+    const selectedSet = new Set(targetIds);
+    set({
+      edges: edges.map((edge) => ({
+        ...edge,
+        selected: selectedSet.has(edge.id),
+      })),
+      nodes: additive
+        ? nodes
+        : nodes.map((node) => ({ ...node, selected: false })),
+      selectedEdgeIds: targetIds,
+      selectedNodeIds: additive ? selectedNodeIds : [],
     });
   },
 
@@ -1087,6 +1173,7 @@ export const useStore = create<DiagramState>((set, get) => ({
       edges: migratedEdges,
       selectedNodeIds: [],
       selectedEdgeIds: [],
+      handleMenu: null,
       // Clear temporary/local state indicators when reloading
       pendingPosition: null,
     });

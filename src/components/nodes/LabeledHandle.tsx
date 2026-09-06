@@ -26,8 +26,8 @@ export function LabeledHandle({
     labelClassName?: string;
     color?: string;
   }) {
-  const { ref, ...handleProps } = props;
- 
+  const { ref, onContextMenu, ...handleProps } = props;
+  
   return (
     <div
       title={title}
@@ -37,6 +37,7 @@ export function LabeledHandle({
         className,
       )}
       ref={ref}
+      onContextMenu={onContextMenu}
     >
       <BaseHandle
         position={position}

@@ -136,6 +136,30 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
               </li>
               <li className="flex items-center gap-2">
                 <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Right-Click Handle
+                </kbd>
+                <span>Select All Edges Connected to That Handle</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Right-Click Node
+                </kbd>
+                <span>Select All Input or Output Edges</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Shift + Click (Context Menu)
+                </kbd>
+                <span>Add Selected Edges to Current Selection</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                  Click Elsewhere / Esc
+                </kbd>
+                <span>Close Context Menu</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <kbd className="rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-mono text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
                   Esc
                 </kbd>
                 <span>Close Dialog</span>

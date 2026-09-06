@@ -32,6 +32,7 @@ import {
 } from "@/components/diagram/LabeledEdge";
 import { ExportButton } from "@/components/diagram/ExportButton";
 import { CableLegend } from "@/components/diagram/CableLegend";
+import { HandleContextMenu } from "@/components/diagram/HandleContextMenu";
 import { useThemeStore } from "@/store/useThemeStore";
 import { cableTypeStyle } from "@/utils/cableStyles";
 import { cn } from "@/lib/utils";
@@ -618,6 +619,7 @@ export const DiagramCanvas = () => {
         >
           <Controls position="bottom-right" />
         </ReactFlow>
+        <HandleContextMenu />
         <CableLegend />
         {!hideTitle && (
           <div className="absolute bottom-6 left-6 z-10">

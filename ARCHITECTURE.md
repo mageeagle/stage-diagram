@@ -92,6 +92,7 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `edges` | `Edge[]` | All connections between nodes |
 | `selectedNodeIds` | `string[]` | Currently selected node IDs |
 | `selectedEdgeIds` | `string[]` | Currently selected edge IDs |
+| `handleMenu` | `HandleMenuState \| null` | Handle context menu state (`{ x, y, nodeId, handleId?, isInput? }`); `null` when closed |
 | `templates` | `NodeTemplate[]` | Reusable node templates |
 | `types` | `string[]` | Available node types (e.g., "Amplifier") |
 | `locations` | `string[]` | Available locations (e.g., "Stage Left") |
@@ -133,6 +134,9 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 - `setDefaultLabelFontSize(size)` / `setDefaultDetailsFontSize(size)` — Global default font sizes (px, clamped 8-48)
 - `updateEdgeLineType(edgeIds, lineType)` — Per-edge line type override (`null` resets to default)
 - `setDefaultLineType(lineType)` — Global default edge line type
+- `openHandleMenu(x, y, nodeId, handleId?, isInput?)` / `closeHandleMenu()` — Handle context menu open/close (transient UI state)
+- `selectEdgesForHandle(nodeId, handleId, isInput, additive)` — Select all edges connected to one handle; `additive` (Shift-held) unions with current selection, otherwise replaces it and clears node selection. Also syncs edge `selected` flags (and node flags when replacing) to match `selectedEdgeIds` — required because `onSelectionChange` derives ids from React Flow's selection, which tracks those flags
+- `selectEdgesForSide(nodeId, side, additive)` — Select all edges on a node's input (left) or output (right) side; same replace/additive semantics and flag syncing
 - `autoConnectEdges(pairs)` — Auto-connect proximity pairs
 - `setSaveAsDialog(suggestedName, extension, onConfirm, onClose?)` — Open save-as dialog
 - `closeSaveAsDialog()` — Close save-as dialog
@@ -407,6 +411,7 @@ Main Signal Flow canvas. Key features:
   - `Delete` / `Backspace` — Delete selected
   - `C` — Copy selected
   - `Space` / `Enter` — Open node creation modal
+- **Handle context menu:** Right-clicking a handle or the node body opens a small portal-rendered menu (`HandleContextMenu`) to select all edges connected to that handle (handle right-click only) or to all input/output edges of the node; holding Shift when clicking a menu item adds to the current edge selection instead of replacing it. The menu closes on any click outside it (left or right button), on Escape; a right-click that dismisses it is swallowed (capture phase) so it cannot immediately reopen on a node/handle, and the browser's native context menu is suppressed for that press
 - **Live node tracking:** Uses `onNodeDrag` callback to track live positions for proximity detection
 - **Title overlay:** Shows `canvasTitle`, `canvasSubtitle`, `canvasPreparedBy`, and date
 - **Cable legend:** Bottom-right overlay listing cable types in use (color/width/dash sample per type); hidden below 2 used types or via Hide Legend setting; included in image exports
@@ -431,6 +436,7 @@ Standard signal flow node:
 - Uses `useUpdateNodeInternals()` to force re-render when handles change
 - Applies `hidden` (opacity-30) and `exportingHidden` (return null) states
 - Selection state: blue border + ring
+- Right-click on node body or any handle calls `openHandleMenu()` (browser default context menu suppressed); handle right-clicks stop propagation so the node-body handler does not also fire
 
 #### `StagePlanNode` (`src/components/nodes/StagePlanNode.tsx`)
 
@@ -703,8 +709,10 @@ User Action
     ├── Drag/Drop
     │   └── → React Flow events → onNodesChange/onEdgesChange → Store update
     │
-    ├── Selection
-    │   └── → onNodeClick/onEdgeClick → setSelectedNodeIds/setSelectedEdgeIds
+├── Selection
+│   ├── → onNodeClick/onEdgeClick → setSelectedNodeIds/setSelectedEdgeIds
+│   └── Handle Context Menu (right-click)
+│       └── → openHandleMenu() → HandleContextMenu → selectEdgesForHandle/Side()
     │
     ├── Proximity Connect (Q key)
     │   └── → useProximityConnect → autoConnectEdges() → Store update
