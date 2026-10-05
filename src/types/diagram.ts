@@ -18,6 +18,10 @@ export interface CustomNodeData {
   hidden?: boolean;
   exportingHidden?: boolean; // Temporary flag for export-time hiding
   hideFromList?: boolean; // Hide node from NodeListModal report
+  isInput?: boolean; // Node appears in Channel List Inputs
+  isOutput?: boolean; // Node appears in Channel List Outputs
+  channelNumber?: number; // Optional; when quantity > 1 it is the STARTING channel
+  channelPrefix?: string; // Optional text prefix (e.g. "AUX")
   shape?: "rectangle" | "circle" | "triangle";
   rotation?: number;
   width?: number;

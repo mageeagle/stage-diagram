@@ -20,6 +20,9 @@ export interface ProjectState {
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
+  channelListTitle: string;
+  channelListSubtitle: string;
+  channelListPreparedBy: string;
   canvasTitle: string;
   canvasSubtitle: string;
   canvasPreparedBy: string;

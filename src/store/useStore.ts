@@ -50,6 +50,7 @@ interface DiagramState {
   isModalOpen: boolean;
   isSettingsModalOpen: boolean;
   isNodeListModalOpen: boolean;
+  isChannelListModalOpen: boolean;
   isHelpModalOpen: boolean;
   pendingPosition: { x: number; y: number } | null;
   templates: NodeTemplate[];
@@ -65,6 +66,9 @@ interface DiagramState {
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
+  channelListTitle: string;
+  channelListSubtitle: string;
+  channelListPreparedBy: string;
   canvasTitle: string;
   canvasSubtitle: string;
   canvasPreparedBy: string;
@@ -115,6 +119,9 @@ interface DiagramState {
   updateRiderListTitle: (title: string) => void;
   updateRiderListSubtitle: (subtitle: string) => void;
   updateRiderListPreparedBy: (preparedBy: string) => void;
+  updateChannelListTitle: (title: string) => void;
+  updateChannelListSubtitle: (subtitle: string) => void;
+  updateChannelListPreparedBy: (preparedBy: string) => void;
   updateCanvasTitle: (title: string) => void;
   updateCanvasSubtitle: (subtitle: string) => void;
   updateCanvasPreparedBy: (preparedBy: string) => void;
@@ -132,6 +139,10 @@ interface DiagramState {
   updateNodeQuantity: (nodeIds: string[], quantity: number) => void;
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
+  updateNodeIsInput: (nodeIds: string[], value: boolean) => void;
+  updateNodeIsOutput: (nodeIds: string[], value: boolean) => void;
+  updateNodeChannelNumber: (nodeIds: string[], value: number | null) => void;
+  updateNodeChannelPrefix: (nodeIds: string[], value: string) => void;
   updateNodeBackground: (nodeIds: string[], name: string | null) => void;
   setLocationBackground: (location: string, name: string | null) => void;
   setTypeBackground: (type: string, hex: string | null) => void;
@@ -205,6 +216,7 @@ interface DiagramState {
   setIsModalOpen: (isOpen: boolean) => void;
   setIsSettingsModalOpen: (isOpen: boolean) => void;
   setIsNodeListModalOpen: (isOpen: boolean) => void;
+  setIsChannelListModalOpen: (isOpen: boolean) => void;
   setIsHelpModalOpen: (isOpen: boolean) => void;
   setPendingPosition: (position: { x: number; y: number } | null) => void;
   addType: (type: string) => void;
@@ -313,6 +325,7 @@ export const useStore = create<DiagramState>((set, get) => ({
   isModalOpen: false,
   isSettingsModalOpen: false,
   isNodeListModalOpen: false,
+  isChannelListModalOpen: false,
   isHelpModalOpen: false,
   pendingPosition: null,
   flowInstance: null,
@@ -323,6 +336,9 @@ export const useStore = create<DiagramState>((set, get) => ({
   riderListTitle: "Technical Rider",
   riderListSubtitle: "",
   riderListPreparedBy: "",
+  channelListTitle: "",
+  channelListSubtitle: "",
+  channelListPreparedBy: "",
   canvasTitle: "Signal Flow",
   canvasSubtitle: "",
   canvasPreparedBy: "",
@@ -843,6 +859,58 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  updateNodeIsInput: (nodeIds, value) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        return {
+          ...node,
+          data: { ...node.data, isInput: value },
+        };
+      }),
+    });
+  },
+
+  updateNodeIsOutput: (nodeIds, value) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        return {
+          ...node,
+          data: { ...node.data, isOutput: value },
+        };
+      }),
+    });
+  },
+
+  updateNodeChannelNumber: (nodeIds, value) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        const data = { ...node.data };
+        if (value === null) delete data.channelNumber;
+        else data.channelNumber = value;
+        return { ...node, data };
+      }),
+    });
+  },
+
+  updateNodeChannelPrefix: (nodeIds, value) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        const data = { ...node.data };
+        if (value === "") delete data.channelPrefix;
+        else data.channelPrefix = value;
+        return { ...node, data };
+      }),
+    });
+  },
+
   updateNodeBackground: (nodeIds, name) => {
     get().recordHistory();
     set({
@@ -1218,6 +1286,9 @@ export const useStore = create<DiagramState>((set, get) => ({
       riderListTitle: projectState.riderListTitle,
       riderListSubtitle: projectState.riderListSubtitle,
       riderListPreparedBy: projectState.riderListPreparedBy,
+      channelListTitle: projectState.channelListTitle ?? "",
+      channelListSubtitle: projectState.channelListSubtitle ?? "",
+      channelListPreparedBy: projectState.channelListPreparedBy ?? "",
       canvasTitle: projectState.canvasTitle,
       canvasSubtitle: projectState.canvasSubtitle,
       canvasPreparedBy: projectState.canvasPreparedBy,
@@ -1431,12 +1502,19 @@ export const useStore = create<DiagramState>((set, get) => ({
   setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
   setIsSettingsModalOpen: (isOpen) => set({ isSettingsModalOpen: isOpen }),
   setIsNodeListModalOpen: (isOpen) => set({ isNodeListModalOpen: isOpen }),
+  setIsChannelListModalOpen: (isOpen) =>
+    set({ isChannelListModalOpen: isOpen }),
   setIsHelpModalOpen: (isOpen) => set({ isHelpModalOpen: isOpen }),
   setPendingPosition: (position) => set({ pendingPosition: position }),
   updateRiderListTitle: (title) => set({ riderListTitle: title }),
   updateRiderListSubtitle: (subtitle) => set({ riderListSubtitle: subtitle }),
   updateRiderListPreparedBy: (preparedBy) =>
     set({ riderListPreparedBy: preparedBy }),
+  updateChannelListTitle: (title) => set({ channelListTitle: title }),
+  updateChannelListSubtitle: (subtitle) =>
+    set({ channelListSubtitle: subtitle }),
+  updateChannelListPreparedBy: (preparedBy) =>
+    set({ channelListPreparedBy: preparedBy }),
   updateCanvasTitle: (title) => set({ canvasTitle: title }),
   updateCanvasSubtitle: (subtitle) => set({ canvasSubtitle: subtitle }),
   updateCanvasPreparedBy: (preparedBy) => set({ canvasPreparedBy: preparedBy }),
