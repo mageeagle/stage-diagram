@@ -11,6 +11,7 @@ import {
   Layers,
   Plus,
   Workflow,
+  AudioLines,
 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
@@ -68,6 +69,9 @@ export const Toolbar = () => {
   );
   const setIsNodeListModalOpen = useStore(
     (state) => state.setIsNodeListModalOpen,
+  );
+  const setIsChannelListModalOpen = useStore(
+    (state) => state.setIsChannelListModalOpen,
   );
   const setIsHelpModalOpen = useStore((state) => state.setIsHelpModalOpen);
   const setIsModalOpen = useStore((state) => state.setIsModalOpen);
@@ -208,6 +212,12 @@ export const Toolbar = () => {
       title: "List",
       onClick: () => setIsNodeListModalOpen(true),
       icon: <List size={20} />,
+    },
+    {
+      key: "channel-list",
+      title: "Channel List",
+      onClick: () => setIsChannelListModalOpen(true),
+      icon: <AudioLines size={20} />,
     },
     {
       key: "stage-plan",

@@ -7,6 +7,7 @@ import { useStore } from "@/store/useStore";
 import { useStagePlanStore } from "@/store/useStagePlanStore";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { NodeListModal } from "@/components/diagram/NodeListModal";
+import { ChannelListModal } from "@/components/diagram/channel-list-modal/ChannelListModal";
 import { Toolbar } from "@/components/toolbar/Toolbar";
 import { HelpModal } from "@/components/help/HelpModal";
 import { SaveAsDialog } from "@/components/settings/SaveAsDialog";
@@ -18,6 +19,8 @@ export default function Home() {
     setIsSettingsModalOpen,
     isNodeListModalOpen,
     setIsNodeListModalOpen,
+    isChannelListModalOpen,
+    setIsChannelListModalOpen,
     isHelpModalOpen,
     setIsHelpModalOpen,
     isSaveAsDialogOpen,
@@ -34,6 +37,8 @@ export default function Home() {
       setIsSettingsModalOpen: state.setIsSettingsModalOpen,
       isNodeListModalOpen: state.isNodeListModalOpen,
       setIsNodeListModalOpen: state.setIsNodeListModalOpen,
+      isChannelListModalOpen: state.isChannelListModalOpen,
+      setIsChannelListModalOpen: state.setIsChannelListModalOpen,
       isHelpModalOpen: state.isHelpModalOpen,
       setIsHelpModalOpen: state.setIsHelpModalOpen,
       isSaveAsDialogOpen: state.isSaveAsDialogOpen,
@@ -63,6 +68,11 @@ export default function Home() {
         <NodeListModal
           isOpen={isNodeListModalOpen}
           onClose={() => setIsNodeListModalOpen(false)}
+        />
+
+        <ChannelListModal
+          isOpen={isChannelListModalOpen}
+          onClose={() => setIsChannelListModalOpen(false)}
         />
 
         <HelpModal
