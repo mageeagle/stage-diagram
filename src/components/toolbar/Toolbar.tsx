@@ -209,7 +209,7 @@ export const Toolbar = () => {
     },
     {
       key: "node-list",
-      title: "List",
+      title: "Rider List",
       onClick: () => setIsNodeListModalOpen(true),
       icon: <List size={20} />,
     },

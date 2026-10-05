@@ -521,7 +521,7 @@ Vertical toolbar (top-right) with buttons:
 | Add Node | `Plus` | Opens `NodeCreationModal` |
 | Undo | `Undo` | Calls `undo()` on active store |
 | Redo | `Redo` | Calls `redo()` on active store |
-| List | `List` | Opens `NodeListModal` |
+| Rider List | `List` | Opens `NodeListModal` |
 | Channel List | `AudioLines` | Opens `ChannelListModal` |
 | Stage Plan | `Layers`/`Workflow` | Toggles `isStagePlanEnabled` |
 | Import | `Upload` | Opens file picker for JSON |
@@ -546,7 +546,7 @@ Creates nodes with:
 
 #### `ChannelListModal`
 
-Portal modal listing nodes marked as inputs/outputs, opened from the toolbar **Channel List** button (between **List** and **Stage Plan**):
+Portal modal listing nodes marked as inputs/outputs, opened from the toolbar **Channel List** button (between **Rider List** and **Stage Plan**):
 - Two side-by-side lists (**Inputs** / **Outputs**), each row showing `Number` | `Node Name`
 - Row expansion: the Inputs list uses `inputChannelNumber`/`inputChannelPrefix`, the Outputs list uses `outputChannelNumber`/`outputChannelPrefix`. A node with a starting number for that direction expands to one row per unit of `quantity` (e.g., quantity 2, start 90, prefix "AUX" → AUX90, AUX91); without one it produces a single unnumbered row
 - Rows sort numeric ascending by trailing number; unnumbered rows come last

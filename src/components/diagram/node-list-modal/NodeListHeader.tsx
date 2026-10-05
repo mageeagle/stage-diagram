@@ -23,7 +23,7 @@ export const NodeListHeader = ({
         <div className="flex-1">
           <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 mb-2">
             <List size={24} />
-            List
+            Rider List
           </h2>
         </div>
         <div className="flex items-center gap-2">
