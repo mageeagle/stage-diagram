@@ -103,6 +103,7 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `isModalOpen` | `boolean` | Node creation modal visibility |
 | `isSettingsModalOpen` | `boolean` | Settings modal visibility |
 | `isNodeListModalOpen` | `boolean` | Node list modal visibility |
+| `isChannelListModalOpen` | `boolean` | Channel List modal visibility |
 | `isHelpModalOpen` | `boolean` | Help modal visibility |
 | `isSaveAsDialogOpen` | `boolean` | Save-as dialog visibility |
 | `saveAsSuggestedName` | `string` | Default filename suggestion |
@@ -111,6 +112,7 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 | `saveAsOnClose` | `() => void \| null` | Callback when dialog closes |
 | `pendingPosition` | `{x, y} \| null` | Canvas position for new node placement |
 | `riderListTitle/Subtitle/PreparedBy` | `string` | Rider list header info |
+| `channelListTitle/Subtitle/PreparedBy` | `string` | Channel List header info |
 | `canvasTitle/Subtitle/PreparedBy` | `string` | Canvas header info |
 | `hideTitle` / `hideRiderTitle` / `hideDate` / `hideRiderDate` | `boolean` | Header visibility toggles |
 | `locationGroupsEnabled` | `boolean` | Group nodes by location |
@@ -128,6 +130,13 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 - `deleteNodes(nodeIds)` / `deleteEdge(edgeIds)` — Delete selected items
 - `updateNodeLabel(nodeId, label)` / `updateNodeType(nodeIds, type)` — Update node properties
 - `updateNodeQuantity(nodeIds, quantity)` — Set quantity on one or more nodes (integer ≥ 1)
+- `setIsChannelListModalOpen(isOpen)` — Channel List modal visibility
+- `updateChannelListTitle(title)` / `updateChannelListSubtitle(subtitle)` / `updateChannelListPreparedBy(preparedBy)` — Channel List header info
+- `updateNodeIsInput(nodeIds, value)` / `updateNodeIsOutput(nodeIds, value)` — Mark node(s) for Channel List Inputs/Outputs
+- `updateNodeChannelNumber(nodeIds, value)` — Starting channel number (`value: number | null`; `null` removes it)
+- `updateNodeChannelPrefix(nodeIds, value)` — Channel prefix text (empty string removes it)
+
+All of the multi-node actions above accept a `nodeIds` array (multi-select) and call `recordHistory()`, so they participate in undo/redo like their sibling update actions.
 - `addTemplate(template)` / `applyTemplate(template, position)` — Template management
 - `undo()` / `redo()` / `recordHistory()` — History management
 - `restoreProjectState(state)` — Import project data
@@ -275,6 +284,9 @@ resetSaveState(): void
 | `NodeListModal` | PDF | `riderListTitle` | `.pdf` |
 | `NodeListModal` | CSV | `riderListTitle` | `.csv` |
 | `NodeListModal` | JSON | `riderListTitle` | `.json` |
+| `ChannelListModal` | PDF | `channelListTitle` | `.pdf` |
+| `ChannelListModal` | CSV | `channelListTitle` | `.csv` |
+| `ChannelListModal` | JSON | `channelListTitle` | `.json` |
 
 ---
 
@@ -303,6 +315,10 @@ interface CustomNodeData {
   hidden?: boolean;                 // Visible on canvas
   exportingHidden?: boolean;        // Hidden during export
   hideFromList?: boolean;           // Hidden from NodeListModal
+  isInput?: boolean;                 // Node appears in Channel List Inputs
+  isOutput?: boolean;                // Node appears in Channel List Outputs
+  channelNumber?: number;            // Optional; starting channel when quantity > 1
+  channelPrefix?: string;            // Optional text prefix (e.g., "AUX")
   shape?: "rectangle" | "circle" | "triangle";  // Stage Plan shape
   rotation?: number;                // Rotation in degrees
   width?: number;                   // Node width
@@ -356,6 +372,9 @@ interface ProjectState {
   riderListTitle: string;
   riderListSubtitle: string;
   riderListPreparedBy: string;
+  channelListTitle: string;
+  channelListSubtitle: string;
+  channelListPreparedBy: string;
   canvasTitle: string;
   canvasSubtitle: string;
   canvasPreparedBy: string;
@@ -501,6 +520,7 @@ Vertical toolbar (top-right) with buttons:
 | Undo | `Undo` | Calls `undo()` on active store |
 | Redo | `Redo` | Calls `redo()` on active store |
 | List | `List` | Opens `NodeListModal` |
+| Channel List | `AudioLines` | Opens `ChannelListModal` |
 | Stage Plan | `Layers`/`Workflow` | Toggles `isStagePlanEnabled` |
 | Import | `Upload` | Opens file picker for JSON |
 | Export | `Download` | Opens export format dropdown |
@@ -521,6 +541,17 @@ Creates nodes with:
 - Input count
 - Output count
 - Quantity (integer >= 1, default 1)
+
+#### `ChannelListModal`
+
+Portal modal listing nodes marked as inputs/outputs, opened from the toolbar **Channel List** button (between **List** and **Stage Plan**):
+- Two side-by-side lists (**Inputs** / **Outputs**), each row showing `Number` | `Node Name`
+- Row expansion: a node with `channelNumber` expands to one row per unit of `quantity` (e.g., quantity 2, start 90, prefix "AUX" → AUX90, AUX91); a node without `channelNumber` produces a single unnumbered row
+- Rows sort numeric ascending by trailing number; unnumbered rows come last
+- Nodes with `hideFromList` (or `exportingHidden`) are excluded
+- Header title/subtitle/preparedBy are inline-editable (`updateChannelListTitle/Subtitle/PreparedBy`)
+- Escape key closes the modal
+- Exports via `useSaveAs`: PDF, CSV (header `Number,Name,Section`; Section is "Inputs"/"Outputs"), JSON (`{title?, subtitle?, preparedBy, exportDate, inputs[], outputs[]}` with entries `{number?, name}`)
 
 #### `SettingsModal`
 
@@ -623,6 +654,7 @@ Generates the rider list report consumed by the modal view and all export format
 
 - `useStore.restoreProjectState()` — Restores main canvas state
 - `useStagePlanStore.restoreProjectState()` — Restores stage plan state
+- `channelListTitle/Subtitle/PreparedBy` are tolerated absent in imported project files (default `""`)
 
 ---
 
