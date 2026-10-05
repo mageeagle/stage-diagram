@@ -141,8 +141,10 @@ interface DiagramState {
   updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
   updateNodeIsInput: (nodeIds: string[], value: boolean) => void;
   updateNodeIsOutput: (nodeIds: string[], value: boolean) => void;
-  updateNodeChannelNumber: (nodeIds: string[], value: number | null) => void;
-  updateNodeChannelPrefix: (nodeIds: string[], value: string) => void;
+  updateNodeInputChannelNumber: (nodeIds: string[], value: number | null) => void;
+  updateNodeInputChannelPrefix: (nodeIds: string[], value: string) => void;
+  updateNodeOutputChannelNumber: (nodeIds: string[], value: number | null) => void;
+  updateNodeOutputChannelPrefix: (nodeIds: string[], value: string) => void;
   updateNodeBackground: (nodeIds: string[], name: string | null) => void;
   setLocationBackground: (location: string, name: string | null) => void;
   setTypeBackground: (type: string, hex: string | null) => void;
@@ -885,27 +887,53 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
-  updateNodeChannelNumber: (nodeIds, value) => {
+  updateNodeInputChannelNumber: (nodeIds, value) => {
     get().recordHistory();
     set({
       nodes: get().nodes.map((node) => {
         if (!nodeIds.includes(node.id)) return node;
         const data = { ...node.data };
-        if (value === null) delete data.channelNumber;
-        else data.channelNumber = value;
+        if (value === null) delete data.inputChannelNumber;
+        else data.inputChannelNumber = value;
         return { ...node, data };
       }),
     });
   },
 
-  updateNodeChannelPrefix: (nodeIds, value) => {
+  updateNodeInputChannelPrefix: (nodeIds, value) => {
     get().recordHistory();
     set({
       nodes: get().nodes.map((node) => {
         if (!nodeIds.includes(node.id)) return node;
         const data = { ...node.data };
-        if (value === "") delete data.channelPrefix;
-        else data.channelPrefix = value;
+        if (value === "") delete data.inputChannelPrefix;
+        else data.inputChannelPrefix = value;
+        return { ...node, data };
+      }),
+    });
+  },
+
+  updateNodeOutputChannelNumber: (nodeIds, value) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        const data = { ...node.data };
+        if (value === null) delete data.outputChannelNumber;
+        else data.outputChannelNumber = value;
+        return { ...node, data };
+      }),
+    });
+  },
+
+  updateNodeOutputChannelPrefix: (nodeIds, value) => {
+    get().recordHistory();
+    set({
+      nodes: get().nodes.map((node) => {
+        if (!nodeIds.includes(node.id)) return node;
+        const data = { ...node.data };
+        if (value === "") delete data.outputChannelPrefix;
+        else data.outputChannelPrefix = value;
         return { ...node, data };
       }),
     });

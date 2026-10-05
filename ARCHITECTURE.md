@@ -133,8 +133,8 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 - `setIsChannelListModalOpen(isOpen)` — Channel List modal visibility
 - `updateChannelListTitle(title)` / `updateChannelListSubtitle(subtitle)` / `updateChannelListPreparedBy(preparedBy)` — Channel List header info
 - `updateNodeIsInput(nodeIds, value)` / `updateNodeIsOutput(nodeIds, value)` — Mark node(s) for Channel List Inputs/Outputs
-- `updateNodeChannelNumber(nodeIds, value)` — Starting channel number (`value: number | null`; `null` removes it)
-- `updateNodeChannelPrefix(nodeIds, value)` — Channel prefix text (empty string removes it)
+- `updateNodeInputChannelNumber(nodeIds, value)` / `updateNodeOutputChannelNumber(nodeIds, value)` — Starting input/output channel number (`value: number | null`; `null` removes it)
+- `updateNodeInputChannelPrefix(nodeIds, value)` / `updateNodeOutputChannelPrefix(nodeIds, value)` — Input/output channel prefix text (empty string removes it)
 
 All of the multi-node actions above accept a `nodeIds` array (multi-select) and call `recordHistory()`, so they participate in undo/redo like their sibling update actions.
 - `addTemplate(template)` / `applyTemplate(template, position)` — Template management
@@ -317,8 +317,10 @@ interface CustomNodeData {
   hideFromList?: boolean;           // Hidden from NodeListModal
   isInput?: boolean;                 // Node appears in Channel List Inputs
   isOutput?: boolean;                // Node appears in Channel List Outputs
-  channelNumber?: number;            // Optional; starting channel when quantity > 1
-  channelPrefix?: string;            // Optional text prefix (e.g., "AUX")
+  inputChannelNumber?: number;       // Optional; starting input channel when quantity > 1
+  inputChannelPrefix?: string;       // Optional text prefix for input channels (e.g., "AUX")
+  outputChannelNumber?: number;      // Optional; starting output channel when quantity > 1
+  outputChannelPrefix?: string;      // Optional text prefix for output channels (e.g., "OUT")
   shape?: "rectangle" | "circle" | "triangle";  // Stage Plan shape
   rotation?: number;                // Rotation in degrees
   width?: number;                   // Node width
@@ -546,7 +548,7 @@ Creates nodes with:
 
 Portal modal listing nodes marked as inputs/outputs, opened from the toolbar **Channel List** button (between **List** and **Stage Plan**):
 - Two side-by-side lists (**Inputs** / **Outputs**), each row showing `Number` | `Node Name`
-- Row expansion: a node with `channelNumber` expands to one row per unit of `quantity` (e.g., quantity 2, start 90, prefix "AUX" → AUX90, AUX91); a node without `channelNumber` produces a single unnumbered row
+- Row expansion: the Inputs list uses `inputChannelNumber`/`inputChannelPrefix`, the Outputs list uses `outputChannelNumber`/`outputChannelPrefix`. A node with a starting number for that direction expands to one row per unit of `quantity` (e.g., quantity 2, start 90, prefix "AUX" → AUX90, AUX91); without one it produces a single unnumbered row
 - Rows sort numeric ascending by trailing number; unnumbered rows come last
 - Nodes with `hideFromList` (or `exportingHidden`) are excluded
 - Header title/subtitle/preparedBy are inline-editable (`updateChannelListTitle/Subtitle/PreparedBy`)

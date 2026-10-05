@@ -22,12 +22,19 @@ function sortRows(rows: ChannelRow[]): ChannelRow[] {
   return [...numbered, ...unnumbered];
 }
 
-function expandNode(node: Node<CustomNodeData>): ChannelRow[] {
+type Direction = "input" | "output";
+
+function expandNode(node: Node<CustomNodeData>, direction: Direction): ChannelRow[] {
   const qty = node.data.quantity ?? 1;
-  if (node.data.channelNumber != null) {
-    const prefix = node.data.channelPrefix ?? "";
+  const start =
+    direction === "input" ? node.data.inputChannelNumber : node.data.outputChannelNumber;
+  if (start != null) {
+    const prefix =
+      direction === "input"
+        ? node.data.inputChannelPrefix ?? ""
+        : node.data.outputChannelPrefix ?? "";
     const rows: ChannelRow[] = [];
-    for (let n = node.data.channelNumber; n < node.data.channelNumber + qty; n++) {
+    for (let n = start; n < start + qty; n++) {
       rows.push({ name: node.data.label, number: `${prefix}${n}` });
     }
     return rows;
@@ -41,16 +48,19 @@ export function generateChannelListReport(nodes: Node<CustomNodeData>[]): Channe
       !(node.data?.hideFromList === true || node.data?.exportingHidden === true),
   );
 
-  const build = (predicate: (node: Node<CustomNodeData>) => boolean): ChannelRow[] => {
+  const build = (
+    predicate: (node: Node<CustomNodeData>) => boolean,
+    direction: Direction,
+  ): ChannelRow[] => {
     const rows: ChannelRow[] = [];
     visibleNodes.forEach((node) => {
-      if (predicate(node)) rows.push(...expandNode(node));
+      if (predicate(node)) rows.push(...expandNode(node, direction));
     });
     return sortRows(rows);
   };
 
   return {
-    inputs: build((node) => node.data.isInput === true),
-    outputs: build((node) => node.data.isOutput === true),
+    inputs: build((node) => node.data.isInput === true, "input"),
+    outputs: build((node) => node.data.isOutput === true, "output"),
   };
 }

@@ -20,11 +20,17 @@ export const PropertiesPanel = () => {
   const updateNodeQuantity = useStore((state) => state.updateNodeQuantity);
   const updateNodeIsInput = useStore((state) => state.updateNodeIsInput);
   const updateNodeIsOutput = useStore((state) => state.updateNodeIsOutput);
-  const updateNodeChannelNumber = useStore(
-    (state) => state.updateNodeChannelNumber,
+  const updateNodeInputChannelNumber = useStore(
+    (state) => state.updateNodeInputChannelNumber,
   );
-  const updateNodeChannelPrefix = useStore(
-    (state) => state.updateNodeChannelPrefix,
+  const updateNodeInputChannelPrefix = useStore(
+    (state) => state.updateNodeInputChannelPrefix,
+  );
+  const updateNodeOutputChannelNumber = useStore(
+    (state) => state.updateNodeOutputChannelNumber,
+  );
+  const updateNodeOutputChannelPrefix = useStore(
+    (state) => state.updateNodeOutputChannelPrefix,
   );
   const updateNodeLabelFontSize = useStore(
     (state) => state.updateNodeLabelFontSize,
@@ -120,17 +126,37 @@ export const PropertiesPanel = () => {
     isMultiSelect && selectedNodes.some((n) => n.data.isInput === true);
   const anyIsOutput =
     isMultiSelect && selectedNodes.some((n) => n.data.isOutput === true);
-  const channelNumbers = selectedNodes.map((n) => n.data.channelNumber);
-  const sharedChannelNumber = channelNumbers.every(
-    (v) => v === channelNumbers[0],
+  const inputChannelNumbers = selectedNodes.map(
+    (n) => n.data.inputChannelNumber,
+  );
+  const sharedInputChannelNumber = inputChannelNumbers.every(
+    (v) => v === inputChannelNumbers[0],
   )
-    ? channelNumbers[0]
+    ? inputChannelNumbers[0]
     : undefined;
-  const channelPrefixes = selectedNodes.map((n) => n.data.channelPrefix);
-  const sharedChannelPrefix = channelPrefixes.every(
-    (v) => v === channelPrefixes[0],
+  const inputChannelPrefixes = selectedNodes.map(
+    (n) => n.data.inputChannelPrefix,
+  );
+  const sharedInputChannelPrefix = inputChannelPrefixes.every(
+    (v) => v === inputChannelPrefixes[0],
   )
-    ? channelPrefixes[0]
+    ? inputChannelPrefixes[0]
+    : undefined;
+  const outputChannelNumbers = selectedNodes.map(
+    (n) => n.data.outputChannelNumber,
+  );
+  const sharedOutputChannelNumber = outputChannelNumbers.every(
+    (v) => v === outputChannelNumbers[0],
+  )
+    ? outputChannelNumbers[0]
+    : undefined;
+  const outputChannelPrefixes = selectedNodes.map(
+    (n) => n.data.outputChannelPrefix,
+  );
+  const sharedOutputChannelPrefix = outputChannelPrefixes.every(
+    (v) => v === outputChannelPrefixes[0],
+  )
+    ? outputChannelPrefixes[0]
     : undefined;
 
   return (
@@ -354,17 +380,13 @@ export const PropertiesPanel = () => {
           >
             Channel
           </label>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="node-channel-input"
                 className="w-4 h-4 cursor-pointer"
-                checked={
-                  isMultiSelect
-                    ? anyIsInput
-                    : !!primaryNode.data.isInput
-                }
+                checked={isMultiSelect ? anyIsInput : !!primaryNode.data.isInput}
                 onChange={(e) =>
                   updateNodeIsInput(selectedNodeIds, e.target.checked)
                 }
@@ -373,10 +395,10 @@ export const PropertiesPanel = () => {
                 htmlFor="node-channel-input"
                 className="text-sm font-medium cursor-pointer"
               >
-                Channel Input
+                Input
               </label>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="node-channel-output"
@@ -394,62 +416,102 @@ export const PropertiesPanel = () => {
                 htmlFor="node-channel-output"
                 className="text-sm font-medium cursor-pointer"
               >
-                Channel Output
+                Output
               </label>
-            </div>
-            <div>
-              <label
-                className={cn(
-                  "block text-xs font-medium uppercase mb-1",
-                  "text-gray-500 dark:text-gray-400",
-                )}
-              >
-                Channel number
-              </label>
-              <input
-                type="number"
-                min={0}
-                step={1}
-                value={
-                  isMultiSelect
-                    ? sharedChannelNumber ?? ""
-                    : primaryNode.data.channelNumber ?? ""
-                }
-                onChange={(e) => {
-                  const v = e.target.value;
-                  updateNodeChannelNumber(
-                    selectedNodeIds,
-                    v === "" ? null : Math.max(0, Math.floor(Number(v))),
-                  );
-                }}
-                placeholder="None"
-                className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
-              />
-            </div>
-            <div>
-              <label
-                className={cn(
-                  "block text-xs font-medium uppercase mb-1",
-                  "text-gray-500 dark:text-gray-400",
-                )}
-              >
-                Channel prefix
-              </label>
-              <input
-                type="text"
-                value={
-                  isMultiSelect
-                    ? sharedChannelPrefix ?? ""
-                    : primaryNode.data.channelPrefix ?? ""
-                }
-                onChange={(e) =>
-                  updateNodeChannelPrefix(selectedNodeIds, e.target.value)
-                }
-                placeholder="None"
-                className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
-              />
             </div>
           </div>
+          {(isMultiSelect ? anyIsInput : !!primaryNode.data.isInput) && (
+            <div className="mt-3">
+              <label
+                className={cn(
+                  "block text-xs font-medium uppercase mb-1",
+                  "text-gray-500 dark:text-gray-400",
+                )}
+              >
+                Input
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={
+                    isMultiSelect
+                      ? sharedInputChannelNumber ?? ""
+                      : primaryNode.data.inputChannelNumber ?? ""
+                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    updateNodeInputChannelNumber(
+                      selectedNodeIds,
+                      v === "" ? null : Math.max(0, Math.floor(Number(v))),
+                    );
+                  }}
+                  placeholder="None"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+                />
+                <input
+                  type="text"
+                  value={
+                    isMultiSelect
+                      ? sharedInputChannelPrefix ?? ""
+                      : primaryNode.data.inputChannelPrefix ?? ""
+                  }
+                  onChange={(e) =>
+                    updateNodeInputChannelPrefix(selectedNodeIds, e.target.value)
+                  }
+                  placeholder="None"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+                />
+              </div>
+            </div>
+          )}
+          {(isMultiSelect ? anyIsOutput : !!primaryNode.data.isOutput) && (
+            <div className="mt-3">
+              <label
+                className={cn(
+                  "block text-xs font-medium uppercase mb-1",
+                  "text-gray-500 dark:text-gray-400",
+                )}
+              >
+                Output
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={
+                    isMultiSelect
+                      ? sharedOutputChannelNumber ?? ""
+                      : primaryNode.data.outputChannelNumber ?? ""
+                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    updateNodeOutputChannelNumber(
+                      selectedNodeIds,
+                      v === "" ? null : Math.max(0, Math.floor(Number(v))),
+                    );
+                  }}
+                  placeholder="None"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+                />
+                <input
+                  type="text"
+                  value={
+                    isMultiSelect
+                      ? sharedOutputChannelPrefix ?? ""
+                      : primaryNode.data.outputChannelPrefix ?? ""
+                  }
+                  onChange={(e) =>
+                    updateNodeOutputChannelPrefix(selectedNodeIds, e.target.value)
+                  }
+                  placeholder="None"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mb-6">
