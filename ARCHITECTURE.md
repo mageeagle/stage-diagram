@@ -123,10 +123,11 @@ The primary store managing Signal Flow / Technical Rider diagrams.
 
 **Key Actions:**
 
-- `addNode(type, position, label, inputsCount, outputsCount, typeProperty, locationProperty, power)` — Create a new node
+- `addNode(type, position, label, inputsCount, outputsCount, typeProperty, locationProperty, power, quantity?)` — Create a new node (quantity defaults to 1)
 - `copyNodes(nodeIds)` — Copy nodes with edges (with offset)
 - `deleteNodes(nodeIds)` / `deleteEdge(edgeIds)` — Delete selected items
 - `updateNodeLabel(nodeId, label)` / `updateNodeType(nodeIds, type)` — Update node properties
+- `updateNodeQuantity(nodeIds, quantity)` — Set quantity on one or more nodes (integer ≥ 1)
 - `addTemplate(template)` / `applyTemplate(template, position)` — Template management
 - `undo()` / `redo()` / `recordHistory()` — History management
 - `restoreProjectState(state)` — Import project data
@@ -309,6 +310,7 @@ interface CustomNodeData {
   zIndex?: number;                  // Stacking order
   labelFontSize?: number;           // Label font size px (8-48); absent = global default
   detailsFontSize?: number;         // Details font size px (8-48); absent = global default
+  quantity?: number;                // Node quantity (integer >= 1, default 1); used for rider list summing and cable count multiplication
   [key: string]: unknown;           // Extensible
 }
 
@@ -436,6 +438,7 @@ Standard signal flow node:
 - Uses `useUpdateNodeInternals()` to force re-render when handles change
 - Applies `hidden` (opacity-30) and `exportingHidden` (return null) states
 - Selection state: blue border + ring
+- Quantity badge: blue pill top-right showing `data.quantity` when > 1 (`pointer-events-none`)
 - Right-click on node body or any handle calls `openHandleMenu()` (browser default context menu suppressed); handle right-clicks stop propagation so the node-body handler does not also fire
 
 #### `StagePlanNode` (`src/components/nodes/StagePlanNode.tsx`)
@@ -517,6 +520,7 @@ Creates nodes with:
 - Location (from `useStore.locations`, creatable inline)
 - Input count
 - Output count
+- Quantity (integer >= 1, default 1)
 
 #### `SettingsModal`
 
@@ -585,6 +589,18 @@ The **Avoid Nodes** toggle on the Signal Flow canvas routes edges orthogonally a
 - **Routing parameters:** `shapeBufferDistance 8`, `idealNudgingDistance 4`, `segmentPenalty 10`; options: `nudgeOrthogonalSegmentsConnectedToShapes false`, `nudgeSharedPathsWithCommonEndPoint true`, `performUnifyingNudgingPreprocessingStep true`, `nudgeOrthogonalTouchingColinearSegments false`, `improveHyperedgeRoutesMovingJunctions true`
 - **Settings:** `edgeRoutingEnabled` and `edgeRounding` (corner radius) are session-only and NOT persisted with the project. `defaultLineType` IS persisted in project files as `defaultEdgeLineType`; per-edge overrides live in each edge's `data.lineType`
 - **Rendering:** Edges render through the `routed` edge type backed by `useRoutedEdgePath`; while a connected node is being dragged, affected edges show a dashed live preview and re-route on drop
+
+---
+
+## Node List Report Generator (`src/components/diagram/node-list-modal/node-list-report-generator.ts`)
+
+Generates the rider list report consumed by the modal view and all export formats (PDF/CSV/JSON).
+
+**Quantity summing:** When grouping nodes (by name, location, or type), same-name nodes are merged and their `quantity` values summed (`data.quantity ?? 1`). A single node with quantity=5 contributes 5 to its group total.
+
+**Cable count multiplication:** Each edge with a non-"none" `cableType` contributes `Math.max(sourceNode.quantity, targetNode.quantity)` (defaulting to 1 if absent) to that cable type's total. This ensures cables scale with the larger of the two connected nodes' quantities — e.g., a rack with quantity=12 receiving an XLR cable counts as 12 XLR cables.
+
+**Power socket aggregation:** In "location" group mode, `hasPower` nodes contribute their `quantity` to the per-location "Power Sockets" summary line.
 
 ---
 
