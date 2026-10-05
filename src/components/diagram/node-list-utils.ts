@@ -12,7 +12,7 @@ export const groupByName = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
       name: node.data.label || "",
       type: node.data.type,
       location: node.data.location,
-      quantity: 1,
+      quantity: node.data.quantity ?? 1,
       hasPower: !!node.data.power,
     });
   });
@@ -24,7 +24,7 @@ export const groupByName = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
       const subKey = `${n.name}-${n.type}-${n.location}`;
       if (subMap.has(subKey)) {
         const existing = subMap.get(subKey)!;
-        existing.quantity += 1;
+        existing.quantity += n.quantity;
         existing.hasPower = existing.hasPower || n.hasPower;
       } else {
         subMap.set(subKey, { ...n });
@@ -45,7 +45,7 @@ export const groupByLocation = (nodes: Node<CustomNodeData>[]): GroupedNode[] =>
       name: node.data.label || "",
       type: node.data.type,
       location: node.data.location,
-      quantity: 1,
+      quantity: node.data.quantity ?? 1,
       hasPower: !!node.data.power,
     });
   });
@@ -57,7 +57,7 @@ export const groupByLocation = (nodes: Node<CustomNodeData>[]): GroupedNode[] =>
       const subKey = `${n.name}-${n.type}`;
       if (subMap.has(subKey)) {
         const existing = subMap.get(subKey)!;
-        existing.quantity += 1;
+        existing.quantity += n.quantity;
         existing.hasPower = existing.hasPower || n.hasPower;
       } else {
         subMap.set(subKey, { ...n });
@@ -78,7 +78,7 @@ export const groupByType = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
       name: node.data.label || "",
       type: node.data.type,
       location: node.data.location,
-      quantity: 1,
+      quantity: node.data.quantity ?? 1,
       hasPower: !!node.data.power,
     });
   });
@@ -90,7 +90,7 @@ export const groupByType = (nodes: Node<CustomNodeData>[]): GroupedNode[] => {
       const subKey = `${n.name}-${n.type}`;
       if (subMap.has(subKey)) {
         const existing = subMap.get(subKey)!;
-        existing.quantity += 1;
+        existing.quantity += n.quantity;
         existing.hasPower = existing.hasPower || n.hasPower;
       } else {
         subMap.set(subKey, { ...n });

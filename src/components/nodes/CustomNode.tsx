@@ -30,6 +30,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
   const typeBgRaw = typeBackgrounds[data?.type ?? ""];
   const bg = nodeBg ?? (isValidHexColor(typeBgRaw) ? typeBgRaw : undefined);
   const fg = bg ? textColorFor(bg) : undefined;
+  const quantity = data?.quantity ?? 1;
 
   if (!data) {
     return null;
@@ -42,7 +43,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
 
   return (
     <div className={cn(
-      "py-2 shadow-md rounded-md border-2 min-w-[250px] max-w-[320px]",
+      "relative py-2 shadow-md rounded-md border-2 min-w-[250px] max-w-[320px]",
       isDark ? "bg-stone-800 text-stone-100 border-stone-600" : "bg-white text-stone-900 border-stone-400",
       selected ? 'border-blue-500 ring-2 ring-blue-200' : "",
       data.hidden ? "opacity-30" : ""
@@ -53,6 +54,12 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
         openHandleMenu(event.clientX, event.clientY, id);
       }}
     >
+      {quantity > 1 && (
+        <div className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-blue-500 text-white pointer-events-none">
+          {quantity}
+        </div>
+      )}
+
       <div
         className="font-bold mb-2 text-center break-words"
         style={{ fontSize: data.labelFontSize ?? defaultLabelFontSize, ...(fg ? { color: fg } : {}) }}

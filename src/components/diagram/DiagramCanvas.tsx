@@ -431,6 +431,7 @@ export const DiagramCanvas = () => {
     location: string,
     details: string,
     power: boolean,
+    quantity = 1,
   ) => {
     if (pendingPosition) {
       addNode(
@@ -443,6 +444,7 @@ export const DiagramCanvas = () => {
         location,
         power,
         details,
+        quantity,
       );
     }
     setIsModalOpen(false);

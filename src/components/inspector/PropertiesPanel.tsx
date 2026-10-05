@@ -17,6 +17,7 @@ export const PropertiesPanel = () => {
   const updateNodeType = useStore((state) => state.updateNodeType);
   const updateNodeLocation = useStore((state) => state.updateNodeLocation);
   const updateNodePower = useStore((state) => state.updateNodePower);
+  const updateNodeQuantity = useStore((state) => state.updateNodeQuantity);
   const updateNodeLabelFontSize = useStore(
     (state) => state.updateNodeLabelFontSize,
   );
@@ -98,6 +99,10 @@ export const PropertiesPanel = () => {
   const detailsSizes = selectedNodes.map((n) => n.data.detailsFontSize);
   const sharedDetailsSize = detailsSizes.every((v) => v === detailsSizes[0])
     ? detailsSizes[0]
+    : undefined;
+  const quantities = selectedNodes.map((n) => n.data.quantity ?? 1);
+  const sharedQuantity = quantities.every((v) => v === quantities[0])
+    ? quantities[0]
     : undefined;
   const bgValues = selectedNodes.map((n) => n.data.backgroundColor ?? "");
   const sharedBg = bgValues.every((v) => v === bgValues[0])
@@ -284,6 +289,36 @@ export const PropertiesPanel = () => {
               Multiple locations selected
             </p>
           )}
+        </div>
+
+        <div className="mb-6">
+          <label
+            className={cn(
+              "block text-xs font-medium uppercase mb-1",
+              "text-gray-500 dark:text-gray-400",
+            )}
+          >
+            Quantity
+          </label>
+          <input
+            type="number"
+            min={1}
+            step={1}
+            value={
+              isMultiSelect
+                ? sharedQuantity ?? ""
+                : primaryNode.data.quantity ?? ""
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              updateNodeQuantity(
+                selectedNodeIds,
+                v === "" ? 1 : Math.max(1, Math.floor(Number(v))),
+              );
+            }}
+            placeholder="1"
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
+          />
         </div>
 
         <div className="mb-6">

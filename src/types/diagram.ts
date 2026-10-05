@@ -26,6 +26,7 @@ export interface CustomNodeData {
   details?: string;                 // Lightweight markup: **bold**, *italic*, __underline__, "- item", "1. item", \n
   labelFontSize?: number;         // Label font size in px (8-48); absent = global default
   detailsFontSize?: number;       // Details font size in px (8-48); absent = global default
+  quantity?: number;              // Integer >= 1; absent = 1
   backgroundColor?: string; // palette entry name; "" or absent = theme default
   [key: string]: unknown;
 }

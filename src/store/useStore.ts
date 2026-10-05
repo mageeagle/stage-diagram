@@ -129,6 +129,7 @@ interface DiagramState {
   updateNodeType: (nodeIds: string[], type: string) => void;
   updateNodeLocation: (nodeIds: string[], location: string) => void;
   updateNodePower: (nodeIds: string[], power: boolean) => void;
+  updateNodeQuantity: (nodeIds: string[], quantity: number) => void;
   updateNodeHidden: (nodeIds: string[], hidden: boolean) => void;
   updateNodeHideFromList: (nodeIds: string[], hideFromList: boolean) => void;
   updateNodeBackground: (nodeIds: string[], name: string | null) => void;
@@ -186,6 +187,7 @@ interface DiagramState {
     locationProperty?: string,
     power?: boolean,
     details?: string,
+    quantity?: number,
   ) => void;
   copyNodes: (nodeIds: string[]) => void;
   deleteNodes: (nodeIds: string[]) => void;
@@ -763,6 +765,22 @@ export const useStore = create<DiagramState>((set, get) => ({
     });
   },
 
+  updateNodeQuantity: (nodeIds, quantity) => {
+    get().recordHistory();
+    const q = Math.max(1, Math.floor(quantity));
+    set({
+      nodes: get().nodes.map((node) => {
+        if (nodeIds.includes(node.id)) {
+          return {
+            ...node,
+            data: { ...node.data, quantity: q },
+          };
+        }
+        return node;
+      }),
+    });
+  },
+
   updateNodeHidden: (nodeIds, hidden) => {
     const updatedNodes = get().nodes.map((node) => {
       if (nodeIds.includes(node.id)) {
@@ -1221,6 +1239,7 @@ export const useStore = create<DiagramState>((set, get) => ({
     locationProperty,
     power = false,
     details = "",
+    quantity,
   ) => {
     get().recordHistory();
     const inputs = Array.from({ length: inputsCount }, (_, i) => ({
@@ -1247,6 +1266,7 @@ export const useStore = create<DiagramState>((set, get) => ({
         hidden: false,
         hideFromList: false,
         details,
+        quantity: quantity ?? 1,
       },
     };
     set({

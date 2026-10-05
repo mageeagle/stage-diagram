@@ -129,10 +129,17 @@ export function generateNodeListReport(
   );
 
   const cableTypeCounts = new Map<string, number>();
+  const nodeById = new Map<string, Node<CustomNodeData>>();
+  nodes.forEach((n) => nodeById.set(n.id, n));
   visibleEdges.forEach((edge) => {
     const type = edge.data?.cableType as string;
     if (type && type !== "none") {
-      cableTypeCounts.set(type, (cableTypeCounts.get(type) || 0) + 1);
+      const sourceNode = nodeById.get(edge.source);
+      const targetNode = nodeById.get(edge.target);
+      const sourceQty = sourceNode ? (sourceNode.data.quantity ?? 1) : 1;
+      const targetQty = targetNode ? (targetNode.data.quantity ?? 1) : 1;
+      const qty = Math.max(sourceQty, targetQty);
+      cableTypeCounts.set(type, (cableTypeCounts.get(type) || 0) + qty);
     }
   });
 

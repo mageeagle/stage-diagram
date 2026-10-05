@@ -9,7 +9,7 @@ import { DetailsEditor } from '../inspector/DetailsEditor';
 interface NodeCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string, inputsCount: number, outputsCount: number, type: string, location: string, details: string, power: boolean) => void;
+  onCreate: (name: string, inputsCount: number, outputsCount: number, type: string, location: string, details: string, power: boolean, quantity: number) => void;
 }
 
 export const NodeCreationModal = ({
@@ -20,6 +20,7 @@ export const NodeCreationModal = ({
   const [name, setName] = useState('');
   const [inputsCount, setInputsCount] = useState(1);
   const [outputsCount, setOutputsCount] = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const [details, setDetails] = useState('');
   const [power, setPower] = useState(false);
   const [selectedType, setSelectedType] = useState('');
@@ -62,7 +63,7 @@ export const NodeCreationModal = ({
 
   const handleCreate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    onCreate(name || 'New Node', inputsCount, outputsCount, effectiveType, effectiveLocation, details, power);
+    onCreate(name || 'New Node', inputsCount, outputsCount, effectiveType, effectiveLocation, details, power, quantity);
   };
 
   const handleCancel = () => {
@@ -208,6 +209,20 @@ export const NodeCreationModal = ({
                 className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              Quantity
+            </label>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            />
           </div>
 
           <div className="mt-8 flex justify-end gap-3">
