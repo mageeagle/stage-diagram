@@ -447,7 +447,7 @@ export const PropertiesPanel = () => {
                       v === "" ? null : Math.max(0, Math.floor(Number(v))),
                     );
                   }}
-                  placeholder="None"
+                  placeholder="Number"
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
                 />
                 <input
@@ -460,7 +460,7 @@ export const PropertiesPanel = () => {
                   onChange={(e) =>
                     updateNodeInputChannelPrefix(selectedNodeIds, e.target.value)
                   }
-                  placeholder="None"
+                  placeholder="Prefix"
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
                 />
               </div>
@@ -493,7 +493,7 @@ export const PropertiesPanel = () => {
                       v === "" ? null : Math.max(0, Math.floor(Number(v))),
                     );
                   }}
-                  placeholder="None"
+                  placeholder="Number"
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
                 />
                 <input
@@ -506,7 +506,7 @@ export const PropertiesPanel = () => {
                   onChange={(e) =>
                     updateNodeOutputChannelPrefix(selectedNodeIds, e.target.value)
                   }
-                  placeholder="None"
+                  placeholder="Prefix"
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm dark:border-gray-700 dark:bg-transparent"
                 />
               </div>
