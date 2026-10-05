@@ -55,8 +55,8 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
       }}
     >
       {quantity > 1 && (
-        <div className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-blue-500 text-white pointer-events-none">
-          {quantity}
+        <div className="absolute top-1 right-1 px-2 py-1 text-xs font-bold rounded-full bg-gray-500 text-white pointer-events-none">
+          x{quantity}
         </div>
       )}
 
