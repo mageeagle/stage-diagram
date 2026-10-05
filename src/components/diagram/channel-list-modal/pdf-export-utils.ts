@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import { type ChannelListReport, type ChannelRow } from "./channel-list-report-generator";
+import { type ChannelListReport } from "./channel-list-report-generator";
 import { format } from "date-fns";
 
 export function exportToPdf(
@@ -49,31 +49,42 @@ export function exportToPdf(
   drawText(format(new Date(), "yyyy.MM.dd"), margin + 5, currentY, 10);
   currentY += 25;
 
-  const renderSection = (label: string, rows: ChannelRow[]) => {
-    currentY += 5;
+  const columnX = [0, 1, 2, 3].map((i) => margin + 5 + i * (contentWidth / 4));
+
+  const drawHeader = () => {
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, currentY - 5, contentWidth, 8, "F");
+    drawText("Inputs", columnX[0], currentY, 10, "bold");
+    drawText("Outputs", columnX[2], currentY, 10, "bold");
+    currentY += 10;
+  };
+
+  currentY += 5;
+  if (currentY > 270) {
+    doc.addPage();
+    currentY = margin;
+  }
+  drawHeader();
+
+  const rowCount = Math.max(report.inputs.length, report.outputs.length);
+  for (let i = 0; i < rowCount; i++) {
     if (currentY > 270) {
       doc.addPage();
       currentY = margin;
+      drawHeader();
     }
-    doc.setFillColor(245, 245, 245);
-    doc.rect(margin, currentY - 5, contentWidth, 8, "F");
-    drawText(label, margin + 5, currentY, 10, "bold");
-    currentY += 10;
-
-    rows.forEach((row) => {
-      if (currentY > 270) {
-        doc.addPage();
-        currentY = margin;
-      }
-      const number = row.number ?? "";
-      drawText(number, margin + 5, currentY, 10);
-      drawText(row.name, margin + 5 + doc.getTextWidth(`${number} `), currentY, 10);
-      currentY += 8;
-    });
-  };
-
-  renderSection("Inputs", report.inputs);
-  renderSection("Outputs", report.outputs);
+    const input = report.inputs[i];
+    const output = report.outputs[i];
+    if (input) {
+      drawText(input.number ?? "", columnX[0], currentY, 10);
+      drawText(input.name, columnX[1], currentY, 10);
+    }
+    if (output) {
+      drawText(output.number ?? "", columnX[2], currentY, 10);
+      drawText(output.name, columnX[3], currentY, 10);
+    }
+    currentY += 8;
+  }
 
   doc.save(customFilename || "channel-list-report.pdf");
 }
