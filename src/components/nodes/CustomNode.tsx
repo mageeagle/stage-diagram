@@ -61,7 +61,7 @@ export const CustomNode = ({ data, id, selected }: NodeProps<Node<CustomNodeData
       )}
 
       <div
-        className="font-bold mb-2 text-center break-words"
+        className={cn("font-bold mb-2 text-center break-words pl-2", quantity > 1 && "pr-12")}
         style={{ fontSize: data.labelFontSize ?? defaultLabelFontSize, ...(fg ? { color: fg } : {}) }}
       >
         {data.label}
