@@ -4,11 +4,13 @@ import { useState, useRef } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { ColorInput } from "./ColorInput";
+import { EditableName } from "./EditableName";
 
 export const TypeList = () => {
   const types = useStore((s) => s.types);
   const addType = useStore((s) => s.addType);
   const removeType = useStore((s) => s.removeType);
+  const renameType = useStore((s) => s.renameType);
   const typeBackgrounds = useStore((s) => s.typeBackgrounds);
   const setTypeBackground = useStore((s) => s.setTypeBackground);
   const [inputValue, setInputValue] = useState("");
@@ -52,7 +54,7 @@ export const TypeList = () => {
             className="rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
           >
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="min-w-0 flex-1 break-words">{type}</span>
+              <EditableName value={type} onRename={renameType} />
               <ColorInput
                 value={typeBackgrounds[type] ?? "#e7e5e4"}
                 onCommit={(hex) => setTypeBackground(type, hex)}

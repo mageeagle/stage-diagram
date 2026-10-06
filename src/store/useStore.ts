@@ -207,6 +207,7 @@ interface DiagramState {
   deleteEdge: (edgeIds: string[]) => void;
   addCableType: (name: string) => void;
   removeCableType: (name: string) => void;
+  renameCableType: (oldName: string, newName: string) => void;
   updateCableTypeStyle: (
     name: string,
     patch: Partial<Omit<CableTypeDef, "name">>,
@@ -223,8 +224,10 @@ interface DiagramState {
   setPendingPosition: (position: { x: number; y: number } | null) => void;
   addType: (type: string) => void;
   removeType: (type: string) => void;
+  renameType: (oldName: string, newName: string) => void;
   addLocation: (location: string) => void;
   removeLocation: (location: string) => void;
+  renameLocation: (oldName: string, newName: string) => void;
   restoreProjectState: (state: ProjectState) => void;
   toggleLocationGroups: () => void;
   toggleEdgeRouting: () => void;
@@ -1506,6 +1509,27 @@ export const useStore = create<DiagramState>((set, get) => ({
   },
   removeCableType: (name) =>
     set({ cableTypes: get().cableTypes.filter((c) => c.name !== name) }),
+  renameCableType: (oldName, newName) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return;
+    if (
+      get().cableTypes.some(
+        (c) => c.name.toLowerCase() === trimmed.toLowerCase(),
+      )
+    )
+      return;
+    get().recordHistory();
+    set({
+      cableTypes: get().cableTypes.map((c) =>
+        c.name === oldName ? { ...c, name: trimmed } : c,
+      ),
+      edges: get().edges.map((edge) =>
+        edge.data && edge.data.cableType === oldName
+          ? { ...edge, data: { ...edge.data, cableType: trimmed } }
+          : edge,
+      ),
+    });
+  },
   updateCableTypeStyle: (name, patch) =>
     set({
       cableTypes: get().cableTypes.map((c) =>
@@ -1565,6 +1589,30 @@ export const useStore = create<DiagramState>((set, get) => ({
       typeBackgrounds: backgrounds,
     });
   },
+  renameType: (oldName, newName) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return;
+    if (
+      get().types.some((t) => t.toLowerCase() === trimmed.toLowerCase())
+    )
+      return;
+    get().recordHistory();
+    const backgrounds = { ...get().typeBackgrounds };
+    backgrounds[trimmed] = backgrounds[oldName];
+    delete backgrounds[oldName];
+    set({
+      types: get().types.map((t) => (t === oldName ? trimmed : t)),
+      typeBackgrounds: backgrounds,
+      nodes: get().nodes.map((node) =>
+        node.data.type === oldName
+          ? { ...node, data: { ...node.data, type: trimmed } }
+          : node,
+      ),
+      templates: get().templates.map((template) =>
+        template.type === oldName ? { ...template, type: trimmed } : template,
+      ),
+    });
+  },
   addLocation: (location) => {
     if (!get().locations.includes(location)) {
       set({
@@ -1582,6 +1630,27 @@ export const useStore = create<DiagramState>((set, get) => ({
     set({
       locations: get().locations.filter((l) => l !== location),
       locationBackgrounds: backgrounds,
+    });
+  },
+  renameLocation: (oldName, newName) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return;
+    if (
+      get().locations.some((l) => l.toLowerCase() === trimmed.toLowerCase())
+    )
+      return;
+    get().recordHistory();
+    const backgrounds = { ...get().locationBackgrounds };
+    backgrounds[trimmed] = backgrounds[oldName];
+    delete backgrounds[oldName];
+    set({
+      locations: get().locations.map((l) => (l === oldName ? trimmed : l)),
+      locationBackgrounds: backgrounds,
+      nodes: get().nodes.map((node) =>
+        node.data.location === oldName
+          ? { ...node, data: { ...node.data, location: trimmed } }
+          : node,
+      ),
     });
   },
 }));

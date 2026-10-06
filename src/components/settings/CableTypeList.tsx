@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { DASH_PATTERN } from "@/utils/cableStyles";
 import { ColorInput } from "./ColorInput";
+import { EditableName } from "./EditableName";
 import type { DashPattern } from "@/types/diagram";
 
 const DASH_OPTIONS: { value: DashPattern; label: string }[] = [
@@ -43,6 +44,7 @@ export const CableTypeList = () => {
   const addCableType = useStore((s) => s.addCableType);
   const removeCableType = useStore((s) => s.removeCableType);
   const updateCableTypeStyle = useStore((s) => s.updateCableTypeStyle);
+  const renameCableType = useStore((s) => s.renameCableType);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -89,7 +91,7 @@ export const CableTypeList = () => {
                 strokeWidth={def.strokeWidth}
                 dash={def.dash}
               />
-              <span className="min-w-0 flex-1 break-words">{def.name}</span>
+              <EditableName value={def.name} onRename={renameCableType} />
               <ColorInput
                 value={def.color}
                 onCommit={(hex) =>

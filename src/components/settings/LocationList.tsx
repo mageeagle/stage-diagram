@@ -4,11 +4,13 @@ import { useState, useRef } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { ColorInput } from "./ColorInput";
+import { EditableName } from "./EditableName";
 
 export const LocationList = () => {
   const locations = useStore((s) => s.locations);
   const addLocation = useStore((s) => s.addLocation);
   const removeLocation = useStore((s) => s.removeLocation);
+  const renameLocation = useStore((s) => s.renameLocation);
   const locationBackgrounds = useStore((s) => s.locationBackgrounds);
   const setLocationBackground = useStore((s) => s.setLocationBackground);
   const [inputValue, setInputValue] = useState("");
@@ -52,7 +54,7 @@ export const LocationList = () => {
             className="rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
           >
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="min-w-0 flex-1 break-words">{location}</span>
+              <EditableName value={location} onRename={renameLocation} />
               <ColorInput
                 value={locationBackgrounds[location] ?? "#e7e5e4"}
                 onCommit={(hex) => setLocationBackground(location, hex)}
