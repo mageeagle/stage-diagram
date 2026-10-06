@@ -16,9 +16,12 @@ function parseTrailingNumber(value: string): number {
 function sortRows(rows: ChannelRow[]): ChannelRow[] {
   const numbered = rows.filter((row) => row.number !== undefined);
   const unnumbered = rows.filter((row) => row.number === undefined);
-  numbered.sort(
-    (a, b) => parseTrailingNumber(a.number!) - parseTrailingNumber(b.number!),
-  );
+  numbered.sort((a, b) => {
+    const pa = a.number!.replace(/\d+$/, "").toLowerCase();
+    const pb = b.number!.replace(/\d+$/, "").toLowerCase();
+    if (pa !== pb) return pa < pb ? -1 : 1;
+    return parseTrailingNumber(a.number!) - parseTrailingNumber(b.number!);
+  });
   return [...numbered, ...unnumbered];
 }
 
