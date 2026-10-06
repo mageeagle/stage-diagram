@@ -549,7 +549,7 @@ Creates nodes with:
 Portal modal listing nodes marked as inputs/outputs, opened from the toolbar **Channel List** button (between **Rider List** and **Stage Plan**):
 - Two side-by-side lists (**Inputs** / **Outputs**), each row showing `Number` | `Node Name`
 - Row expansion: the Inputs list uses `inputChannelNumber`/`inputChannelPrefix`, the Outputs list uses `outputChannelNumber`/`outputChannelPrefix`. A node with a starting number for that direction expands to one row per unit of `quantity` (e.g., quantity 2, start 90, prefix "AUX" → AUX90, AUX91); without one it produces a single unnumbered row
-- Rows sort numeric ascending by trailing number; unnumbered rows come last
+- Rows sort by prefix first (case-insensitive A→Z; no prefix sorts first), then numeric ascending by trailing number; unnumbered rows come last
 - Nodes with `hideFromList` (or `exportingHidden`) are excluded
 - Header title/subtitle/preparedBy are inline-editable (`updateChannelListTitle/Subtitle/PreparedBy`)
 - Escape key closes the modal
